@@ -27,11 +27,40 @@ const recentActivities = [
 ]
 
 export default function DashboardPage() {
+  const now = new Date()
+  const hour = now.getHours()
+  let greeting = "Good Evening"
+  if (hour < 12) greeting = "Good Morning"
+  else if (hour < 18) greeting = "Good Afternoon"
+
+  const currentDate = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(now)
+
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">Welcome to CarbonSphere AI. Here is your footprint overview.</p>
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-2">
+        <div className="space-y-1.5">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+            🌍 {greeting}, Alex
+          </h1>
+          <p className="text-muted-foreground text-base">
+            Your carbon footprint decreased <span className="font-medium text-foreground">18%</span> this month and AI identified <span className="font-medium text-foreground">3</span> sustainability opportunities.
+          </p>
+        </div>
+        
+        <div className="flex flex-col items-start md:items-end gap-2.5">
+          <div className="text-sm font-medium text-muted-foreground">
+            {currentDate}
+          </div>
+          <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400">
+            <div className="mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Carbon Score Improving
+          </div>
+        </div>
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
