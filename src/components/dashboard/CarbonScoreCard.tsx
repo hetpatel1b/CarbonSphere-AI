@@ -8,14 +8,14 @@ interface CarbonScoreCardProps {
 
 export function CarbonScoreCard({ score, trendLabel }: CarbonScoreCardProps) {
   return (
-    <Card className="border-primary/50 bg-primary/5">
+    <Card className="relative overflow-hidden border-emerald-500/20 bg-emerald-50/30 dark:border-emerald-500/10 dark:bg-emerald-950/10">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Sustainability Score</CardTitle>
-        <Leaf className="h-4 w-4 text-primary" />
+        <CardTitle className="text-sm font-medium text-muted-foreground">Sustainability Score</CardTitle>
+        <Leaf className="h-4 w-4 text-emerald-500" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-primary">{score}</div>
-        <p className="text-xs text-muted-foreground mt-1">{trendLabel}</p>
+        <div className="text-3xl font-semibold tracking-tight">{score}</div>
+        <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mt-1.5">{trendLabel}</p>
       </CardContent>
     </Card>
   )
