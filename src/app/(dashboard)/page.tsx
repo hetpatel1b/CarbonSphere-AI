@@ -41,36 +41,46 @@ export default function DashboardPage() {
   }).format(now)
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between mb-2">
-        <div className="space-y-1.5">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-            🌍 {greeting}, Alex
-          </h1>
-          <p className="text-muted-foreground text-base">
-            Your carbon footprint decreased <span className="font-medium text-foreground">18%</span> this month and AI identified <span className="font-medium text-foreground">3</span> sustainability opportunities.
-          </p>
+    <div className="flex flex-col gap-8">
+      {/* Hero Section */}
+      <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              {greeting}, Alex
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Your sustainability overview at a glance.
+            </p>
+          </div>
+          <div className="flex items-start gap-3 rounded-lg border border-emerald-200/60 bg-emerald-50/50 px-4 py-3 dark:border-emerald-500/10 dark:bg-emerald-500/5">
+            <div className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-emerald-500" />
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Carbon footprint decreased <span className="font-medium text-foreground">18%</span> this month — AI identified <span className="font-medium text-foreground">3</span> sustainability opportunities.
+            </p>
+          </div>
         </div>
         
-        <div className="flex flex-col items-start md:items-end gap-2.5">
-          <div className="text-sm font-medium text-muted-foreground">
+        <div className="flex flex-col items-start md:items-end gap-2.5 shrink-0">
+          <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {currentDate}
           </div>
-          <div className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400">
-            <div className="mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            Carbon Score Improving
+          <div className="inline-flex items-center rounded-full border border-emerald-200/60 bg-emerald-50/80 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-500/15 dark:bg-emerald-500/10 dark:text-emerald-400">
+            <div className="mr-2 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Score Improving
           </div>
         </div>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Metrics Grid */}
+      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <CarbonScoreCard score={780} trendLabel="+15 pts this week" />
         
         <MetricCard 
           title="Monthly Emissions" 
           value="1.2 tCO2e" 
           icon={Cloud} 
-          trend={{ value: "-5", label: "from last month", isPositive: true }} 
+          trend={{ value: "-5%", label: "from last month", isPositive: true }} 
         />
         
         <MetricCard 
@@ -88,7 +98,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+      {/* Bottom Section */}
+      <div className="grid gap-5 md:grid-cols-3 lg:grid-cols-4">
         <ActivityFeed activities={recentActivities} />
         <AIInsightCard 
           title="AI Suggestion" 
