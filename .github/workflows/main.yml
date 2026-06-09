@@ -9,6 +9,12 @@ on:
 jobs:
   quality-gates:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgres://postgres:password@localhost:5432/postgres"
+      DIRECT_URL: "postgres://postgres:password@localhost:5432/postgres"
+      GEMINI_API_KEY: "AIzaSy_dummy_key_for_ci_purposes_only"
+      NEXT_PUBLIC_SUPABASE_URL: "https://dummy.supabase.co"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy"
     steps:
     - uses: actions/checkout@v4
     
