@@ -99,12 +99,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom Section */}
-      <div className="grid gap-5 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid gap-5 md:grid-cols-3 lg:grid-cols-4 items-start">
         <ActivityFeed activities={recentActivities} />
-        <AIInsightCard 
-          title="AI Suggestion" 
-          insight="You could save an estimated 0.1 tCO2e this week by switching to public transit for your Friday commute based on your historical patterns." 
-        />
+        <AIInsightCard />
       </div>
     </div>
   )

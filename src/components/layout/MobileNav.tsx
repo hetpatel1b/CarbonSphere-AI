@@ -2,7 +2,7 @@
 
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Leaf, LayoutDashboard, BarChart3, Award, Settings } from "lucide-react";
+import { Menu, Leaf, LayoutDashboard, BarChart3, Sparkles, Calculator, MessageSquare, Target, TrendingUp, Users, Award, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,12 @@ const navItems: NavItem[] = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Log Activity", href: "/log", icon: Leaf },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
+  { name: "AI Coach", href: "/ai-coach" as Route, icon: Sparkles },
+  { name: "Simulator", href: "/simulator" as Route, icon: Calculator },
+  { name: "AI Assistant", href: "/assistant" as Route, icon: MessageSquare },
+  { name: "Challenges", href: "/challenges" as Route, icon: Target },
+  { name: "Forecasting", href: "/forecasting" as Route, icon: TrendingUp },
+  { name: "Community", href: "/community" as Route, icon: Users },
   { name: "Achievements", href: "/achievements", icon: Award },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
