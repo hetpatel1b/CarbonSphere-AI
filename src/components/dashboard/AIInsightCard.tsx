@@ -1,67 +1,80 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
+
 import { Sparkles, ArrowRight, TrendingDown, Target, Lightbulb } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 
 export function AIInsightCard() {
   return (
-    <Card className="col-span-full md:col-span-1 lg:col-span-1 relative overflow-hidden border border-border/40 bg-white/50 backdrop-blur-xl shadow-[0_2px_16px_rgba(0,0,0,0.02)] dark:bg-zinc-950/50 dark:shadow-[0_2px_16px_rgba(0,0,0,0.02)]">
-      {/* Background soft emerald glow */}
-      <div className="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-emerald-500/5 blur-[60px] dark:bg-emerald-500/3" />
-      <div className="pointer-events-none absolute -bottom-16 -left-16 h-36 w-36 rounded-full bg-emerald-500/3 blur-[60px] dark:bg-emerald-500/2" />
+    <Card className="col-span-full md:col-span-1 lg:col-span-1 relative overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/50 dark:to-zinc-950/30 shadow-md hover:shadow-[0_20px_40px_rgba(16,185,129,0.06)] hover:-translate-y-1 hover:border-emerald-500/30 dark:hover:border-emerald-500/20 transition-all duration-500 group">
+      {/* Decorative hover grid background */}
+      <div className="absolute inset-0 bg-[radial-gradient(#80808008_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none" />
+
+      {/* Dual neon background glow spots */}
+      <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-emerald-500/5 dark:bg-emerald-500/8 blur-3xl pointer-events-none group-hover:bg-emerald-500/12 transition-colors duration-700 animate-pulse-glow" />
+      <div className="absolute -bottom-16 -left-16 h-36 w-36 rounded-full bg-emerald-500/3 dark:bg-emerald-500/4 blur-3xl pointer-events-none animate-pulse-glow" style={{ animationDelay: "2s" }} />
 
       {/* Header */}
-      <CardHeader className="relative pb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-            <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+      <CardHeader className="relative pb-4 z-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100/80 dark:bg-emerald-950/40 border border-emerald-200/40 dark:border-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <CardTitle className="text-sm font-bold text-foreground">AI Insights</CardTitle>
           </div>
-          <CardTitle className="text-sm font-semibold text-foreground">AI Insights</CardTitle>
+          {/* Live pulsing dot */}
+          <span className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
         </div>
       </CardHeader>
       
-      <CardContent className="relative flex flex-col gap-5">
-        <p className="text-[13px] leading-relaxed text-muted-foreground">
-          You have <span className="font-medium text-foreground">3</span> new sustainability recommendations available.
+      <CardContent className="relative flex flex-col gap-5 z-10">
+        <p className="text-[13px] leading-relaxed text-muted-foreground/90 font-medium">
+          You have <span className="font-bold text-foreground">3</span> new AI recommendation logs waiting in your assistant dashboard.
         </p>
         
-        {/* Content Box */}
-        <div className="flex flex-col gap-3 rounded-lg border border-border/30 bg-muted/15 p-3.5 dark:border-white/5 dark:bg-white/[0.02]">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <TrendingDown className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground truncate">Potential Savings</span>
-            </div>
-            <span className="text-sm font-semibold text-foreground shrink-0">0.32 tCO2e</span>
-          </div>
-          
-          <div className="h-px w-full bg-border/40 dark:bg-white/5" />
-          
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <Lightbulb className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground truncate">Top Opportunity</span>
-            </div>
-            <span className="text-[13px] font-medium text-foreground leading-snug">Reduce transportation emissions</span>
-          </div>
-          
-          <div className="h-px w-full bg-border/40 dark:bg-white/5" />
+        {/* Insight Diagnostic Spotlight Box */}
+        <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-100/30 dark:bg-zinc-950/40 p-4 transition-all duration-300 group-hover:border-zinc-350 dark:group-hover:border-zinc-700">
           
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <Target className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground truncate">Confidence</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <TrendingDown className="h-4 w-4 shrink-0 text-emerald-500" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Potential Savings</span>
             </div>
-            <span className="text-sm font-semibold text-foreground shrink-0">92%</span>
+            <span className="text-xs font-black text-foreground shrink-0">0.32 tCO₂e</span>
+          </div>
+          
+          <div className="h-[1px] w-full bg-zinc-200 dark:bg-zinc-850" />
+          
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2 min-w-0">
+              <Lightbulb className="h-4 w-4 shrink-0 text-emerald-500" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Top Opportunity</span>
+            </div>
+            <span className="text-xs font-bold text-foreground leading-snug truncate pl-6">Reduce transportation emissions</span>
+          </div>
+          
+          <div className="h-[1px] w-full bg-zinc-200 dark:bg-zinc-850" />
+          
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Target className="h-4 w-4 shrink-0 text-emerald-500" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Confidence</span>
+            </div>
+            <span className="text-xs font-black text-emerald-400 shrink-0">92%</span>
           </div>
         </div>
         
         {/* CTA Button */}
         <Link 
           href="/ai-coach"
-          className="group inline-flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-200/60 bg-emerald-50/50 px-4 py-2.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100/50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:border-emerald-500/10 dark:bg-emerald-500/5 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:focus:ring-offset-zinc-950"
+          className="group inline-flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-300/30 bg-emerald-50/50 hover:bg-emerald-100/60 dark:border-emerald-500/10 dark:bg-emerald-500/5 px-4 py-2.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-sm hover:shadow-inner"
         >
           Open AI Coach
-          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
         </Link>
       </CardContent>
     </Card>

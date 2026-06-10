@@ -15,7 +15,8 @@ import {
   Users,
   Award, 
   Settings,
-  MoreHorizontal
+  MoreHorizontal,
+  FileText
 } from "lucide-react";
 import type { Route } from "next";
 
@@ -37,6 +38,7 @@ const navItems: NavItem[] = [
   { name: "Community", href: "/community" as Route, icon: Users },
   { name: "Offset Marketplace", href: "/offset-marketplace" as Route, icon: Leaf },
   { name: "Achievements", href: "/achievements", icon: Award },
+  { name: "Impact Reports", href: "/reports" as Route, icon: FileText },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 

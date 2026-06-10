@@ -2,7 +2,7 @@
 
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Leaf, LayoutDashboard, BarChart3, Sparkles, Calculator, MessageSquare, Target, TrendingUp, Users, Award, Settings } from "lucide-react";
+import { Menu, Leaf, LayoutDashboard, BarChart3, Sparkles, Calculator, MessageSquare, Target, TrendingUp, Users, Award, Settings, FileText } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,7 @@ const navItems: NavItem[] = [
   { name: "Community", href: "/community" as Route, icon: Users },
   { name: "Offset Marketplace", href: "/offset-marketplace" as Route, icon: Leaf },
   { name: "Achievements", href: "/achievements", icon: Award },
+  { name: "Impact Reports", href: "/reports" as Route, icon: FileText },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 

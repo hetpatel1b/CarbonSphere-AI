@@ -1,6 +1,9 @@
+"use client"
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
+import { motion, AnimatePresence, type HTMLMotionProps } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -35,20 +38,99 @@ const buttonVariants = cva(
 )
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends Omit<HTMLMotionProps<"button">, "ref" | "children">,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  children?: React.ReactNode
+}
+
+interface Ripple {
+  id: number
+  x: number
+  y: number
+  size: number
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+  ({ className, variant, size, asChild = false, onClick, onPointerDown, ...props }, ref) => {
+    const [ripples, setRipples] = React.useState<Ripple[]>([])
+
+    const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (onPointerDown) onPointerDown(e)
+      if (asChild) return
+
+      const button = e.currentTarget
+      const rect = button.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      const size = Math.max(rect.width, rect.height) * 2.2
+
+      const newRipple = {
+        id: Date.now() + Math.random(),
+        x,
+        y,
+        size
+      }
+
+      setRipples((prev) => [...prev, newRipple])
+    }
+
+    if (asChild) {
+      return (
+        <Slot
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          {...(props as any)}
+        />
+      )
+    }
+
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+      <motion.button
         ref={ref}
+        onPointerDown={handlePointerDown}
+        onClick={onClick}
+        whileTap={{ scale: 0.965 }}
+        whileHover={{ y: -0.5 }}
+        transition={{ type: "spring", stiffness: 500, damping: 25 }}
+        className={cn(
+          "relative overflow-hidden group select-none cursor-pointer",
+          buttonVariants({ variant, size, className })
+        )}
         {...props}
-      />
+      >
+        <span className="relative z-10 flex items-center justify-center gap-2">
+          {props.children}
+        </span>
+
+        {/* Dynamic expanding ripple spans */}
+        <span className="absolute inset-0 z-0 overflow-hidden pointer-events-none rounded-[inherit]">
+          <AnimatePresence>
+            {ripples.map((ripple) => (
+              <motion.span
+                key={ripple.id}
+                initial={{ scale: 0, opacity: 0.25 }}
+                animate={{ scale: 1, opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.55, ease: "easeOut" }}
+                onAnimationComplete={() => {
+                  setRipples((prev) => prev.filter((r) => r.id !== ripple.id))
+                }}
+                className="bg-current opacity-25"
+                style={{
+                  position: "absolute",
+                  left: ripple.x - ripple.size / 2,
+                  top: ripple.y - ripple.size / 2,
+                  width: ripple.size,
+                  height: ripple.size,
+                  borderRadius: "50%",
+                  transformOrigin: "center",
+                }}
+              />
+            ))}
+          </AnimatePresence>
+        </span>
+      </motion.button>
     )
   }
 )
