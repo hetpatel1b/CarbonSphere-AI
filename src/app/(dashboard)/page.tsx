@@ -7,6 +7,7 @@ import { GoalProgressCard } from "@/components/dashboard/GoalProgressCard"
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed"
 import { AIInsightCard } from "@/components/dashboard/AIInsightCard"
 import { AIHeroSection } from "@/components/dashboard/AIHeroSection"
+import { ActiveActionsWidget } from "@/components/dashboard/ActiveActionsWidget"
 import { Cloud, Calendar, Trophy, Target, Loader2 } from "lucide-react"
 import { dashboardService, DashboardSummary, DashboardAnalytics } from "@/services/dashboardService"
 
@@ -165,12 +166,17 @@ export default function DashboardPage() {
       {/* Bottom Section */}
       <div className="grid gap-5 md:grid-cols-3 lg:grid-cols-4 items-start">
         {/* Activity Feed */}
-        <div className="md:col-span-2 lg:col-span-3 animate-scale-up animation-delay-500">
+        <div className="md:col-span-1 lg:col-span-2 animate-scale-up animation-delay-500">
           <ActivityFeed activities={recentActivities} />
         </div>
         
-        {/* AI Insight Spotlight Card */}
+        {/* Active Actions Widget */}
         <div className="md:col-span-1 lg:col-span-1 animate-scale-up animation-delay-375">
+          <ActiveActionsWidget actions={(summary as any)?.activeActions || []} />
+        </div>
+        
+        {/* AI Insight Spotlight Card */}
+        <div className="md:col-span-1 lg:col-span-1 animate-scale-up animation-delay-450">
           <AIInsightCard insight={summary?.aiInsight} />
         </div>
       </div>

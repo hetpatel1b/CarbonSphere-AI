@@ -15,3 +15,16 @@ export const fetchForecastData = async () => {
   if (!response.ok) throw new Error('Failed to fetch forecast data');
   return response.json();
 };
+
+export const applyAction = async (data: { title: string, reduction: number, difficulty: string, impact: string }) => {
+  const response = await fetch(`${API_URL}/actions/apply`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data)
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || 'Failed to apply action');
+  }
+  return response.json();
+};

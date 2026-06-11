@@ -143,7 +143,12 @@ export function AIHeroSection() {
         </div>
 
         {/* Action Button */}
-        <button className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-5 py-2.5 text-sm font-semibold shadow-md shadow-emerald-600/10 hover:shadow-emerald-600/20 hover:from-emerald-500 hover:to-emerald-400 transition-all duration-300 group/btn hover:scale-[1.02] active:scale-[0.98]">
+        <button 
+          onClick={() => {
+            window.location.href = '/forecasting#recommended-actions';
+          }}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white px-5 py-2.5 text-sm font-semibold shadow-md shadow-emerald-600/10 hover:shadow-emerald-600/20 hover:from-emerald-500 hover:to-emerald-400 transition-all duration-300 group/btn hover:scale-[1.02] active:scale-[0.98]"
+        >
           View Action Plan
           <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
         </button>

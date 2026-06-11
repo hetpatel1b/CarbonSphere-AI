@@ -5,15 +5,56 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon } from "lucide-react"
+import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { fetchForecastData } from "@/services/forecastService"
+import { fetchForecastData, applyAction } from "@/services/forecastService"
+import { useToast } from "@/hooks/use-toast"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 export default function ForecastingPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
   const [forecast, setForecast] = useState<any>(null)
+  
+  const { toast } = useToast()
+  const [selectedAction, setSelectedAction] = useState<any>(null)
+  const [isApplying, setIsApplying] = useState(false)
+
+  const handleApplyAction = async () => {
+    if (!selectedAction) return;
+    try {
+      setIsApplying(true);
+      // Parse reduction number from string e.g. "0.2 tCO2e/yr" -> 0.2
+      const reductionMatch = selectedAction.reduction?.match(/[\d.]+/);
+      const reductionValue = reductionMatch ? parseFloat(reductionMatch[0]) : 0;
+
+      await applyAction({
+        title: selectedAction.title,
+        reduction: reductionValue,
+        difficulty: selectedAction.difficulty,
+        impact: selectedAction.impact
+      });
+
+      toast({
+        title: "Action Applied",
+        description: `Successfully added "${selectedAction.title}" to your plan.`,
+        duration: 4000,
+      });
+
+      setSelectedAction(null);
+      // Optional: reload data to update forecast
+      // window.location.reload();
+    } catch (err: any) {
+      toast({
+        title: "Failed to apply action",
+        description: err.response?.data?.message || err.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -309,7 +350,11 @@ export default function ForecastingPage() {
                   </div>
                 </CardContent>
                 <CardFooter className="pt-0 border-t border-border/30 mt-auto flex">
-                  <Button variant="ghost" className="w-full mt-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/50 justify-between">
+                  <Button 
+                    onClick={() => setSelectedAction(action)}
+                    variant="ghost" 
+                    className="w-full mt-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/50 justify-between"
+                  >
                     Apply Action
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
@@ -324,6 +369,54 @@ export default function ForecastingPage() {
           </div>
         )}
       </div>
+
+      <Dialog open={!!selectedAction} onOpenChange={(open) => !open && setSelectedAction(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Apply Sustainability Action</DialogTitle>
+            <DialogDescription>
+              Commit to this action and track its impact on your forecast.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedAction && (
+            <div className="flex flex-col gap-4 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
+                  <Leaf className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold">{selectedAction.title}</h4>
+                  <p className="text-xs text-muted-foreground">{selectedAction.description}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 border border-border/50">
+                  <span className="text-[10px] uppercase text-muted-foreground font-medium">Reduction</span>
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{selectedAction.reduction}</span>
+                </div>
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 border border-border/50">
+                  <span className="text-[10px] uppercase text-muted-foreground font-medium">Difficulty</span>
+                  <span className="text-xs font-bold mt-0.5">{selectedAction.difficulty}</span>
+                </div>
+                <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 border border-border/50">
+                  <span className="text-[10px] uppercase text-muted-foreground font-medium">Impact</span>
+                  <span className="text-xs font-bold mt-0.5">{selectedAction.impact}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="sm:justify-between">
+            <Button variant="ghost" onClick={() => setSelectedAction(null)}>Cancel</Button>
+            <Button 
+              onClick={handleApplyAction} 
+              disabled={isApplying}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              {isApplying ? "Applying..." : "Apply Action"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -66,6 +66,21 @@ const getDashboardSummary = async (req, res) => {
        sustainabilityScore = 0;
     }
 
+    // Active Actions
+    const UserAction = require('../models/UserAction');
+    const activeActionsRaw = await UserAction.find({ userId: objectIdUser, status: 'active' }).sort({ appliedAt: -1 });
+    const activeActionsCount = activeActionsRaw.length;
+    
+    // Add bonus to sustainability score
+    sustainabilityScore = Math.min(100, sustainabilityScore + (activeActionsCount * 2));
+    
+    // Format for frontend
+    const activeActions = activeActionsRaw.map(a => ({
+      id: a._id,
+      title: a.actionTitle,
+      reduction: a.reduction
+    }));
+
     // Achievements
     const userAchievements = await UserAchievement.find({ userId }).populate('achievementId').sort({ unlockedAt: -1 });
     const totalAchievementsUnlocked = userAchievements.length;
@@ -99,7 +114,8 @@ const getDashboardSummary = async (req, res) => {
         latestAchievement,
         activeChallengesCount,
         completedChallengesCount,
-        aiInsight
+        aiInsight,
+        activeActions
       }
     });
 

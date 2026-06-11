@@ -1,4 +1,5 @@
 const Activity = require('../models/Activity');
+const UserAction = require('../models/UserAction');
 const groqService = require('../services/groqService');
 const mongoose = require('mongoose');
 
@@ -48,17 +49,14 @@ const getUnifiedForecast = async (req, res) => {
     const previousDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const previousMonthKey = `${previousDate.getFullYear()}-${String(previousDate.getMonth() + 1).padStart(2, '0')}`;
 
-    const currentMonthData = historicalSeries.find(s => s.month === currentMonthKey);
-    const currentMonth = currentMonthData ? currentMonthData.actual : 0;
+    let currentMonthData = historicalSeries.find(s => s.month === currentMonthKey);
+    let currentMonth = currentMonthData ? currentMonthData.actual : 0;
     
     const previousMonthData = historicalSeries.find(s => s.month === previousMonthKey);
     const previousMonth = previousMonthData ? previousMonthData.actual : 0;
 
     // 3. Weighted Linear Regression for Prediction
     const predictionSeries = [];
-    let forecastNextMonth = currentMonth;
-    let forecast3Months = currentMonth * 3;
-    let forecast6Months = currentMonth * 6;
     let slope = 0;
 
     if (historicalSeries.length > 0) {
@@ -148,6 +146,22 @@ const getUnifiedForecast = async (req, res) => {
       forecastNextMonth = predictionSeries[0].predicted;
       forecast3Months = predictionSeries.slice(0, 3).reduce((acc, curr) => acc + curr.predicted, 0);
       forecast6Months = predictionSeries.reduce((acc, curr) => acc + curr.predicted, 0);
+    }
+
+    // Deduct active sustainability action plans
+    const activeActions = await UserAction.find({ userId, status: 'active' });
+    const safeActions = activeActions || [];
+    const totalReduction = safeActions.reduce((acc, act) => acc + (act.reduction || 0), 0);
+
+    if (totalReduction > 0) {
+      currentMonth = Math.max(0, currentMonth - totalReduction);
+      if (forecastNextMonth !== undefined) forecastNextMonth = Math.max(0, forecastNextMonth - totalReduction);
+      if (forecast3Months !== undefined) forecast3Months = Math.max(0, forecast3Months - (totalReduction * 3));
+      if (forecast6Months !== undefined) forecast6Months = Math.max(0, forecast6Months - (totalReduction * 6));
+      
+      predictionSeries.forEach(p => {
+        p.predicted = Math.max(0, p.predicted - totalReduction);
+      });
     }
 
     // 4. Smart Risk Detection

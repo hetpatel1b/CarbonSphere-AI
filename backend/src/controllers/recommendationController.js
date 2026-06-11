@@ -4,6 +4,7 @@ const CarbonLog = require('../models/CarbonLog');
 const UserChallenge = require('../models/UserChallenge');
 const UserAchievement = require('../models/UserAchievement');
 const User = require('../models/User');
+const UserAction = require('../models/UserAction');
 const mongoose = require('mongoose');
 const { createNotification } = require('./notificationController');
 const groqService = require('../services/groqService');
@@ -163,6 +164,7 @@ const analyzeWithAI = async (req, res) => {
 
     const challenges = await UserChallenge.find({ userId: objectIdUser }).populate('challengeId');
     const achievements = await UserAchievement.find({ userId: objectIdUser }).populate('achievementId');
+    const activeActions = await UserAction.find({ userId: objectIdUser, status: 'active' });
 
     const totalCarbonAgg = await CarbonLog.aggregate([
       { $match: { userId: objectIdUser } },
@@ -194,6 +196,9 @@ const analyzeWithAI = async (req, res) => {
       
       Achievements Earned:
       ${achievements.map(a => `- ${a.achievementId ? a.achievementId.title : 'Unknown'}`).join('\n')}
+      
+      Active Action Plans (DO NOT recommend these again):
+      ${activeActions.length > 0 ? activeActions.map(a => `- ${a.actionTitle}`).join('\n') : 'None'}
       
       Based on this data, provide a JSON response EXACTLY matching this structure:
       {

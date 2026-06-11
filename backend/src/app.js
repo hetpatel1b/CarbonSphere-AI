@@ -23,6 +23,7 @@ const assistantRoutes = require('./routes/assistantRoutes');
 const communityRoutes = require('./routes/communityRoutes');
 const simulatorRoutes = require('./routes/simulatorRoutes');
 const settingsRoutes = require('./routes/settingsRoutes');
+const actionRoutes = require('./routes/actionRoutes');
 
 // Create Express app instance
 const app = express();
@@ -73,6 +74,7 @@ app.use('/api/assistant', assistantRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/simulator', simulatorRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/actions', actionRoutes);
 
 // Health check route
 app.get('/api/health/ai', (req, res) => {
