@@ -5,36 +5,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, BarChart3, Leaf, Settings, CheckCircle2, ArrowRight } from "lucide-react"
+import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { fetchForecastSummary, fetchForecastTrends, fetchForecastPredictions, fetchForecastInsights } from "@/services/forecastService"
+import { fetchForecastData } from "@/services/forecastService"
 
 export default function ForecastingPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  const [summary, setSummary] = useState<any>(null)
-  const [trends, setTrends] = useState<any>(null)
-  const [predictions, setPredictions] = useState<any>(null)
-  const [insights, setInsights] = useState<any>(null)
+  const [forecast, setForecast] = useState<any>(null)
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true)
         setError(null)
-        
-        const [sumRes, trendRes, predRes, insRes] = await Promise.all([
-          fetchForecastSummary(),
-          fetchForecastTrends(),
-          fetchForecastPredictions(),
-          fetchForecastInsights()
-        ])
-        
-        setSummary(sumRes.data)
-        setTrends(trendRes.data)
-        setPredictions(predRes.data)
-        setInsights(insRes.data)
+        const res = await fetchForecastData()
+        setForecast(res.data)
       } catch (err: any) {
         setError(err.response?.data?.message || err.message || "Failed to load forecasting data.")
       } finally {
@@ -65,44 +52,58 @@ export default function ForecastingPage() {
   }
 
   // Fallbacks if data is missing
-  const hasSufficientData = predictions?.sufficientData
+  const hasSufficientData = forecast?.historicalSeries?.length > 0
   
   // Prepare chart data
-  // Combine historical and predicted into one timeline
-  const chartData: any[] = []
-  
-  if (trends?.historicalTrend) {
-    trends.historicalTrend.forEach((item: any) => {
-      chartData.push({
-        month: item.month,
-        actual: parseFloat(item.actual.toFixed(2))
-      })
-    })
+  const chartMap = new Map();
+  let lastActual: any = null;
+
+  if (forecast?.historicalSeries) {
+    forecast.historicalSeries.forEach((item: any) => {
+      chartMap.set(item.month, { month: item.month, actual: parseFloat(item.actual.toFixed(2)) });
+      lastActual = { month: item.month, val: parseFloat(item.actual.toFixed(2)) };
+    });
   }
 
-  if (hasSufficientData && predictions?.predictions) {
-    predictions.predictions.forEach((item: any) => {
-      chartData.push({
-        month: item.month,
-        predicted: parseFloat(item.predicted.toFixed(2))
-      })
-    })
+  if (forecast?.predictionSeries) {
+    // To connect lines visually, inject the last actual point as the first prediction point
+    if (lastActual) {
+      if (chartMap.has(lastActual.month)) {
+        chartMap.get(lastActual.month).predicted = lastActual.val;
+      }
+    }
+
+    forecast.predictionSeries.forEach((item: any) => {
+      if (chartMap.has(item.month)) {
+        chartMap.get(item.month).predicted = parseFloat(item.predicted.toFixed(2));
+      } else {
+        chartMap.set(item.month, { month: item.month, predicted: parseFloat(item.predicted.toFixed(2)) });
+      }
+    });
   }
 
-  // Risk Level computation based on slope
-  let riskLevel = "Low Risk"
+  const chartData = Array.from(chartMap.values()).sort((a, b) => a.month.localeCompare(b.month));
+
+  // Risk Level computation
+  let riskLevel = forecast?.riskLevel || "LOW"
   let riskColor = "text-emerald-500"
   let RiskIcon = TrendingDown
-  if (hasSufficientData) {
-    if (predictions.slope > 0) {
-      riskLevel = "High Risk"
-      riskColor = "text-rose-500"
-      RiskIcon = TrendingUp
-    } else if (predictions.slope > -0.05) { // very slow decrease
-      riskLevel = "Moderate Risk"
-      riskColor = "text-amber-500"
-      RiskIcon = TrendingUp // Or a stable icon
-    }
+
+  if (riskLevel === "CRITICAL") {
+    riskColor = "text-rose-600 dark:text-rose-500"
+    RiskIcon = AlertTriangle
+  } else if (riskLevel === "HIGH") {
+    riskColor = "text-rose-500"
+    RiskIcon = TrendingUp
+  } else if (riskLevel === "MEDIUM") {
+    riskColor = "text-amber-500"
+    RiskIcon = ActivityIcon
+  }
+
+  // Monthly trend calculation
+  let monthlyTrend = 0;
+  if (forecast?.previousMonth > 0) {
+    monthlyTrend = ((forecast.currentMonth - forecast.previousMonth) / forecast.previousMonth) * 100;
   }
 
   return (
@@ -121,13 +122,13 @@ export default function ForecastingPage() {
           <CardContent className="p-5 flex flex-col gap-1">
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Current Emissions (Month)</p>
             <div className="flex items-center justify-between mt-1">
-              <h4 className="text-2xl font-bold">{summary?.currentMonthCarbon?.toFixed(2) || "0.00"} <span className="text-sm font-normal text-muted-foreground">tCO₂e</span></h4>
-              {summary?.monthlyTrend !== 0 && (
+              <h4 className="text-2xl font-bold">{forecast?.currentMonth?.toFixed(2) || "0.00"} <span className="text-sm font-normal text-muted-foreground">tCO₂e</span></h4>
+              {monthlyTrend !== 0 && (
                 <Badge variant="secondary" className={cn(
-                  summary.monthlyTrend < 0 ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400"
+                  monthlyTrend < 0 ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400"
                 )}>
-                  {summary.monthlyTrend < 0 ? <TrendingDown className="mr-1 h-3 w-3" /> : <TrendingUp className="mr-1 h-3 w-3" />}
-                  {Math.abs(summary.monthlyTrend).toFixed(1)}%
+                  {monthlyTrend < 0 ? <TrendingDown className="mr-1 h-3 w-3" /> : <TrendingUp className="mr-1 h-3 w-3" />}
+                  {Math.abs(monthlyTrend).toFixed(1)}%
                 </Badge>
               )}
             </div>
@@ -138,7 +139,7 @@ export default function ForecastingPage() {
           <CardContent className="p-5 flex flex-col gap-1">
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Forecasted (Next Month)</p>
             {hasSufficientData ? (
-               <h4 className="text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">{predictions?.nextMonth?.toFixed(2)} <span className="text-sm font-normal opacity-70">tCO₂e</span></h4>
+               <h4 className="text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">{forecast?.forecastNextMonth?.toFixed(2)} <span className="text-sm font-normal opacity-70">tCO₂e</span></h4>
             ) : (
                <h4 className="text-sm font-medium mt-2 text-muted-foreground">Need more data</h4>
             )}
@@ -151,7 +152,7 @@ export default function ForecastingPage() {
             {hasSufficientData ? (
               <div className="flex items-center mt-1 gap-2">
                 <RiskIcon className={cn("h-5 w-5", riskColor)} />
-                <h4 className={cn("text-2xl font-bold", riskColor)}>{riskLevel}</h4>
+                <h4 className={cn("text-2xl font-bold", riskColor)}>{riskLevel} Risk</h4>
               </div>
             ) : (
               <h4 className="text-sm font-medium mt-2 text-muted-foreground">Insufficient Data</h4>
@@ -161,11 +162,11 @@ export default function ForecastingPage() {
 
         <Card>
           <CardContent className="p-5 flex flex-col gap-1">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Goal Prediction</p>
+            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Trend Direction</p>
             {hasSufficientData ? (
-               <h4 className={`text-sm font-semibold mt-2 leading-tight ${predictions.slope < 0 ? 'text-emerald-500' : 'text-amber-500'}`}>{predictions?.goalPrediction}</h4>
+               <h4 className={`text-xl font-bold mt-2 leading-tight ${forecast.trendDirection === 'Decreasing' ? 'text-emerald-500' : (forecast.trendDirection === 'Stable' ? 'text-amber-500' : 'text-rose-500')}`}>{forecast?.trendDirection}</h4>
             ) : (
-               <h4 className="text-sm font-medium mt-2 text-muted-foreground">Keep logging to see predictions</h4>
+               <h4 className="text-sm font-medium mt-2 text-muted-foreground">Keep logging activities</h4>
             )}
           </CardContent>
         </Card>
@@ -240,12 +241,12 @@ export default function ForecastingPage() {
               </div>
               <div className="space-y-1">
                 <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Overall Insight</p>
-                <h4 className="text-sm font-medium text-foreground leading-snug">{insights?.insight || "Insufficient data for detailed AI insights."}</h4>
+                <h4 className="text-sm font-medium text-foreground leading-snug">{forecast?.aiInsights?.insight || "Insufficient data for detailed AI insights."}</h4>
               </div>
             </CardContent>
           </Card>
 
-          {insights?.highestRiskArea && (
+          {forecast?.aiInsights?.highestRiskArea && forecast.aiInsights.highestRiskArea !== "None" && (
             <Card className="bg-rose-50/50 border-rose-200/60 dark:bg-rose-500/5 dark:border-rose-500/10 shadow-none">
               <CardContent className="p-4 flex gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/40">
@@ -253,27 +254,24 @@ export default function ForecastingPage() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Highest Risk Area</p>
-                  <h4 className="text-sm font-semibold text-foreground">{insights.highestRiskArea}</h4>
-                  {insights.potentialIncrease && (
-                    <p className="text-xs text-muted-foreground mt-1">Potential Increase: <span className="font-medium text-rose-600 dark:text-rose-400">+{insights.potentialIncrease}</span></p>
+                  <h4 className="text-sm font-semibold text-foreground">{forecast.aiInsights.highestRiskArea}</h4>
+                  {forecast.aiInsights.potentialIncrease && (
+                    <p className="text-xs text-muted-foreground mt-1">Potential Increase: <span className="font-medium text-rose-600 dark:text-rose-400">+{forecast.aiInsights.potentialIncrease}</span></p>
                   )}
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {insights?.mostImpactfulArea && (
+          {forecast?.aiInsights?.potentialReduction && (
             <Card className="bg-muted/30 border-border/50 shadow-none">
               <CardContent className="p-4 flex gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900/40">
                   <Lightbulb className="h-5 w-5 text-sky-600 dark:text-sky-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Most Impactful Area</p>
-                  <h4 className="text-sm font-semibold text-foreground">{insights.mostImpactfulArea}</h4>
-                  {insights.potentialReduction && (
-                    <p className="text-xs text-muted-foreground mt-1">Potential Reduction: <span className="font-medium text-foreground">{insights.potentialReduction}</span></p>
-                  )}
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Potential Reduction</p>
+                  <h4 className="text-sm font-semibold text-foreground">{forecast.aiInsights.potentialReduction}</h4>
                 </div>
               </CardContent>
             </Card>
@@ -284,9 +282,9 @@ export default function ForecastingPage() {
       {/* Section 4: Recommended Actions */}
       <div>
         <h2 className="text-base font-semibold mb-4">Recommended Actions</h2>
-        {insights?.recommendations?.length > 0 ? (
+        {forecast?.recommendations?.length > 0 ? (
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {insights.recommendations.map((action: any, i: number) => (
+            {forecast.recommendations.map((action: any, i: number) => (
               <Card key={i} className="flex flex-col group hover:border-emerald-500/30 transition-colors">
                 <CardHeader className="pb-3 flex-1">
                   <CardTitle className="text-sm font-semibold leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{action.title}</CardTitle>

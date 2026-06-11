@@ -10,26 +10,8 @@ const getHeaders = () => {
   };
 };
 
-export const fetchForecastSummary = async () => {
-  const response = await fetch(`${API_URL}/forecast/summary`, { headers: getHeaders() });
-  if (!response.ok) throw new Error('Failed to fetch summary');
-  return response.json();
-};
-
-export const fetchForecastTrends = async () => {
-  const response = await fetch(`${API_URL}/forecast/trends`, { headers: getHeaders() });
-  if (!response.ok) throw new Error('Failed to fetch trends');
-  return response.json();
-};
-
-export const fetchForecastPredictions = async () => {
-  const response = await fetch(`${API_URL}/forecast/predictions`, { headers: getHeaders() });
-  if (!response.ok) throw new Error('Failed to fetch predictions');
-  return response.json();
-};
-
-export const fetchForecastInsights = async () => {
-  const response = await fetch(`${API_URL}/forecast/insights`, { headers: getHeaders() });
-  if (!response.ok) throw new Error('Failed to fetch insights');
+export const fetchForecastData = async () => {
+  const response = await fetch(`${API_URL}/forecast/data`, { headers: getHeaders() });
+  if (!response.ok) throw new Error('Failed to fetch forecast data');
   return response.json();
 };
