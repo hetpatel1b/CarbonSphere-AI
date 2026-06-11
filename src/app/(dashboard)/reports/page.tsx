@@ -68,7 +68,7 @@ export default function ImpactReportsPage() {
     const { reportData } = activeReport;
 
     return (
-      <div className="print-section space-y-8 bg-white dark:bg-zinc-950 p-8 rounded-xl border border-border shadow-lg">
+      <div className="print-section space-y-8 bg-white dark:bg-zinc-950 p-8 rounded-xl border border-border shadow-lg print:border-none print:shadow-none print:p-0 print:w-full print:m-0 print:block">
         {/* Report Header for Print */}
         <div className="flex justify-between items-center border-b pb-6">
           <div>
@@ -188,30 +188,11 @@ export default function ImpactReportsPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{__html: `
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          .print-section, .print-section * {
-            visibility: visible;
-          }
-          .print-section {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 20mm;
-            border: none !important;
-            box-shadow: none !important;
-          }
-          @page { margin: 0; }
-        }
-      `}} />
 
-      <div className="flex flex-col gap-8 pb-8 relative print:hidden">
+
+      <div className="flex flex-col gap-8 pb-8 relative">
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
           <div>
             <h1 className="text-3xl font-black tracking-tight text-foreground">Impact Reporting</h1>
             <p className="text-muted-foreground mt-1.5 text-sm sm:text-base">
@@ -244,7 +225,7 @@ export default function ImpactReportsPage() {
 
         {/* Main reporting deck */}
         {!activeReport && (
-          <div className="space-y-4">
+          <div className="space-y-4 print:hidden">
             <h2 className="text-lg font-bold flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-500" /> Report History Vault
             </h2>
