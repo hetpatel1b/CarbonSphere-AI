@@ -3,11 +3,13 @@ const app = require('../src/app');
 const Activity = require('../src/models/Activity');
 const CarbonLog = require('../src/models/CarbonLog');
 const User = require('../src/models/User');
+const UserAchievement = require('../src/models/UserAchievement');
 const jwt = require('jsonwebtoken');
 
 jest.mock('../src/models/Activity');
 jest.mock('../src/models/CarbonLog');
 jest.mock('../src/models/User');
+jest.mock('../src/models/UserAchievement');
 
 describe('Dashboard API', () => {
   beforeEach(() => {
@@ -30,6 +32,14 @@ describe('Dashboard API', () => {
       CarbonLog.aggregate.mockResolvedValue([{ total: 1250.5 }]);
       
       Activity.aggregate.mockResolvedValue([{ total: 10 }]); // for month and week
+
+      UserAchievement.find.mockReturnValue({
+        populate: jest.fn().mockReturnValue({
+          sort: jest.fn().mockResolvedValue([
+            { achievementId: { _id: 'a1', title: 'Test' } }
+          ])
+        })
+      });
 
       const res = await request(app)
         .get('/api/dashboard/summary')

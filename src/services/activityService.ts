@@ -70,13 +70,28 @@ export const activityService = {
     return handleResponse(response);
   },
 
-  async createActivity(data: CreateActivityDTO): Promise<ActivityDocument> {
+  async createActivity(data: CreateActivityDTO): Promise<{ activity: ActivityDocument, newlyUnlocked: any[] }> {
     const response = await fetch(`${API_URL}/activities`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(data),
     });
-    return handleResponse(response);
+    
+    if (response.status === 401) {
+      logout();
+      if (typeof window !== 'undefined') window.location.href = '/login';
+      throw new Error('Authentication expired. Please log in again.');
+    }
+
+    const resData = await response.json();
+    if (!response.ok) {
+      throw new Error(resData.message || 'API request failed');
+    }
+
+    return {
+      activity: resData.data,
+      newlyUnlocked: resData.newlyUnlocked || []
+    };
   },
 
   async updateActivity(id: string, data: Partial<CreateActivityDTO>): Promise<ActivityDocument> {

@@ -27,9 +27,14 @@ const createActivity = async (req, res) => {
 
     await activity.save();
 
+    // Trigger dynamic achievement engine synchronously so we can return newly unlocked
+    const { checkAndUnlockAchievements } = require('../services/achievementEngine');
+    const newlyUnlocked = await checkAndUnlockAchievements(req.user.id);
+
     res.status(201).json({
       success: true,
-      data: activity
+      data: activity,
+      newlyUnlocked: newlyUnlocked || []
     });
   } catch (error) {
     console.error(`Error in createActivity: ${error.message}`);

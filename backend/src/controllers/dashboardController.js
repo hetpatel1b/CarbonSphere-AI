@@ -1,5 +1,6 @@
 const Activity = require('../models/Activity');
 const CarbonLog = require('../models/CarbonLog');
+const UserAchievement = require('../models/UserAchievement');
 const mongoose = require('mongoose');
 
 // @desc    Get dashboard summary
@@ -65,6 +66,11 @@ const getDashboardSummary = async (req, res) => {
        sustainabilityScore = 0;
     }
 
+    // Achievements
+    const userAchievements = await UserAchievement.find({ userId }).populate('achievementId').sort({ unlockedAt: -1 });
+    const totalAchievementsUnlocked = userAchievements.length;
+    const latestAchievement = totalAchievementsUnlocked > 0 ? userAchievements[0].achievementId : null;
+
     return res.status(200).json({
       success: true,
       data: {
@@ -72,7 +78,9 @@ const getDashboardSummary = async (req, res) => {
         totalCarbon,
         sustainabilityScore,
         currentMonthCarbon,
-        currentWeekCarbon
+        currentWeekCarbon,
+        totalAchievementsUnlocked,
+        latestAchievement
       }
     });
 

@@ -6,6 +6,9 @@ const jwt = require('jsonwebtoken');
 
 jest.mock('../src/models/Activity');
 jest.mock('../src/models/User');
+jest.mock('../src/services/achievementEngine', () => ({
+  checkAndUnlockAchievements: jest.fn().mockResolvedValue([])
+}));
 
 describe('Activities API', () => {
   beforeEach(() => {

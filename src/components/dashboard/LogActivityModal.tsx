@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { activityService, CreateActivityDTO, ActivityDocument } from "@/services/activityService";
+import { useToast } from "@/hooks/use-toast";
 
 interface LogActivityModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ const CATEGORIES = [
 export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: LogActivityModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const { toast } = useToast();
 
   const [formData, setFormData] = useState<CreateActivityDTO>({
     title: "",
@@ -87,7 +89,13 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
       if (activityToEdit) {
         await activityService.updateActivity(activityToEdit._id, formData);
       } else {
-        await activityService.createActivity(formData);
+        const { newlyUnlocked } = await activityService.createActivity(formData);
+        if (newlyUnlocked && newlyUnlocked.length > 0) {
+          toast({
+            title: "🏆 Achievement Unlocked!",
+            description: `You just unlocked ${newlyUnlocked.length} new achievement(s)!`,
+          });
+        }
       }
       onSave(); // Trigger parent refresh
       onClose(); // Close modal

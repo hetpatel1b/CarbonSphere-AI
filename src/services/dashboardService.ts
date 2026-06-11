@@ -8,6 +8,7 @@ export interface DashboardSummary {
   sustainabilityScore: number;
   currentMonthCarbon: number;
   currentWeekCarbon: number;
+  totalAchievementsUnlocked?: number;
 }
 
 export interface ActivityDocument {
