@@ -12,6 +12,8 @@ jest.mock('../src/models/User');
 jest.mock('../src/models/UserAchievement');
 const UserChallenge = require('../src/models/UserChallenge');
 jest.mock('../src/models/UserChallenge');
+const UserAction = require('../src/models/UserAction');
+jest.mock('../src/models/UserAction');
 
 describe('Dashboard API', () => {
   beforeEach(() => {
@@ -46,6 +48,12 @@ describe('Dashboard API', () => {
       UserChallenge.find.mockReturnValue({
         populate: jest.fn().mockResolvedValue([
           { challengeId: { isActive: true, endDate: new Date('2099-01-01') }, completed: false }
+        ])
+      });
+
+      UserAction.find.mockReturnValue({
+        sort: jest.fn().mockResolvedValue([
+          { _id: 'ua1', actionTitle: 'Test Action', reduction: 10 }
         ])
       });
 
