@@ -9,6 +9,9 @@ jest.mock('../src/models/User');
 jest.mock('../src/services/achievementEngine', () => ({
   checkAndUnlockAchievements: jest.fn().mockResolvedValue([])
 }));
+jest.mock('../src/services/challengeEngine', () => ({
+  checkAndUpdateChallenges: jest.fn().mockResolvedValue([])
+}));
 
 describe('Activities API', () => {
   beforeEach(() => {

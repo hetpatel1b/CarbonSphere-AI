@@ -10,6 +10,8 @@ jest.mock('../src/models/Activity');
 jest.mock('../src/models/CarbonLog');
 jest.mock('../src/models/User');
 jest.mock('../src/models/UserAchievement');
+const UserChallenge = require('../src/models/UserChallenge');
+jest.mock('../src/models/UserChallenge');
 
 describe('Dashboard API', () => {
   beforeEach(() => {
@@ -39,6 +41,12 @@ describe('Dashboard API', () => {
             { achievementId: { _id: 'a1', title: 'Test' } }
           ])
         })
+      });
+
+      UserChallenge.find.mockReturnValue({
+        populate: jest.fn().mockResolvedValue([
+          { challengeId: { isActive: true, endDate: new Date('2099-01-01') }, completed: false }
+        ])
       });
 
       const res = await request(app)
