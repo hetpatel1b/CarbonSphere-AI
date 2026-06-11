@@ -13,6 +13,7 @@ export interface DashboardSummary {
 export interface ActivityDocument {
   _id: string;
   activityType: string;
+  title?: string;
   description: string;
   carbonEmission: number;
   category: string;

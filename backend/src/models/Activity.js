@@ -25,6 +25,12 @@ const ActivitySchema = new mongoose.Schema(
     date: {
       type: Date,
       default: Date.now
+    },
+    title: {
+      type: String
+    },
+    notes: {
+      type: String
     }
   },
   {

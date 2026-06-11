@@ -5,7 +5,7 @@ const Activity = require('../models/Activity');
 // @access  Private
 const createActivity = async (req, res) => {
   try {
-    const { activityType, description, carbonEmission, category, date } = req.body;
+    const { activityType, description, carbonEmission, category, date, title, notes } = req.body;
 
     if (!activityType || carbonEmission === undefined || !category) {
       return res.status(400).json({
@@ -20,7 +20,9 @@ const createActivity = async (req, res) => {
       description,
       carbonEmission,
       category,
-      date
+      date,
+      title,
+      notes
     });
 
     await activity.save();
