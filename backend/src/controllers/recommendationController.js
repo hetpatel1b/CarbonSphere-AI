@@ -2,8 +2,27 @@ const Recommendation = require('../models/Recommendation');
 const Activity = require('../models/Activity');
 const CarbonLog = require('../models/CarbonLog');
 const UserChallenge = require('../models/UserChallenge');
+const UserAchievement = require('../models/UserAchievement');
+const User = require('../models/User');
 const mongoose = require('mongoose');
 const { createNotification } = require('./notificationController');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const path = require('path');
+const fs = require('fs');
+const dotenv = require('dotenv');
+
+// Attempt to load .env.local if GEMINI_API_KEY is not already present
+if (!process.env.GEMINI_API_KEY) {
+  const envLocalPath = path.resolve(__dirname, '../../../.env.local');
+  if (fs.existsSync(envLocalPath)) {
+    const envConfig = dotenv.parse(fs.readFileSync(envLocalPath));
+    for (const k in envConfig) {
+      if (!process.env[k]) {
+        process.env[k] = envConfig[k];
+      }
+    }
+  }
+}
 
 // @desc    Generate new recommendations based on user data
 // @route   POST /api/recommendations/generate
@@ -143,6 +162,149 @@ const generateRecommendations = async (req, res) => {
   }
 };
 
+// @desc    Analyze user profile with Gemini AI and generate insights
+// @route   POST /api/ai-coach/analyze
+// @access  Private
+const analyzeWithAI = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Check for API key
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ success: false, message: 'Gemini API Key is not configured on the server.' });
+    }
+
+    // Gather data
+    const objectIdUser = new mongoose.Types.ObjectId(userId);
+    const activities = await Activity.find({ userId: objectIdUser }).sort({ date: -1 }).limit(20);
+    
+    if (activities.length === 0) {
+      return res.status(400).json({ success: false, message: 'Not enough activity data to analyze.' });
+    }
+
+    const challenges = await UserChallenge.find({ userId: objectIdUser }).populate('challengeId');
+    const achievements = await UserAchievement.find({ userId: objectIdUser }).populate('achievementId');
+
+    const totalCarbonAgg = await CarbonLog.aggregate([
+      { $match: { userId: objectIdUser } },
+      { $group: { _id: null, total: { $sum: '$carbonEmission' } } }
+    ]);
+    const totalCarbon = totalCarbonAgg.length > 0 ? totalCarbonAgg[0].total : 0;
+
+    const categoryBreakdownAgg = await Activity.aggregate([
+      { $match: { userId: objectIdUser } },
+      { $group: { _id: '$category', totalCarbon: { $sum: '$carbonEmission' } } }
+    ]);
+
+    // Build the Prompt
+    const prompt = `
+      You are CarbonSphere's AI Sustainability Coach. Analyze the following user data and provide personalized recommendations to help them reduce their carbon footprint.
+      
+      User Data:
+      Total Carbon Emitted: ${totalCarbon} kg CO2e
+      Total Activities Logged: ${activities.length}
+      
+      Category Breakdown:
+      ${categoryBreakdownAgg.map(c => `- ${c._id}: ${c.totalCarbon} kg CO2e`).join('\n')}
+      
+      Recent Activities:
+      ${activities.slice(0, 10).map(a => `- ${a.category} (${a.activityType}): ${a.carbonEmission} kg CO2e`).join('\n')}
+      
+      Challenges Status:
+      ${challenges.map(c => `- ${c.challengeId ? c.challengeId.title : 'Unknown'}: ${c.completed ? 'Completed' : 'In Progress'}`).join('\n')}
+      
+      Achievements Earned:
+      ${achievements.map(a => `- ${a.achievementId ? a.achievementId.title : 'Unknown'}`).join('\n')}
+      
+      Based on this data, provide a JSON response EXACTLY matching this structure:
+      {
+        "score": <number between 0-100 indicating their overall sustainability score>,
+        "strengths": [<string array of up to 3 positive habits based on data>],
+        "weaknesses": [<string array of up to 3 areas needing improvement>],
+        "monthlyGoal": "<string, a specific measurable goal for the month>",
+        "carbonReductionPotential": "<string, e.g., '0.15 tCO2e/mo'>",
+        "challengeSuggestion": "<string, name of a challenge they should try or focus on>",
+        "recommendations": [
+          {
+            "title": "<string, short actionable title>",
+            "description": "<string, detailed explanation of why and how>",
+            "category": "<string, e.g., Transport, Energy, Lifestyle>",
+            "saving": "<string, estimated saving e.g., '5 kg CO2e'>",
+            "confidence": <number between 1-100>
+          }
+        ]
+      }
+      Do NOT include any markdown formatting or \`\`\`json wrappers in your response. Output raw JSON only.
+    `;
+
+    // Initialize Gemini
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const result = await model.generateContent(prompt);
+    let aiResponseText = result.response.text().trim();
+    
+    // Clean up if it returned markdown
+    if (aiResponseText.startsWith('```json')) {
+      aiResponseText = aiResponseText.replace(/^```json/, '').replace(/```$/, '').trim();
+    } else if (aiResponseText.startsWith('```')) {
+      aiResponseText = aiResponseText.replace(/^```/, '').replace(/```$/, '').trim();
+    }
+
+    let aiData;
+    try {
+      aiData = JSON.parse(aiResponseText);
+    } catch (err) {
+      console.error("Failed to parse Gemini response:", aiResponseText);
+      return res.status(500).json({ success: false, message: 'Failed to process AI response.' });
+    }
+
+    // Overwrite Recommendations in DB
+    await Recommendation.deleteMany({ userId: objectIdUser });
+    
+    const recDocs = [];
+    if (aiData.recommendations && Array.isArray(aiData.recommendations)) {
+      for (const rec of aiData.recommendations) {
+        recDocs.push({
+          userId: objectIdUser,
+          title: rec.title,
+          description: rec.description,
+          category: rec.category,
+          priority: 'high',
+          estimatedCarbonSaving: parseFloat(rec.saving) || 0
+        });
+      }
+      if (recDocs.length > 0) {
+        await Recommendation.insertMany(recDocs);
+      }
+    }
+
+    // Cache the AI Insight on the User model
+    const userToUpdate = await User.findById(userId);
+    userToUpdate.aiInsight = {
+      score: aiData.score || 0,
+      strengths: aiData.strengths || [],
+      weaknesses: aiData.weaknesses || [],
+      monthlyGoal: aiData.monthlyGoal || "",
+      carbonReductionPotential: aiData.carbonReductionPotential || "",
+      challengeSuggestion: aiData.challengeSuggestion || "",
+      generatedAt: new Date()
+    };
+    await userToUpdate.save();
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        insight: userToUpdate.aiInsight,
+        recommendations: aiData.recommendations
+      }
+    });
+  } catch (error) {
+    console.error(`Error in analyzeWithAI: ${error.message}`);
+    return res.status(500).json({ success: false, message: error.message || 'Server Error' });
+  }
+};
+
 // @desc    Get user recommendations
 // @route   GET /api/recommendations
 // @access  Private
@@ -218,5 +380,6 @@ module.exports = {
   generateRecommendations,
   getMyRecommendations,
   getRecommendationById,
-  markAsRead
+  markAsRead,
+  analyzeWithAI
 };

@@ -1,10 +1,15 @@
 "use client"
 
-import { Sparkles, ArrowRight, TrendingDown, Target, Lightbulb } from "lucide-react"
+import { Sparkles, ArrowRight, TrendingDown, Target, Lightbulb, Zap } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { AIInsight } from "@/services/aiCoachService"
 
-export function AIInsightCard() {
+interface AIInsightCardProps {
+  insight?: AIInsight | null;
+}
+
+export function AIInsightCard({ insight }: AIInsightCardProps) {
   return (
     <Card className="col-span-full md:col-span-1 lg:col-span-1 relative overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/50 dark:to-zinc-950/30 shadow-md hover:shadow-[0_20px_40px_rgba(16,185,129,0.06)] hover:-translate-y-1 hover:border-emerald-500/30 dark:hover:border-emerald-500/20 transition-all duration-500 group">
       {/* Decorative hover grid background */}
@@ -32,41 +37,51 @@ export function AIInsightCard() {
       </CardHeader>
       
       <CardContent className="relative flex flex-col gap-5 z-10">
-        <p className="text-[13px] leading-relaxed text-muted-foreground/90 font-medium">
-          You have <span className="font-bold text-foreground">3</span> new AI recommendation logs waiting in your assistant dashboard.
-        </p>
-        
-        {/* Insight Diagnostic Spotlight Box */}
-        <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-100/30 dark:bg-zinc-950/40 p-4 transition-all duration-300 group-hover:border-zinc-350 dark:group-hover:border-zinc-700">
-          
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <TrendingDown className="h-4 w-4 shrink-0 text-emerald-500" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Potential Savings</span>
+        {!insight ? (
+          <p className="text-[13px] leading-relaxed text-muted-foreground/90 font-medium">
+            No recent AI insights available. Generate a new analysis in the AI Coach dashboard!
+          </p>
+        ) : (
+          <>
+            <p className="text-[13px] leading-relaxed text-muted-foreground/90 font-medium">
+              Your latest AI analysis yielded a sustainability score of <span className="font-bold text-foreground">{insight.score}</span>.
+            </p>
+            
+            {/* Insight Diagnostic Spotlight Box */}
+            <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-100/30 dark:bg-zinc-950/40 p-4 transition-all duration-300 group-hover:border-zinc-350 dark:group-hover:border-zinc-700">
+              
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <TrendingDown className="h-4 w-4 shrink-0 text-emerald-500" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Reduction Potential</span>
+                </div>
+                <span className="text-xs font-black text-foreground shrink-0">{insight.carbonReductionPotential || "N/A"}</span>
+              </div>
+              
+              <div className="h-[1px] w-full bg-zinc-200 dark:bg-zinc-850" />
+              
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Lightbulb className="h-4 w-4 shrink-0 text-emerald-500" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Monthly Goal</span>
+                </div>
+                <span className="text-xs font-bold text-foreground leading-snug truncate pl-6">{insight.monthlyGoal || "Keep logging activities!"}</span>
+              </div>
+              
+              <div className="h-[1px] w-full bg-zinc-200 dark:bg-zinc-850" />
+              
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Zap className="h-4 w-4 shrink-0 text-emerald-500" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Top Recommendation</span>
+                </div>
+                <span className="text-xs font-bold text-foreground leading-snug truncate pl-6 text-emerald-600 dark:text-emerald-400">
+                  {insight.challengeSuggestion || "Try a new challenge!"}
+                </span>
+              </div>
             </div>
-            <span className="text-xs font-black text-foreground shrink-0">0.32 tCO₂e</span>
-          </div>
-          
-          <div className="h-[1px] w-full bg-zinc-200 dark:bg-zinc-850" />
-          
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 min-w-0">
-              <Lightbulb className="h-4 w-4 shrink-0 text-emerald-500" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Top Opportunity</span>
-            </div>
-            <span className="text-xs font-bold text-foreground leading-snug truncate pl-6">Reduce transportation emissions</span>
-          </div>
-          
-          <div className="h-[1px] w-full bg-zinc-200 dark:bg-zinc-850" />
-          
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <Target className="h-4 w-4 shrink-0 text-emerald-500" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Confidence</span>
-            </div>
-            <span className="text-xs font-black text-emerald-400 shrink-0">92%</span>
-          </div>
-        </div>
+          </>
+        )}
         
         {/* CTA Button */}
         <Link 

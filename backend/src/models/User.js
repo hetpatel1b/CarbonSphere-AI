@@ -43,6 +43,10 @@ const UserSchema = new mongoose.Schema(
     totalAchievements: {
       type: Number,
       default: 0
+    },
+    aiInsight: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null
     }
   },
   {

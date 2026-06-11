@@ -82,6 +82,11 @@ const getDashboardSummary = async (req, res) => {
     ).length;
     const completedChallengesCount = userChallenges.filter(uc => uc.completed).length;
 
+    // Latest AI Insight
+    const User = require('../models/User');
+    const user = await User.findById(userId);
+    const aiInsight = user.aiInsight || null;
+
     return res.status(200).json({
       success: true,
       data: {
@@ -93,7 +98,8 @@ const getDashboardSummary = async (req, res) => {
         totalAchievementsUnlocked,
         latestAchievement,
         activeChallengesCount,
-        completedChallengesCount
+        completedChallengesCount,
+        aiInsight
       }
     });
 

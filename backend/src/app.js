@@ -18,6 +18,7 @@ const offsetRoutes = require('./routes/offsetRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const aiCoachRoutes = require('./routes/aiCoachRoutes');
 
 // Create Express app instance
 const app = express();
@@ -61,6 +62,7 @@ app.use('/api/offsets', offsetRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/ai-coach', aiCoachRoutes);
 
 // Health check route
 app.get('/', (req, res) => {

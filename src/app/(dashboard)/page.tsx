@@ -171,7 +171,7 @@ export default function DashboardPage() {
         
         {/* AI Insight Spotlight Card */}
         <div className="md:col-span-1 lg:col-span-1 animate-scale-up animation-delay-375">
-          <AIInsightCard />
+          <AIInsightCard insight={summary?.aiInsight} />
         </div>
       </div>
     </div>

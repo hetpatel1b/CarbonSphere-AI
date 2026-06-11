@@ -2,6 +2,8 @@ import { getToken, logout } from '../utils/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+import { AIInsight } from './aiCoachService';
+
 export interface DashboardSummary {
   totalActivities: number;
   totalCarbon: number;
@@ -11,6 +13,7 @@ export interface DashboardSummary {
   totalAchievementsUnlocked?: number;
   activeChallengesCount?: number;
   completedChallengesCount?: number;
+  aiInsight?: AIInsight;
 }
 
 export interface ActivityDocument {
