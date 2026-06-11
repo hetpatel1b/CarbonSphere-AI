@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const OffsetProject = require('../models/OffsetProject');
 const OffsetPurchase = require('../models/OffsetPurchase');
 const Activity = require('../models/Activity');
-const aiService = require('../services/aiService');
+const groqService = require('../services/groqService');
 
 // @desc    Get all available offset projects
 // @route   GET /api/offsets/projects
@@ -48,7 +48,7 @@ const getRecommendations = async (req, res) => {
 
     let aiData;
     try {
-      const aiResponse = await aiService.generateAssistantResponse(prompt);
+      const aiResponse = await groqService.generateAssistantResponse(prompt);
       aiData = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
     } catch (err) {
       console.warn("AI parsing failed, using fallback", err.message);

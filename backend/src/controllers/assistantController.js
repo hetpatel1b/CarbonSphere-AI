@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const aiService = require('../services/aiService');
+const groqService = require('../services/groqService');
 
 // @desc    Chat with AI Assistant
 // @route   POST /api/assistant/chat
@@ -36,7 +36,7 @@ const chatWithAssistant = async (req, res) => {
       Do not include any markdown backticks around the JSON. Just return the raw JSON object.
     `;
 
-    const aiResponse = await aiService.generateAssistantResponse(prompt);
+    const aiResponse = await groqService.generateAssistantResponse(prompt);
 
     res.status(200).json({
       success: true,

@@ -1,5 +1,5 @@
 const Activity = require('../models/Activity');
-const aiService = require('../services/aiService');
+const groqService = require('../services/groqService');
 const mongoose = require('mongoose');
 
 // @desc    Get Unified Forecast Data
@@ -214,7 +214,7 @@ const getUnifiedForecast = async (req, res) => {
         Provide 4 recommendations. At least two should specifically target the ${highestEmission} category.
       `;
       
-      aiInsights = await aiService.generateAssistantResponse(prompt);
+      aiInsights = await groqService.generateAssistantResponse(prompt);
     }
 
     return res.status(200).json({

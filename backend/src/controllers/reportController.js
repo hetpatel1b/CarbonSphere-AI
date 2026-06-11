@@ -4,7 +4,7 @@ const Activity = require('../models/Activity');
 const OffsetPurchase = require('../models/OffsetPurchase');
 const UserChallenge = require('../models/UserChallenge');
 const UserAchievement = require('../models/UserAchievement');
-const aiService = require('../services/aiService');
+const groqService = require('../services/groqService');
 
 // @desc    Generate a new sustainability report
 // @route   POST /api/reports/generate
@@ -108,7 +108,7 @@ const generateReport = async (req, res) => {
       `;
 
       try {
-        const aiResponse = await aiService.generateAssistantResponse(prompt);
+        const aiResponse = await groqService.generateAssistantResponse(prompt);
         const parsed = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
         aiInsights = {
           executiveSummary: parsed.executiveSummary || aiInsights.executiveSummary,

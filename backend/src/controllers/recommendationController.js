@@ -6,7 +6,7 @@ const UserAchievement = require('../models/UserAchievement');
 const User = require('../models/User');
 const mongoose = require('mongoose');
 const { createNotification } = require('./notificationController');
-const aiService = require('../services/aiService');
+const groqService = require('../services/groqService');
 
 // @desc    Generate new recommendations based on user data
 // @route   POST /api/recommendations/generate
@@ -221,7 +221,7 @@ const analyzeWithAI = async (req, res) => {
 
     let aiData;
     try {
-      aiData = await aiService.generateAssistantResponse(prompt);
+      aiData = await groqService.generateAssistantResponse(prompt);
       if (!aiData || !aiData.recommendations) {
         throw new Error("Invalid response format from AI Service.");
       }

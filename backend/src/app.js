@@ -75,6 +75,11 @@ app.use('/api/simulator', simulatorRoutes);
 app.use('/api/settings', settingsRoutes);
 
 // Health check route
+app.get('/api/health/ai', (req, res) => {
+  const groqService = require('./services/groqService');
+  res.status(200).json(groqService.getHealthStats());
+});
+
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,

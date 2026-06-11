@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Simulation = require('../models/Simulation');
 const Activity = require('../models/Activity');
-const aiService = require('../services/aiService');
+const groqService = require('../services/groqService');
 
 const SCENARIOS = {
   'switch_to_ev': { category: 'Transport', reductionFactor: 0.70, baseCost: 40000, annualSavings: 1500, title: 'Switch to EV' },
@@ -91,7 +91,7 @@ const runSimulation = async (req, res) => {
     };
 
     try {
-      const aiResponse = await aiService.generateAssistantResponse(prompt);
+      const aiResponse = await groqService.generateAssistantResponse(prompt);
       const parsed = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
       aiInsights = { ...aiInsights, ...parsed };
     } catch (err) {
