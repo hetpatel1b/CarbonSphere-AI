@@ -46,7 +46,7 @@ export default function CommunityPage() {
   }
 
   useEffect(() => {
-    loadData()
+    Promise.resolve().then(() => loadData())
   }, [])
 
   const handleJoinChallenge = async (id: string) => {
