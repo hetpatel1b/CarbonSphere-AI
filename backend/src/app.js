@@ -28,6 +28,9 @@ const app = express();
 // 1. Set Security Headers
 app.use(helmet());
 
+// Apply CORS before rate limiter so 429 responses get CORS headers
+app.use(cors());
+
 // 2. Rate Limiting (100 req per 15 min)
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -47,7 +50,6 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.use(cors());
 app.use(express.json()); // Enable JSON body parsing
 
 // Mount auth routes
