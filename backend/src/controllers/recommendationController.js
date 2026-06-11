@@ -7,22 +7,6 @@ const User = require('../models/User');
 const mongoose = require('mongoose');
 const { createNotification } = require('./notificationController');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const path = require('path');
-const fs = require('fs');
-const dotenv = require('dotenv');
-
-// Attempt to load .env.local if GEMINI_API_KEY is not already present
-if (!process.env.GEMINI_API_KEY) {
-  const envLocalPath = path.resolve(__dirname, '../../../.env.local');
-  if (fs.existsSync(envLocalPath)) {
-    const envConfig = dotenv.parse(fs.readFileSync(envLocalPath));
-    for (const k in envConfig) {
-      if (!process.env[k]) {
-        process.env[k] = envConfig[k];
-      }
-    }
-  }
-}
 
 // @desc    Generate new recommendations based on user data
 // @route   POST /api/recommendations/generate
