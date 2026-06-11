@@ -311,7 +311,7 @@ export default function AICoachPage() {
                 <span className="text-xs font-bold text-muted-foreground/75 uppercase tracking-wider">{data.recommendations?.length || 0} items verified</span>
               </div>
               
-              <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 {(data.recommendations || []).map((rec, idx) => (
                   <Card key={idx} className="border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/50 dark:to-zinc-950/30 shadow-md group relative overflow-hidden hover:border-emerald-500/20 transition-all duration-350 hover:-translate-y-0.5">
                     <div className="absolute left-0 top-0 h-full w-1.5 bg-emerald-500" />
@@ -329,7 +329,7 @@ export default function AICoachPage() {
                     <CardContent className="flex flex-col gap-4">
                       <p className="text-xs leading-relaxed text-muted-foreground font-medium line-clamp-3">{rec.description}</p>
                       
-                      <div className="grid grid-cols-2 gap-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div className="rounded-xl border border-zinc-200/60 bg-zinc-100/20 px-3 py-2 dark:border-zinc-850 dark:bg-zinc-950/20">
                           <div className="flex items-center gap-1">
                             <TrendingDown className="h-3.5 w-3.5 text-emerald-500" />

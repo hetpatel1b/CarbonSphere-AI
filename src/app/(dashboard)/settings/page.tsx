@@ -302,8 +302,8 @@ export default function SettingsPage() {
                 <div className="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-zinc-200/50 dark:border-zinc-800/50">
                   <div className="relative group cursor-pointer shrink-0">
                     <Avatar className="h-24 w-24 border-[3px] border-emerald-500/40 shadow-md">
-                      <AvatarImage src={profile.avatar || "/placeholder-avatar.jpg"} alt="Profile" />
-                      <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-teal-500 text-white text-3xl font-extrabold">{profile.name.charAt(0) || "U"}</AvatarFallback>
+                      <AvatarImage src={profile.avatar || undefined} alt="Profile" />
+                      <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-teal-500 text-white text-3xl font-extrabold">{profile.name?.charAt(0)?.toUpperCase() || "U"}</AvatarFallback>
                     </Avatar>
                   </div>
                   
@@ -318,7 +318,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6 pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                   <div className="space-y-2.5">
                     <Label className="text-sm font-semibold flex items-center gap-1.5"><User className="h-4 w-4 text-zinc-400" /> Full Name</Label>
                     <Input value={profile.name} onChange={(e) => setProfile({...profile, name: e.target.value})} required className="rounded-2xl h-12" />
@@ -365,7 +365,7 @@ export default function SettingsPage() {
           {/* Diagnostic Stats */}
           <div>
             <h3 className="text-lg font-bold flex items-center gap-2 mb-5 pl-2"><BarChart3 className="h-5 w-5 text-emerald-500" /> Sustainability Diagnostic</h3>
-            <StaggerContainer className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <StaggerContainer className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               <StaggerItem>
                 <MotionCard glowColor="rgba(16, 185, 129, 0.12)">
                   <CardContent className="p-5 flex items-center gap-4">
@@ -412,7 +412,7 @@ export default function SettingsPage() {
               </div>
             </CardHeader>
             <CardContent className="p-8 pt-4 space-y-6">
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2.5">
                   <Label className="text-sm font-semibold flex gap-1.5"><Target className="h-4 w-4" /> Preferred Goal</Label>
                   <Select value={preferences.goal} onValueChange={(v) => setPreferences({...preferences, goal: v})}>

@@ -175,7 +175,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Financial Tickers Summary Row */}
-      <div className="grid gap-5 md:grid-cols-3">
+      <div className="grid gap-5 grid-cols-1 md:grid-cols-3">
         {/* Ticker 1 */}
         <Card className="relative overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/50 dark:to-zinc-950/30 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 group">
           <div className="absolute left-0 top-0 h-full w-1.5 bg-emerald-500" />
@@ -241,7 +241,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Asymmetrical Asymmetric Analytics Panel Grid */}
-      <div className="grid gap-6 lg:grid-cols-3 items-start">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 items-start">
         
         {/* Left Side Chart Panel (2/3 size) */}
         <div className="lg:col-span-2 space-y-5">

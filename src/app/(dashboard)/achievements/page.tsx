@@ -128,7 +128,7 @@ export default function AchievementsPage() {
       </div>
 
       {/* Top Statistics */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
         <Card className="bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm border-border/40">
           <CardContent className="p-4 flex flex-col gap-1">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total</span>
@@ -252,7 +252,7 @@ export default function AchievementsPage() {
               No achievements found in this category.
             </div>
           ) : (
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {filteredAchievements.map((achievement, i) => {
                 const rarityName = determineRarity(achievement.points)
                 const rarityStyle = RARITY_CONFIG[rarityName]

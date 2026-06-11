@@ -148,7 +148,7 @@ export default function OffsetMarketplacePage() {
       </div>
 
       {/* Section 1: Top Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="bg-muted/10 border-border/40">
           <CardContent className="p-5 flex flex-col gap-1">
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Total Offset Purchased</p>
@@ -204,7 +204,7 @@ export default function OffsetMarketplacePage() {
       {/* Section 2: Offset Projects */}
       <div>
         <h2 className="text-base font-semibold mb-4">Available Projects</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((p) => {
             const isRecommended = recommendations?.insight?.suggestedCategory === p.category;
             return (
@@ -250,7 +250,8 @@ export default function OffsetMarketplacePage() {
         <Card className="border-border/40 bg-white/50 dark:bg-zinc-950/30 overflow-hidden">
           {history.length > 0 ? (
             <>
-              <Table>
+              <div className="w-full overflow-x-auto">
+                <Table className="min-w-[600px]">
                 <TableHeader className="bg-muted/30">
                   <TableRow>
                     <TableHead>Date</TableHead>
@@ -272,6 +273,7 @@ export default function OffsetMarketplacePage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
               {totalPages > 1 && (
                 <div className="flex items-center justify-end p-4 border-t gap-2">
                   <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</Button>
@@ -292,7 +294,7 @@ export default function OffsetMarketplacePage() {
       {/* Section 4: Certificates */}
       <div>
         <h2 className="text-base font-semibold mb-4">Platform Guarantees</h2>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
           {CERTIFICATES.map((c, i) => (
             <Card key={i} className="flex items-start gap-4 p-4 border-border/40 bg-muted/10">
               <c.icon className="h-6 w-6 text-emerald-600 dark:text-emerald-400 shrink-0" />

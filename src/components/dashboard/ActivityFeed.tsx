@@ -45,7 +45,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                 <Avatar className="h-8 w-8 mt-0.5 shrink-0 ring-2 ring-zinc-100 dark:ring-zinc-900 shadow-sm group-hover/item:scale-105 group-hover/item:ring-emerald-500/30 transition-all duration-300">
                   <AvatarImage src={activity.icon} alt="Icon" />
                   <AvatarFallback className="text-[11px] font-bold bg-emerald-100/80 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200/30 dark:border-emerald-500/10">
-                    {activity.title.charAt(0)}
+                    {activity.title?.charAt(0)?.toUpperCase() || "A"}
                   </AvatarFallback>
                 </Avatar>
                 

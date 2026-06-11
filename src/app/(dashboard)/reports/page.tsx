@@ -94,7 +94,7 @@ export default function ImpactReportsPage() {
         </div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div className="p-5 border rounded-xl bg-muted/10">
             <p className="text-[10px] font-bold text-muted-foreground uppercase mb-1">Gross Emissions</p>
             <h3 className="text-2xl font-black text-rose-500">{reportData.summary.totalEmissions.toFixed(1)} <span className="text-sm">tCO₂e</span></h3>
@@ -114,7 +114,7 @@ export default function ImpactReportsPage() {
         </div>
 
         {/* Breakdown & Community */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-lg font-bold mb-4 border-b pb-2">Emissions Analysis</h3>
             {reportData.emissionsAnalysis.categoryBreakdown.length > 0 ? (
@@ -150,7 +150,7 @@ export default function ImpactReportsPage() {
         </div>
 
         {/* AI Key Findings & Risks */}
-        <div className="grid md:grid-cols-2 gap-6 pt-4 border-t">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
           <div>
             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">Key Findings</h3>
             <ul className="space-y-2">
@@ -252,7 +252,7 @@ export default function ImpactReportsPage() {
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 {reports.map((report) => (
                   <Card key={report._id} className="border-border/40 hover:shadow-md transition-shadow bg-white/40 dark:bg-zinc-950/40 backdrop-blur-sm group">
                     <CardHeader className="pb-3">

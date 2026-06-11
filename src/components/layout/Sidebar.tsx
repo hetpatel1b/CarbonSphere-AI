@@ -100,9 +100,9 @@ export function Sidebar() {
         ) : user ? (
           <div className="flex items-center gap-3 rounded-lg p-2.5 transition-colors duration-200 hover:bg-muted/60 cursor-pointer dark:hover:bg-zinc-800/50">
             <Avatar className="h-8 w-8 rounded-full ring-2 ring-emerald-500/20 dark:ring-emerald-500/15 shrink-0">
-              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarImage src={user.avatar || undefined} alt={user.name} />
               <AvatarFallback className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 text-sm font-semibold">
-                {user.name.charAt(0).toUpperCase()}
+                {user.name?.charAt(0)?.toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col gap-0.5 min-w-0 overflow-hidden">

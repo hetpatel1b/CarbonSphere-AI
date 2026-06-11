@@ -158,7 +158,7 @@ export default function ForecastingPage() {
       </div>
 
       {/* Section 1: Forecast Summary */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-5 flex flex-col gap-1">
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Current Emissions (Month)</p>
@@ -324,7 +324,7 @@ export default function ForecastingPage() {
       <div>
         <h2 className="text-base font-semibold mb-4">Recommended Actions</h2>
         {forecast?.recommendations?.length > 0 ? (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {forecast.recommendations.map((action: any, i: number) => (
               <Card key={i} className="flex flex-col group hover:border-emerald-500/30 transition-colors">
                 <CardHeader className="pb-3 flex-1">
@@ -389,7 +389,7 @@ export default function ForecastingPage() {
                   <p className="text-xs text-muted-foreground">{selectedAction.description}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
                 <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 border border-border/50">
                   <span className="text-[10px] uppercase text-muted-foreground font-medium">Reduction</span>
                   <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{selectedAction.reduction}</span>

@@ -169,7 +169,7 @@ export default function ChallengesPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         {statsCards.map((stat, i) => (
           <Card key={i}>
             <CardContent className="p-5 flex items-center gap-4">
@@ -193,7 +193,7 @@ export default function ChallengesPage() {
             You haven&apos;t joined any active challenges yet. Browse available challenges below!
           </div>
         ) : (
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {active.map(c => renderChallengeCard(c, false))}
           </div>
         )}
@@ -203,13 +203,13 @@ export default function ChallengesPage() {
       {available.length > 0 && (
         <div>
           <h2 className="text-base font-semibold mb-4">Available to Join</h2>
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {available.map(c => renderChallengeCard(c, true))}
           </div>
         </div>
       )}
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-8 grid-cols-1 lg:grid-cols-2">
         {/* Completed Challenges */}
         <div>
           <h2 className="text-base font-semibold mb-4">Completed Challenges</h2>

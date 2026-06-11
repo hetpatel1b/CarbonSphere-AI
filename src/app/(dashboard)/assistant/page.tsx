@@ -208,7 +208,7 @@ export default function AssistantPage() {
                     ))}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 w-full mt-4 max-w-lg">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mt-4 max-w-lg">
                     {CAPABILITIES.map((cap, i) => (
                       <div key={i} className="p-4 rounded-xl border border-border/40 bg-white/50 dark:bg-zinc-900/50 text-left hover:shadow-md transition-shadow">
                         <div className="p-2 w-fit rounded-lg bg-emerald-50 dark:bg-emerald-900/30 mb-3">

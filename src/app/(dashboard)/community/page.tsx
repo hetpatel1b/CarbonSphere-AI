@@ -96,7 +96,7 @@ export default function CommunityPage() {
       </div>
 
       {/* Section 1: Community Overview */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-5 flex flex-col gap-1">
             <div className="flex items-center justify-between">
@@ -192,7 +192,7 @@ export default function CommunityPage() {
           <div className="flex flex-col gap-4">
             <h2 className="text-base font-semibold">Community Challenges</h2>
             {challenges.length > 0 ? (
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
                 {challenges.map((challenge) => (
                   <Card key={challenge.id} className="flex flex-col border-border/40 hover:border-emerald-500/30 transition-colors">
                     <CardHeader className="pb-3">
@@ -245,7 +245,7 @@ export default function CommunityPage() {
             </CardHeader>
             <CardContent>
               {currentUserRank ? (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1 p-3 rounded-lg bg-background/60 border border-border/40 backdrop-blur-sm">
                     <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Your Rank</span>
                     <span className="text-lg font-bold text-foreground">#{currentUserRank.rank}</span>
@@ -333,7 +333,7 @@ export default function CommunityPage() {
       {/* Section 6: Real-Time Activity Feed */}
       <div>
         <h2 className="text-base font-semibold mb-4">Recent Community Activity</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {feed.length > 0 ? feed.map((item) => (
             <Card key={item.id} className="bg-muted/15 border-border/40 shadow-none">
               <CardContent className="p-4 flex items-start gap-4">

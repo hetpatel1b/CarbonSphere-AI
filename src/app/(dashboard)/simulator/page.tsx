@@ -82,7 +82,7 @@ export default function SimulatorPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               
-              <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {SCENARIOS.map((m) => (
                   <button
                     key={m.id}
@@ -156,7 +156,7 @@ export default function SimulatorPage() {
                 <CardContent className="space-y-8">
                   
                   {/* Metrics */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1 rounded-xl border border-border/30 bg-muted/15 p-5 shadow-sm">
                       <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Current Trajectory</span>
                       <span className="text-3xl font-black text-rose-500">{results.currentEmissions.toFixed(0)} <span className="text-sm font-bold text-muted-foreground">kg CO₂e/yr</span></span>
@@ -228,7 +228,7 @@ export default function SimulatorPage() {
                     <p className="text-sm text-foreground/90 leading-relaxed">{results.aiInsights.environmentalSummary}</p>
                   </div>
                   
-                  <div className="grid sm:grid-cols-2 gap-4 pt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                     <div>
                       <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Long-Term Benefits</h4>
                       <ul className="space-y-1">
