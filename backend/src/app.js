@@ -21,6 +21,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const aiCoachRoutes = require('./routes/aiCoachRoutes');
 const assistantRoutes = require('./routes/assistantRoutes');
 const communityRoutes = require('./routes/communityRoutes');
+const simulatorRoutes = require('./routes/simulatorRoutes');
 
 // Create Express app instance
 const app = express();
@@ -69,6 +70,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/ai-coach', aiCoachRoutes);
 app.use('/api/assistant', assistantRoutes);
 app.use('/api/community', communityRoutes);
+app.use('/api/simulator', simulatorRoutes);
 
 // Health check route
 app.get('/', (req, res) => {

@@ -1,192 +1,268 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
-import { Car, Train, Bike, Footprints, Zap, TrendingDown, Leaf } from "lucide-react"
+import { Car, Train, Bike, Footprints, Zap, TrendingDown, Leaf, Shield, History, Sparkles, DollarSign, Trees } from "lucide-react"
+import { runSimulation, fetchSimulationHistory } from "@/services/simulatorService"
 
-type TransportMode = "Car" | "Public Transport" | "EV" | "Bicycle" | "Walking"
-
-const EMISSION_FACTORS: Record<TransportMode, number> = {
-  "Car": 0.21,
-  "Public Transport": 0.08,
-  "EV": 0.10,
-  "Bicycle": 0,
-  "Walking": 0,
-}
-
-const MODES = [
-  { id: "Car", label: "Car", icon: Car },
-  { id: "Public Transport", label: "Transit", icon: Train },
-  { id: "EV", label: "EV", icon: Zap },
-  { id: "Bicycle", label: "Bicycle", icon: Bike },
-  { id: "Walking", label: "Walking", icon: Footprints },
+const SCENARIOS = [
+  { id: "switch_to_ev", label: "Switch to EV", icon: Car, category: 'Transport' },
+  { id: "public_transport", label: "Public Transit", icon: Train, category: 'Transport' },
+  { id: "reduce_flights", label: "Reduce Flights", icon: Shield, category: 'Transport' },
+  { id: "solar_panels", label: "Solar Panels", icon: Zap, category: 'Energy' },
+  { id: "plant_based", label: "Plant-Based", icon: Leaf, category: 'Food' },
+  { id: "second_hand", label: "Second-Hand", icon: Footprints, category: 'Shopping' }
 ]
 
 export default function SimulatorPage() {
-  const [mode, setMode] = useState<TransportMode>("Public Transport")
-  const [distance, setDistance] = useState<number>(15)
-  const [daysPerWeek, setDaysPerWeek] = useState<number>(5)
+  const [selectedScenario, setSelectedScenario] = useState("switch_to_ev")
+  const [isRunning, setIsRunning] = useState(false)
+  const [results, setResults] = useState<any>(null)
+  const [history, setHistory] = useState<any[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  // Calculations
-  const distanceVal = distance || 0
-  const daysVal = daysPerWeek || 0
-  
-  const baselineAnnual = distanceVal * daysVal * 52 * EMISSION_FACTORS["Car"]
-  const projectedAnnual = distanceVal * daysVal * 52 * EMISSION_FACTORS[mode]
-  const annualReduction = Math.max(0, baselineAnnual - projectedAnnual)
-
-  const chartData = [
-    {
-      name: "Baseline",
-      emissions: baselineAnnual,
-      color: "#71717a", // zinc-500
-    },
-    {
-      name: "Projected",
-      emissions: projectedAnnual,
-      color: "#10b981", // emerald-500
+  const loadHistory = async () => {
+    try {
+      const res = await fetchSimulationHistory()
+      setHistory(res.data)
+    } catch (err) {
+      console.warn("Could not load history")
     }
-  ]
+  }
+
+  useEffect(() => {
+    Promise.resolve().then(() => loadHistory())
+  }, [])
+
+  const handleSimulate = async () => {
+    try {
+      setIsRunning(true)
+      setError(null)
+      const res = await runSimulation(selectedScenario)
+      setResults(res.data.results)
+      loadHistory()
+    } catch (err: any) {
+      setError(err.message || 'Failed to run simulation')
+    } finally {
+      setIsRunning(false)
+    }
+  }
+
+  const chartData = results ? [
+    { name: "Current Footprint", emissions: results.currentEmissions, color: "#f43f5e" },
+    { name: "Simulated Projection", emissions: results.simulatedEmissions, color: "#10b981" }
+  ] : []
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 pb-8 relative">
       {/* Header */}
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Carbon Footprint Simulator</h1>
-        <p className="text-sm text-muted-foreground">
-          Explore how lifestyle changes can reduce your emissions.
+        <h1 className="text-3xl font-black tracking-tight text-foreground">Sustainability Simulator</h1>
+        <p className="text-muted-foreground mt-1.5 text-sm sm:text-base">
+          Simulate lifestyle changes against your actual footprint and forecast planetary impact.
         </p>
       </div>
 
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-950/30 dark:border-rose-900/50">
+          {error}
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-12">
-        {/* Left Panel: Scenario */}
+        {/* Left Panel: Scenario Builder */}
         <div className="lg:col-span-5 flex flex-col gap-6">
-          <Card>
+          <Card className="border-border/40 hover:shadow-md transition-shadow bg-white/40 dark:bg-zinc-950/40 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">What If Scenario</CardTitle>
-              <CardDescription>Adjust variables to simulate environmental impact.</CardDescription>
+              <CardTitle className="text-lg font-bold">Scenario Builder</CardTitle>
+              <CardDescription>Select an action to project the mathematical impact against your historic carbon logs.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               
-              {/* Transport Type */}
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Transport Type</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {MODES.map((m) => (
-                    <button
-                      key={m.id}
-                      onClick={() => setMode(m.id as TransportMode)}
-                      className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all ${
-                        mode === m.id 
-                          ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' 
-                          : 'border-border/40 bg-muted/10 text-muted-foreground hover:bg-muted/30'
-                      }`}
-                    >
-                      <m.icon className="h-5 w-5" />
-                      <span className="text-[11px] font-medium">{m.label}</span>
-                    </button>
-                  ))}
-                </div>
+              <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
+                {SCENARIOS.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setSelectedScenario(m.id)}
+                    className={`flex flex-col items-center justify-center gap-3 p-4 rounded-xl border transition-all ${
+                      selectedScenario === m.id 
+                        ? 'border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shadow-sm' 
+                        : 'border-border/40 bg-muted/10 text-muted-foreground hover:bg-muted/30'
+                    }`}
+                  >
+                    <m.icon className="h-6 w-6" />
+                    <span className="text-xs font-bold">{m.label}</span>
+                  </button>
+                ))}
               </div>
 
-              {/* Inputs */}
-              <div className="space-y-4 pt-2">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Distance Per Day (km)</Label>
-                  <Input 
-                    type="number" 
-                    min={0} 
-                    value={distance} 
-                    onChange={(e) => setDistance(Number(e.target.value))} 
-                    className="bg-muted/20 border-border/50 rounded-lg focus-visible:ring-emerald-500/30"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Days Per Week</Label>
-                  <Input 
-                    type="number" 
-                    min={0} 
-                    max={7}
-                    value={daysPerWeek} 
-                    onChange={(e) => setDaysPerWeek(Number(e.target.value))} 
-                    className="bg-muted/20 border-border/50 rounded-lg focus-visible:ring-emerald-500/30"
-                  />
-                </div>
-              </div>
+              <Button 
+                onClick={handleSimulate} 
+                disabled={isRunning}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 rounded-xl"
+              >
+                {isRunning ? "Simulating Quantum Trajectories..." : "Run Simulation"}
+              </Button>
               
             </CardContent>
           </Card>
+
+          {/* History Panel */}
+          {history.length > 0 && (
+            <Card className="border-border/40 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-sm">
+              <CardHeader className="pb-3 border-b">
+                <CardTitle className="text-base font-bold flex items-center gap-2"><History className="w-4 h-4 text-emerald-500" /> Recent Simulations</CardTitle>
+              </CardHeader>
+              <div className="flex flex-col max-h-[300px] overflow-y-auto">
+                {history.slice(0,5).map((sim) => (
+                  <div key={sim._id} className="p-4 border-b flex justify-between items-center hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setResults(sim.results)}>
+                    <div>
+                      <h4 className="text-sm font-bold">{sim.scenarioType}</h4>
+                      <p className="text-xs text-muted-foreground">{new Date(sim.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <Badge variant="outline" className="text-emerald-500 bg-emerald-500/10 border-emerald-500/20">
+                      -{sim.results.percentageImprovement.toFixed(0)}% CO₂e
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* Right Panel: Impact Projection */}
         <div className="lg:col-span-7 flex flex-col gap-6">
-          <Card className="relative overflow-hidden border border-emerald-500/15 bg-white/50 backdrop-blur-xl shadow-[0_4px_24px_rgba(16,185,129,0.04)] dark:border-emerald-500/10 dark:bg-zinc-950/50">
-            <div className="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-emerald-500/8 blur-[60px] dark:bg-emerald-500/5" />
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Impact Projection</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-8">
-              
-              {/* Metrics */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1 rounded-lg border border-border/30 bg-muted/15 p-4">
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Current Baseline</span>
-                  <span className="text-2xl font-bold">{baselineAnnual.toFixed(0)} <span className="text-sm font-normal text-muted-foreground">kg CO₂e/yr</span></span>
-                </div>
-                <div className="flex flex-col gap-1 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Projected Emissions</span>
-                  <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{projectedAnnual.toFixed(0)} <span className="text-sm font-normal opacity-70">kg CO₂e/yr</span></span>
-                </div>
+          {!results ? (
+            <div className="h-full min-h-[500px] border border-dashed border-border/50 bg-muted/10 rounded-2xl flex flex-col items-center justify-center text-center gap-4">
+              <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center animate-pulse">
+                <TrendingDown className="h-8 w-8 text-emerald-500/50" />
               </div>
-              
-              {/* Highlight stats */}
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                 <div className="flex items-center gap-3">
-                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
-                     <TrendingDown className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                   </div>
-                   <div>
-                     <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Annual Reduction</div>
-                     <div className="text-lg font-semibold text-foreground">{annualReduction.toFixed(0)} kg CO₂e</div>
-                   </div>
-                 </div>
-                 <div className="flex items-center gap-3">
-                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
-                     <Leaf className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                   </div>
-                   <div>
-                     <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Score Improvement</div>
-                     <div className="text-lg font-semibold text-foreground">+{Math.round(annualReduction / 5)} pts</div>
-                   </div>
-                 </div>
+              <div>
+                <h3 className="font-bold text-foreground">Awaiting Parameters</h3>
+                <p className="text-sm text-muted-foreground mt-1 max-w-sm">Select a scenario and click run to mathematically project your future carbon reduction.</p>
               </div>
+            </div>
+          ) : (
+            <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
               
-              {/* Chart */}
-              <div className="h-[200px] w-full pt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 0, right: 30, left: 0, bottom: 0 }} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--muted-foreground)/0.2)" />
-                    <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${val} kg`} />
-                    <YAxis dataKey="name" type="category" width={80} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                    <Tooltip 
-                      cursor={{ fill: 'hsl(var(--muted)/0.5)' }}
-                      contentStyle={{ backgroundColor: "hsl(var(--background))", borderRadius: "8px", border: "1px solid hsl(var(--border))" }}
-                      formatter={(value: number) => [`${value.toFixed(0)} kg CO₂e`, "Emissions"]}
-                    />
-                    <Bar dataKey="emissions" radius={[0, 4, 4, 0]} barSize={32}>
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+              <Card className="relative overflow-hidden border border-emerald-500/15 bg-white/50 backdrop-blur-xl shadow-lg dark:border-emerald-500/10 dark:bg-zinc-950/50">
+                <div className="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-emerald-500/8 blur-[60px] dark:bg-emerald-500/5" />
+                <CardHeader>
+                  <CardTitle className="text-xl font-black">Simulation Results</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-8">
+                  
+                  {/* Metrics */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1 rounded-xl border border-border/30 bg-muted/15 p-5 shadow-sm">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Current Trajectory</span>
+                      <span className="text-3xl font-black text-rose-500">{results.currentEmissions.toFixed(0)} <span className="text-sm font-bold text-muted-foreground">kg CO₂e/yr</span></span>
+                    </div>
+                    <div className="flex flex-col gap-1 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 shadow-sm">
+                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Simulated Target</span>
+                      <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{results.simulatedEmissions.toFixed(0)} <span className="text-sm font-bold opacity-70">kg CO₂e/yr</span></span>
+                    </div>
+                  </div>
+                  
+                  {/* Highlight stats */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                    <div className="p-4 bg-white dark:bg-zinc-900 border rounded-xl flex flex-col items-center justify-center text-center">
+                      <TrendingDown className="h-6 w-6 text-emerald-500 mb-2" />
+                      <div className="text-[10px] font-bold text-muted-foreground uppercase">Reduction</div>
+                      <div className="text-lg font-black">{results.carbonReduction.toFixed(0)} kg</div>
+                    </div>
+                    <div className="p-4 bg-white dark:bg-zinc-900 border rounded-xl flex flex-col items-center justify-center text-center">
+                      <Leaf className="h-6 w-6 text-emerald-500 mb-2" />
+                      <div className="text-[10px] font-bold text-muted-foreground uppercase">Improvement</div>
+                      <div className="text-lg font-black">{results.percentageImprovement.toFixed(1)}%</div>
+                    </div>
+                    <div className="p-4 bg-white dark:bg-zinc-900 border rounded-xl flex flex-col items-center justify-center text-center">
+                      <Trees className="h-6 w-6 text-emerald-500 mb-2" />
+                      <div className="text-[10px] font-bold text-muted-foreground uppercase">Trees Eq</div>
+                      <div className="text-lg font-black">{results.treesEquivalent}</div>
+                    </div>
+                    <div className="p-4 bg-white dark:bg-zinc-900 border rounded-xl flex flex-col items-center justify-center text-center">
+                      <DollarSign className="h-6 w-6 text-emerald-500 mb-2" />
+                      <div className="text-[10px] font-bold text-muted-foreground uppercase">Annual Saved</div>
+                      <div className="text-lg font-black">${results.annualSavings}</div>
+                    </div>
+                  </div>
+                  
+                  {/* Chart */}
+                  <div className="h-[250px] w-full pt-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={chartData} margin={{ top: 0, right: 30, left: 0, bottom: 0 }} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--muted-foreground)/0.2)" />
+                        <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${val} kg`} />
+                        <YAxis dataKey="name" type="category" width={120} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} fontWeight={700} />
+                        <Tooltip 
+                          cursor={{ fill: 'hsl(var(--muted)/0.5)' }}
+                          contentStyle={{ backgroundColor: "hsl(var(--background))", borderRadius: "12px", border: "1px solid hsl(var(--border))", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
+                          formatter={(value: number) => [`${value.toFixed(0)} kg CO₂e`, "Emissions"]}
+                        />
+                        <Bar dataKey="emissions" radius={[0, 6, 6, 0]} barSize={40}>
+                          {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
 
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+
+              {/* AI Insights Card */}
+              <Card className="border-emerald-500/20 bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20">
+                <CardHeader>
+                  <CardTitle className="text-base font-bold flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+                    <Sparkles className="w-5 h-5" /> Groq AI Coach Assessment
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Environmental Impact</h4>
+                    <p className="text-sm text-foreground/90 leading-relaxed">{results.aiInsights.environmentalSummary}</p>
+                  </div>
+                  
+                  <div className="grid sm:grid-cols-2 gap-4 pt-2">
+                    <div>
+                      <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Long-Term Benefits</h4>
+                      <ul className="space-y-1">
+                        {results.aiInsights.longTermBenefits.map((b: string, i: number) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Recommended Actions</h4>
+                      <ul className="space-y-1">
+                        {results.aiInsights.recommendedActions.map((a: string, i: number) => (
+                          <li key={i} className="text-sm flex items-start gap-2">
+                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                            <span>{a}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-emerald-500/10">
+                     <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">Risk Reduction</h4>
+                     <p className="text-sm font-semibold">{results.aiInsights.riskReduction}</p>
+                     <p className="text-xs text-muted-foreground mt-1">ROI Estimate: <span className="font-mono text-foreground">{results.roiEstimate}</span> (Base Cost: ${results.costEstimate})</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+            </div>
+          )}
         </div>
       </div>
     </div>
