@@ -1,4 +1,4 @@
-const CarbonLog = require('../models/CarbonLog');
+const Activity = require('../models/Activity');
 const aiService = require('../services/aiService');
 const mongoose = require('mongoose');
 
@@ -34,20 +34,20 @@ const getForecastSummary = async (req, res) => {
     startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
 
     const aggregations = await Promise.all([
-      CarbonLog.aggregate([
-        { $match: { userId: objectIdUser, createdAt: { $gte: startOfCurrentMonth } } },
+      Activity.aggregate([
+        { $match: { userId: objectIdUser, date: { $gte: startOfCurrentMonth } } },
         { $group: { _id: null, total: { $sum: '$carbonEmission' } } }
       ]),
-      CarbonLog.aggregate([
-        { $match: { userId: objectIdUser, createdAt: { $gte: startOfLastMonth, $lt: startOfCurrentMonth } } },
+      Activity.aggregate([
+        { $match: { userId: objectIdUser, date: { $gte: startOfLastMonth, $lt: startOfCurrentMonth } } },
         { $group: { _id: null, total: { $sum: '$carbonEmission' } } }
       ]),
-      CarbonLog.aggregate([
-        { $match: { userId: objectIdUser, createdAt: { $gte: startOfCurrentWeek } } },
+      Activity.aggregate([
+        { $match: { userId: objectIdUser, date: { $gte: startOfCurrentWeek } } },
         { $group: { _id: null, total: { $sum: '$carbonEmission' } } }
       ]),
-      CarbonLog.aggregate([
-        { $match: { userId: objectIdUser, createdAt: { $gte: startOfLastWeek, $lt: startOfCurrentWeek } } },
+      Activity.aggregate([
+        { $match: { userId: objectIdUser, date: { $gte: startOfLastWeek, $lt: startOfCurrentWeek } } },
         { $group: { _id: null, total: { $sum: '$carbonEmission' } } }
       ])
     ]);
@@ -97,17 +97,17 @@ const getForecastTrends = async (req, res) => {
     const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
     
     // Aggregate by category
-    const categoryAgg = await CarbonLog.aggregate([
-      { $match: { userId: objectIdUser, createdAt: { $gte: sixMonthsAgo } } },
+    const categoryAgg = await Activity.aggregate([
+      { $match: { userId: objectIdUser, date: { $gte: sixMonthsAgo } } },
       { $group: { _id: '$category', total: { $sum: '$carbonEmission' } } },
       { $sort: { total: -1 } }
     ]);
 
     // Aggregate by month for total historical trend
-    const monthlyTrendAgg = await CarbonLog.aggregate([
-      { $match: { userId: objectIdUser, createdAt: { $gte: sixMonthsAgo } } },
+    const monthlyTrendAgg = await Activity.aggregate([
+      { $match: { userId: objectIdUser, date: { $gte: sixMonthsAgo } } },
       { $group: { 
-          _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } }, 
+          _id: { year: { $year: '$date' }, month: { $month: '$date' } }, 
           total: { $sum: '$carbonEmission' } 
       }},
       { $sort: { '_id.year': 1, '_id.month': 1 } }
@@ -144,21 +144,23 @@ const getForecastPredictions = async (req, res) => {
     const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
     
     // Get monthly totals for the past year
-    const monthlyAgg = await CarbonLog.aggregate([
-      { $match: { userId: objectIdUser, createdAt: { $gte: oneYearAgo } } },
+    const monthlyAgg = await Activity.aggregate([
+      { $match: { userId: objectIdUser, date: { $gte: oneYearAgo } } },
       { $group: { 
-          _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } }, 
+          _id: { year: { $year: '$date' }, month: { $month: '$date' } }, 
           total: { $sum: '$carbonEmission' } 
       }},
       { $sort: { '_id.year': 1, '_id.month': 1 } }
     ]);
 
-    if (monthlyAgg.length < 2) {
+    console.log("[DEBUG] getForecastPredictions - monthlyAgg:", JSON.stringify(monthlyAgg));
+
+    if (monthlyAgg.length === 0) {
       return res.status(200).json({
         success: true,
         data: {
           sufficientData: false,
-          message: "Not enough historical data to generate accurate predictions. Please continue logging your activities for at least 2 months.",
+          message: "Not enough historical data to generate accurate predictions. Please continue logging your activities.",
           predictions: []
         }
       });
@@ -178,8 +180,16 @@ const getForecastPredictions = async (req, res) => {
       sumXX += xValues[i] * xValues[i];
     }
     
-    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-    const intercept = (sumY - slope * sumX) / n;
+    let slope = 0;
+    let intercept = 0;
+
+    if (n === 1) {
+      slope = 0;
+      intercept = yValues[0];
+    } else {
+      slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+      intercept = (sumY - slope * sumX) / n;
+    }
 
     // Generate forecasts
     const predictions = [];
@@ -250,8 +260,8 @@ const getForecastInsights = async (req, res) => {
     const now = new Date();
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     
-    const recentAgg = await CarbonLog.aggregate([
-      { $match: { userId: objectIdUser, createdAt: { $gte: startOfLastMonth } } },
+    const recentAgg = await Activity.aggregate([
+      { $match: { userId: objectIdUser, date: { $gte: startOfLastMonth } } },
       { $group: { _id: '$category', total: { $sum: '$carbonEmission' } } }
     ]);
 
