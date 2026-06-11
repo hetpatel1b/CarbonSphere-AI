@@ -19,6 +19,9 @@ import {
   FileText
 } from "lucide-react";
 import type { Route } from "next";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type NavItem = {
   name: string;
@@ -44,6 +47,7 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user, isLoading } = useAuth();
 
   return (
     <aside className="hidden lg:flex w-[var(--layout-sidebar-width)] flex-col border-r border-border/30 bg-card h-screen sticky top-0 print:hidden">
@@ -86,21 +90,38 @@ export function Sidebar() {
 
       {/* User Avatar Section */}
       <div className="border-t border-border/30 p-3">
-        <div className="flex items-center justify-between gap-3 rounded-lg p-2.5 transition-colors duration-200 hover:bg-muted/60 cursor-pointer dark:hover:bg-zinc-800/50">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 ring-2 ring-emerald-500/20 dark:bg-emerald-900/50 dark:ring-emerald-500/15">
-              <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">A</span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium text-foreground leading-none">Alex</span>
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Pro Plan
-              </span>
+        {isLoading ? (
+          <div className="flex items-center gap-3 rounded-lg p-2.5">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <div className="flex flex-col gap-1.5 flex-1">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-3 w-16" />
             </div>
           </div>
-          <MoreHorizontal className="h-4 w-4 text-muted-foreground/60" />
-        </div>
+        ) : user ? (
+          <div className="flex items-center justify-between gap-3 rounded-lg p-2.5 transition-colors duration-200 hover:bg-muted/60 cursor-pointer dark:hover:bg-zinc-800/50">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-8 w-8 rounded-full ring-2 ring-emerald-500/20 dark:ring-emerald-500/15">
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 text-sm font-semibold">
+                  {user.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col gap-0.5 max-w-[120px]">
+                <span className="text-sm font-medium text-foreground leading-none truncate">{user.name}</span>
+                <span className="text-xs text-muted-foreground truncate">{user.email}</span>
+              </div>
+            </div>
+            <MoreHorizontal className="h-4 w-4 text-muted-foreground/60 shrink-0" />
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-3 rounded-lg p-2.5">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium text-foreground leading-none">Guest</span>
+              <span className="text-xs text-muted-foreground">Not signed in</span>
+            </div>
+          </div>
+        )}
       </div>
     </aside>
   );
