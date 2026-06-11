@@ -13,11 +13,14 @@ export interface AIRecommendation {
 }
 
 export interface AIInsight {
+  executiveSummary?: string;
   score: number;
+  topEmissionSources?: string[];
   strengths: string[];
   weaknesses: string[];
-  monthlyGoal: string;
-  carbonReductionPotential: string;
+  riskAssessment?: string;
+  monthlyImprovementPlan?: string;
+  carbonReductionOpportunities?: string;
   challengeSuggestion: string;
   generatedAt?: string;
 }

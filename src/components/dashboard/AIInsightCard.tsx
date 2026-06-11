@@ -55,7 +55,7 @@ export function AIInsightCard({ insight }: AIInsightCardProps) {
                   <TrendingDown className="h-4 w-4 shrink-0 text-emerald-500" />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Reduction Potential</span>
                 </div>
-                <span className="text-xs font-black text-foreground shrink-0">{insight.carbonReductionPotential || "N/A"}</span>
+                <span className="text-xs font-black text-foreground shrink-0">{insight.carbonReductionOpportunities || "N/A"}</span>
               </div>
               
               <div className="h-[1px] w-full bg-zinc-200 dark:bg-zinc-850" />
@@ -63,9 +63,9 @@ export function AIInsightCard({ insight }: AIInsightCardProps) {
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2 min-w-0">
                   <Lightbulb className="h-4 w-4 shrink-0 text-emerald-500" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Monthly Goal</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">Monthly Plan</span>
                 </div>
-                <span className="text-xs font-bold text-foreground leading-snug truncate pl-6">{insight.monthlyGoal || "Keep logging activities!"}</span>
+                <span className="text-xs font-bold text-foreground leading-snug truncate pl-6">{insight.monthlyImprovementPlan || "Keep logging activities!"}</span>
               </div>
               
               <div className="h-[1px] w-full bg-zinc-200 dark:bg-zinc-850" />

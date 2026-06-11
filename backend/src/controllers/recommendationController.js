@@ -6,7 +6,7 @@ const UserAchievement = require('../models/UserAchievement');
 const User = require('../models/User');
 const mongoose = require('mongoose');
 const { createNotification } = require('./notificationController');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const aiService = require('../services/aiService');
 
 // @desc    Generate new recommendations based on user data
 // @route   POST /api/recommendations/generate
@@ -146,24 +146,19 @@ const generateRecommendations = async (req, res) => {
   }
 };
 
-// @desc    Analyze user profile with Gemini AI and generate insights
+// @desc    Analyze user profile with AI and generate insights
 // @route   POST /api/ai-coach/analyze
 // @access  Private
 const analyzeWithAI = async (req, res) => {
   try {
     const userId = req.user.id;
-    
-    // Check for API key
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ success: false, message: 'Gemini API Key is not configured on the server.' });
-    }
 
     // Gather data
     const objectIdUser = new mongoose.Types.ObjectId(userId);
     const activities = await Activity.find({ userId: objectIdUser }).sort({ date: -1 }).limit(20);
     
-    if (activities.length === 0) {
-      return res.status(400).json({ success: false, message: 'Not enough activity data to analyze.' });
+    if (activities.length < 3) {
+      return res.status(400).json({ success: false, message: 'Log at least 3 activities to unlock AI analysis.' });
     }
 
     const challenges = await UserChallenge.find({ userId: objectIdUser }).populate('challengeId');
@@ -182,7 +177,7 @@ const analyzeWithAI = async (req, res) => {
 
     // Build the Prompt
     const prompt = `
-      You are CarbonSphere's AI Sustainability Coach. Analyze the following user data and provide personalized recommendations to help them reduce their carbon footprint.
+      You are CarbonSphere's AI Sustainability Coach. Analyze the following user data and provide a comprehensive sustainability report.
       
       User Data:
       Total Carbon Emitted: ${totalCarbon} kg CO2e
@@ -202,11 +197,14 @@ const analyzeWithAI = async (req, res) => {
       
       Based on this data, provide a JSON response EXACTLY matching this structure:
       {
+        "executiveSummary": "<string, a 2-3 sentence high-level summary of their sustainability journey>",
         "score": <number between 0-100 indicating their overall sustainability score>,
+        "topEmissionSources": [<string array of top 2-3 areas where emissions are highest>],
         "strengths": [<string array of up to 3 positive habits based on data>],
         "weaknesses": [<string array of up to 3 areas needing improvement>],
-        "monthlyGoal": "<string, a specific measurable goal for the month>",
-        "carbonReductionPotential": "<string, e.g., '0.15 tCO2e/mo'>",
+        "riskAssessment": "<string, 1-2 sentence risk analysis of their current emission trajectory>",
+        "monthlyImprovementPlan": "<string, a specific actionable plan for the upcoming month>",
+        "carbonReductionOpportunities": "<string, an overarching description of potential CO2 savings>",
         "challengeSuggestion": "<string, name of a challenge they should try or focus on>",
         "recommendations": [
           {
@@ -221,26 +219,15 @@ const analyzeWithAI = async (req, res) => {
       Do NOT include any markdown formatting or \`\`\`json wrappers in your response. Output raw JSON only.
     `;
 
-    // Initialize Gemini
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    
-    const result = await model.generateContent(prompt);
-    let aiResponseText = result.response.text().trim();
-    
-    // Clean up if it returned markdown
-    if (aiResponseText.startsWith('```json')) {
-      aiResponseText = aiResponseText.replace(/^```json/, '').replace(/```$/, '').trim();
-    } else if (aiResponseText.startsWith('```')) {
-      aiResponseText = aiResponseText.replace(/^```/, '').replace(/```$/, '').trim();
-    }
-
     let aiData;
     try {
-      aiData = JSON.parse(aiResponseText);
+      aiData = await aiService.generateAssistantResponse(prompt);
+      if (!aiData || !aiData.recommendations) {
+        throw new Error("Invalid response format from AI Service.");
+      }
     } catch (err) {
-      console.error("Failed to parse Gemini response:", aiResponseText);
-      return res.status(500).json({ success: false, message: 'Failed to process AI response.' });
+      console.error("Failed to generate or parse Groq response:", err.message);
+      return res.status(500).json({ success: false, message: 'Failed to process AI response: ' + err.message });
     }
 
     // Overwrite Recommendations in DB
@@ -266,11 +253,14 @@ const analyzeWithAI = async (req, res) => {
     // Cache the AI Insight on the User model
     const userToUpdate = await User.findById(userId);
     userToUpdate.aiInsight = {
+      executiveSummary: aiData.executiveSummary || "",
       score: aiData.score || 0,
+      topEmissionSources: aiData.topEmissionSources || [],
       strengths: aiData.strengths || [],
       weaknesses: aiData.weaknesses || [],
-      monthlyGoal: aiData.monthlyGoal || "",
-      carbonReductionPotential: aiData.carbonReductionPotential || "",
+      riskAssessment: aiData.riskAssessment || "",
+      monthlyImprovementPlan: aiData.monthlyImprovementPlan || "",
+      carbonReductionOpportunities: aiData.carbonReductionOpportunities || "",
       challengeSuggestion: aiData.challengeSuggestion || "",
       generatedAt: new Date()
     };
