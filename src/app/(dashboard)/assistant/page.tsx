@@ -5,11 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MessageSquare, Sparkles, Send, Leaf, ShieldCheck, Zap, Droplets, Clock, BarChart3, TrendingUp, Target, User, CheckCircle2, Loader2 } from "lucide-react"
+import { MessageSquare, Sparkles, Send, Leaf, ShieldCheck, Zap, Droplets, Clock, BarChart3, TrendingUp, Target, User, CheckCircle2, AlertCircle } from "lucide-react"
+import { assistantService } from "@/services/assistantService"
+import { useToast } from "@/hooks/use-toast"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 type Message = {
   id: string
-  role: "user" | "assistant"
+  role: "user" | "assistant" | "error"
   content: string
   impact?: "High" | "Medium" | "Low"
   actionability?: number
@@ -67,6 +71,7 @@ export default function AssistantPage() {
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -74,7 +79,7 @@ export default function AssistantPage() {
     }
   }, [messages, isTyping])
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     if (!text.trim()) return
 
     const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: text }
@@ -82,49 +87,29 @@ export default function AssistantPage() {
     setInput("")
     setIsTyping(true)
 
-    // Mock AI response
-    setTimeout(() => {
-      const lowerText = text.toLowerCase()
-      let replyContent = ""
-      let impact: "High" | "Medium" | "Low" = "Medium"
-      let actionability = 70
-
-      if (lowerText.includes("transportation") || lowerText.includes("transport")) {
-        replyContent = "To lower transportation emissions, I recommend shifting to public transport, organizing carpools for your daily commute, and considering an EV for your next vehicle purchase. These changes can reduce your footprint by up to 30%."
-        impact = "High"
-        actionability = 85
-      } else if (lowerText.includes("energy")) {
-        replyContent = "For energy efficiency, start by upgrading to Energy Star appliances, switching to LED lighting, and opting into a green energy tariff with your utility provider if available."
-        impact = "High"
-        actionability = 90
-      } else if (lowerText.includes("carbon neutral") || lowerText.includes("roadmap")) {
-        replyContent = "Becoming carbon neutral is a two-step process: First, aggressively reduce your own emissions through lifestyle and home efficiency changes. Second, purchase verified carbon offsets for the remaining unavoidable emissions."
-        impact = "High"
-        actionability = 60
-      } else if (lowerText.includes("biggest emission") || lowerText.includes("source")) {
-        replyContent = "Based on typical user profiles, your biggest emission source is likely daily transportation, followed closely by home heating and electricity usage. Checking your Analytics tab can confirm this."
-        impact = "High"
-        actionability = 75
-      } else {
-        replyContent = "Here are 3 practical actions you can take today:\n1) Switch to a plant-rich diet 2 days a week.\n2) Wash clothes in cold water.\n3) Unplug phantom energy drainers when not in use."
-        impact = "Medium"
-        actionability = 95
-      }
-
+    try {
+      const aiResponse = await assistantService.chat(text);
       const aiMsg: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: replyContent,
-        impact,
-        actionability
+        content: aiResponse.content,
+        impact: aiResponse.impact,
+        actionability: aiResponse.actionability
       }
       setMessages((prev) => [...prev, aiMsg])
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "AI Request Failed",
+        description: error.message || "Failed to communicate with AI Assistant. Please try again."
+      })
+    } finally {
       setIsTyping(false)
-    }, 1500)
+    }
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] min-h-[600px] gap-6 pb-6">
+    <div className="flex flex-col h-[calc(100dvh-120px)] lg:h-[calc(100dvh-130px)] gap-4 lg:gap-6 w-full overflow-hidden pb-0">
       {/* Header */}
       <div className="flex flex-col gap-1 shrink-0">
         <h1 className="text-2xl font-semibold tracking-tight">AI Sustainability Assistant</h1>
@@ -133,7 +118,7 @@ export default function AssistantPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-12 flex-1 min-h-0">
+      <div className="grid gap-4 lg:gap-6 lg:grid-cols-12 flex-1 min-h-0 overflow-hidden">
         {/* Left Sidebar */}
         <div className="lg:col-span-4 flex flex-col gap-6 h-full overflow-y-auto pr-1 pb-2">
           
@@ -199,8 +184,8 @@ export default function AssistantPage() {
         </div>
 
         {/* Main Chat Area */}
-        <div className="lg:col-span-8 flex flex-col h-full relative">
-          <Card className="flex flex-col flex-1 relative overflow-hidden border border-emerald-500/15 bg-white/60 backdrop-blur-xl shadow-[0_8px_32px_rgba(16,185,129,0.05)] dark:border-emerald-500/10 dark:bg-zinc-950/60 h-full">
+        <div className="lg:col-span-8 flex flex-col h-full relative min-h-0 overflow-hidden">
+          <Card className="flex flex-col flex-1 relative overflow-hidden border border-emerald-500/15 bg-white/60 backdrop-blur-xl shadow-[0_8px_32px_rgba(16,185,129,0.05)] dark:border-emerald-500/10 dark:bg-zinc-950/60 min-h-0">
             <div className="pointer-events-none absolute -right-32 -top-32 h-64 w-64 rounded-full bg-emerald-500/10 blur-[80px] dark:bg-emerald-500/5" />
             <div className="pointer-events-none absolute -left-32 -bottom-32 h-64 w-64 rounded-full bg-teal-500/10 blur-[80px] dark:bg-teal-500/5" />
             
@@ -256,8 +241,10 @@ export default function AssistantPage() {
                            </div>
                          ) : (
                            <div className="space-y-3">
-                             <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-white/80 dark:bg-zinc-900/80 p-4 text-sm leading-relaxed text-foreground shadow-sm whitespace-pre-wrap">
-                               {msg.content}
+                             <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-white/80 dark:bg-zinc-900/80 p-4 text-sm leading-relaxed text-foreground shadow-sm overflow-hidden prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-zinc-900 prose-pre:text-zinc-50 prose-a:text-emerald-500">
+                               <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                 {msg.content}
+                               </ReactMarkdown>
                              </div>
                              <div className="flex items-center flex-wrap gap-2.5 pl-1">
                                 {msg.impact && (
@@ -292,9 +279,13 @@ export default function AssistantPage() {
                          <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-1">
                            CarbonSphere AI
                          </span>
-                         <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-white/80 dark:bg-zinc-900/80 p-4 text-sm shadow-sm flex items-center gap-2">
-                           <Loader2 className="h-4 w-4 animate-spin text-emerald-500" />
-                           <span className="text-muted-foreground text-sm">Analyzing...</span>
+                         <div className="rounded-2xl rounded-tl-sm border border-border/40 bg-white/80 dark:bg-zinc-900/80 px-4 py-3 text-sm shadow-sm flex items-center gap-2">
+                           <div className="flex gap-1">
+                             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></div>
+                           </div>
+                           <span className="text-muted-foreground text-sm ml-1">Thinking...</span>
                          </div>
                        </div>
                      </div>
