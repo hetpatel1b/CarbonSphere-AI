@@ -92,7 +92,38 @@ async function run() {
     let intercept = 0;
 
     if (n === 1) {
-      slope = 0;
+      const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const dailyAgg = await Activity.aggregate([
+        { $match: { userId: objectIdUser, date: { $gte: startOfCurrentMonth } } },
+        { $group: {
+            _id: { day: { $dayOfMonth: '$date' } },
+            total: { $sum: '$carbonEmission' }
+        }},
+        { $sort: { '_id.day': 1 } }
+      ]);
+
+      if (dailyAgg.length > 1) {
+        let dSumX = 0, dSumY = 0, dSumXY = 0, dSumXX = 0;
+        const dn = dailyAgg.length;
+        const dxValues = dailyAgg.map((_, i) => i);
+        const dyValues = dailyAgg.map(item => item.total);
+
+        for (let i = 0; i < dn; i++) {
+          dSumX += dxValues[i];
+          dSumY += dyValues[i];
+          dSumXY += dxValues[i] * dyValues[i];
+          dSumXX += dxValues[i] * dxValues[i];
+        }
+
+        const dailySlope = (dn * dSumXY - dSumX * dSumY) / (dn * dSumXX - dSumX * dSumX);
+        slope = dailySlope * 30;
+      } else {
+         if (categoryBreakdown.length > 0 && categoryBreakdown[0].category === 'Transport') {
+            slope = yValues[0] * 0.05;
+         } else {
+            slope = yValues[0] * -0.02;
+         }
+      }
       intercept = yValues[0];
     } else {
       slope = (wSum * sumXY - sumX * sumY) / (wSum * sumXX - sumX * sumX);

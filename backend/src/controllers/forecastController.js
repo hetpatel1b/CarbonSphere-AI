@@ -81,7 +81,43 @@ const getUnifiedForecast = async (req, res) => {
       let intercept = 0;
 
       if (n === 1) {
-        slope = 0;
+        // Build a realistic baseline model from current activity patterns (daily intra-month trends)
+        const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const dailyAgg = await Activity.aggregate([
+          { $match: { userId: objectIdUser, date: { $gte: startOfCurrentMonth } } },
+          { $group: {
+              _id: { day: { $dayOfMonth: '$date' } },
+              total: { $sum: '$carbonEmission' }
+          }},
+          { $sort: { '_id.day': 1 } }
+        ]);
+
+        if (dailyAgg.length > 1) {
+          // Calculate slope based on the days within the single month
+          let dSumX = 0, dSumY = 0, dSumXY = 0, dSumXX = 0;
+          const dn = dailyAgg.length;
+          const dxValues = dailyAgg.map((_, i) => i);
+          const dyValues = dailyAgg.map(item => item.total);
+
+          for (let i = 0; i < dn; i++) {
+            dSumX += dxValues[i];
+            dSumY += dyValues[i];
+            dSumXY += dxValues[i] * dyValues[i];
+            dSumXX += dxValues[i] * dxValues[i];
+          }
+
+          const dailySlope = (dn * dSumXY - dSumX * dSumY) / (dn * dSumXX - dSumX * dSumX);
+          
+          // Extrapolate daily slope to monthly
+          slope = dailySlope * 30;
+        } else {
+           // If only 1 day of data exists, apply a modest default curve based on highest category
+           if (categoryBreakdown.length > 0 && categoryBreakdown[0].category === 'Transport') {
+              slope = yValues[0] * 0.05; // 5% expected growth for heavy transport
+           } else {
+              slope = yValues[0] * -0.02; // 2% expected reduction baseline
+           }
+        }
         intercept = yValues[0];
       } else {
         slope = (wSum * sumXY - sumX * sumY) / (wSum * sumXX - sumX * sumX);
@@ -150,12 +186,13 @@ const getUnifiedForecast = async (req, res) => {
     if (historicalSeries.length > 0) {
       const highestEmission = categoryBreakdown.length > 0 ? categoryBreakdown[0].category : "None";
       const highestPercentage = categoryBreakdown.length > 0 ? categoryBreakdown[0].percentage.toFixed(1) : 0;
+      const categoryContext = categoryBreakdown.map(c => `${c.category}: ${c.percentage.toFixed(1)}%`).join(', ');
       
       const prompt = `
         Act as an expert AI sustainability coach.
         The user's recent carbon emissions show a ${trendDirection} trend.
         Their current month emissions: ${currentMonth.toFixed(2)} tCO2e.
-        Their highest emitting category is ${highestEmission}, accounting for ${highestPercentage}% of their recent emissions.
+        Their category breakdown is: ${categoryContext}.
         
         Generate a brief, highly personalized forecast insight and recommendations in JSON format.
         Do not include markdown tags outside of the JSON.
