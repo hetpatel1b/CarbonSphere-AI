@@ -15,7 +15,6 @@ import {
   Users,
   Award, 
   Settings,
-  MoreHorizontal,
   FileText
 } from "lucide-react";
 import type { Route } from "next";
@@ -99,20 +98,17 @@ export function Sidebar() {
             </div>
           </div>
         ) : user ? (
-          <div className="flex items-center justify-between gap-3 rounded-lg p-2.5 transition-colors duration-200 hover:bg-muted/60 cursor-pointer dark:hover:bg-zinc-800/50">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8 rounded-full ring-2 ring-emerald-500/20 dark:ring-emerald-500/15">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 text-sm font-semibold">
-                  {user.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col gap-0.5 max-w-[120px]">
-                <span className="text-sm font-medium text-foreground leading-none truncate">{user.name}</span>
-                <span className="text-xs text-muted-foreground truncate">{user.email}</span>
-              </div>
+          <div className="flex items-center gap-3 rounded-lg p-2.5 transition-colors duration-200 hover:bg-muted/60 cursor-pointer dark:hover:bg-zinc-800/50">
+            <Avatar className="h-8 w-8 rounded-full ring-2 ring-emerald-500/20 dark:ring-emerald-500/15 shrink-0">
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 text-sm font-semibold">
+                {user.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col gap-0.5 min-w-0 overflow-hidden">
+              <span className="text-sm font-medium text-foreground leading-none truncate">{user.name}</span>
+              <span className="text-xs text-muted-foreground truncate">{user.email}</span>
             </div>
-            <MoreHorizontal className="h-4 w-4 text-muted-foreground/60 shrink-0" />
           </div>
         ) : (
           <div className="flex items-center justify-between gap-3 rounded-lg p-2.5">
