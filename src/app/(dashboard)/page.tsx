@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { MetricCard } from "@/components/dashboard/MetricCard"
 import { CarbonScoreCard } from "@/components/dashboard/CarbonScoreCard"
 import { GoalProgressCard } from "@/components/dashboard/GoalProgressCard"
@@ -33,8 +33,12 @@ export default function DashboardPage() {
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const loadingRef = useRef(false);
 
   useEffect(() => {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+
     const fetchDashboardData = async () => {
       try {
         const [summaryData, analyticsData] = await Promise.all([
@@ -63,19 +67,33 @@ export default function DashboardPage() {
   }
 
   if (error) {
+    const isRateLimited = error.toLowerCase().includes('too many requests') || error.includes('429');
+    
     return (
       <div className="flex flex-col items-center justify-center h-[80vh] w-full gap-4 text-center">
         <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400">
           <Cloud className="h-10 w-10" />
         </div>
-        <h2 className="text-2xl font-bold">Failed to load dashboard</h2>
-        <p className="text-muted-foreground">{error}</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
-        >
-          Try again
-        </button>
+        <h2 className="text-2xl font-bold">
+          {isRateLimited ? "Too Many Requests" : "Failed to load dashboard"}
+        </h2>
+        <p className="text-muted-foreground max-w-md">
+          {isRateLimited 
+            ? "You've hit the API rate limit for this IP address. Please wait 15 minutes before trying again."
+            : error}
+        </p>
+        {!isRateLimited && (
+          <button 
+            onClick={() => {
+              loadingRef.current = false;
+              setIsLoading(true);
+              setError('');
+            }} 
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
+          >
+            Try again
+          </button>
+        )}
       </div>
     );
   }
