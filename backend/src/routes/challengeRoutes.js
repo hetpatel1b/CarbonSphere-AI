@@ -5,12 +5,14 @@ const {
   getMyChallenges,
   getChallengeById,
   joinChallenge,
-  updateChallengeProgress
+  updateChallengeProgress,
+  getChallengeStatus
 } = require('../controllers/challengeController');
 const { protect } = require('../middleware/authMiddleware');
 
-// Note: /my must come before /:id to prevent 'my' from being parsed as an id parameter
+// Note: /my and /status must come before /:id to prevent being parsed as an id parameter
 router.get('/my', protect, getMyChallenges);
+router.get('/status', protect, getChallengeStatus);
 router.get('/', protect, getAllChallenges);
 router.get('/:id', protect, getChallengeById);
 router.post('/join/:id', protect, joinChallenge);

@@ -9,6 +9,8 @@ export interface DashboardSummary {
   currentMonthCarbon: number;
   currentWeekCarbon: number;
   totalAchievementsUnlocked?: number;
+  activeChallengesCount?: number;
+  completedChallengesCount?: number;
 }
 
 export interface ActivityDocument {

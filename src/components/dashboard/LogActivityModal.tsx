@@ -89,11 +89,18 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
       if (activityToEdit) {
         await activityService.updateActivity(activityToEdit._id, formData);
       } else {
-        const { newlyUnlocked } = await activityService.createActivity(formData);
+        const { newlyUnlocked, newlyCompletedChallenges } = await activityService.createActivity(formData);
         if (newlyUnlocked && newlyUnlocked.length > 0) {
           toast({
             title: "🏆 Achievement Unlocked!",
             description: `You just unlocked ${newlyUnlocked.length} new achievement(s)!`,
+          });
+        }
+        if (newlyCompletedChallenges && newlyCompletedChallenges.length > 0) {
+          toast({
+            title: "🏆 Challenge Completed!",
+            description: `You completed ${newlyCompletedChallenges.length} challenge(s)!`,
+            variant: "default",
           });
         }
       }

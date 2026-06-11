@@ -70,7 +70,7 @@ export const activityService = {
     return handleResponse(response);
   },
 
-  async createActivity(data: CreateActivityDTO): Promise<{ activity: ActivityDocument, newlyUnlocked: any[] }> {
+  async createActivity(data: CreateActivityDTO): Promise<{ activity: ActivityDocument, newlyUnlocked: any[], newlyCompletedChallenges: any[] }> {
     const response = await fetch(`${API_URL}/activities`, {
       method: 'POST',
       headers: getHeaders(),
@@ -90,7 +90,8 @@ export const activityService = {
 
     return {
       activity: resData.data,
-      newlyUnlocked: resData.newlyUnlocked || []
+      newlyUnlocked: resData.newlyUnlocked || [],
+      newlyCompletedChallenges: resData.newlyCompletedChallenges || []
     };
   },
 

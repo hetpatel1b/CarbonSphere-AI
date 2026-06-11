@@ -29,12 +29,17 @@ const createActivity = async (req, res) => {
 
     // Trigger dynamic achievement engine synchronously so we can return newly unlocked
     const { checkAndUnlockAchievements } = require('../services/achievementEngine');
-    const newlyUnlocked = await checkAndUnlockAchievements(req.user.id);
+    const newlyUnlockedAchievements = await checkAndUnlockAchievements(req.user.id);
+
+    // Trigger dynamic challenge engine synchronously
+    const { checkAndUpdateChallenges } = require('../services/challengeEngine');
+    const newlyCompletedChallenges = await checkAndUpdateChallenges(req.user.id);
 
     res.status(201).json({
       success: true,
       data: activity,
-      newlyUnlocked: newlyUnlocked || []
+      newlyUnlocked: newlyUnlockedAchievements || [],
+      newlyCompletedChallenges: newlyCompletedChallenges || []
     });
   } catch (error) {
     console.error(`Error in createActivity: ${error.message}`);

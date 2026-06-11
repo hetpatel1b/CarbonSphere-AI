@@ -23,6 +23,18 @@ const ChallengeSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    icon: {
+      type: String,
+      default: 'Target'
+    },
+    color: {
+      type: String,
+      default: 'emerald'
+    },
+    criteria: {
+      type: mongoose.Schema.Types.Mixed,
+      required: true
+    },
     difficulty: {
       type: String,
       enum: ['easy', 'medium', 'hard'],

@@ -7,7 +7,7 @@ import { GoalProgressCard } from "@/components/dashboard/GoalProgressCard"
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed"
 import { AIInsightCard } from "@/components/dashboard/AIInsightCard"
 import { AIHeroSection } from "@/components/dashboard/AIHeroSection"
-import { Cloud, Calendar, Trophy, Loader2 } from "lucide-react"
+import { Cloud, Calendar, Trophy, Target, Loader2 } from "lucide-react"
 import { dashboardService, DashboardSummary, DashboardAnalytics } from "@/services/dashboardService"
 
 // Helper to format relative time
@@ -102,7 +102,7 @@ export default function DashboardPage() {
       </div>
       
       {/* Metrics Grid */}
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {/* Score Card */}
         <div className="animate-scale-up animation-delay-75">
           <CarbonScoreCard 
@@ -150,12 +150,22 @@ export default function DashboardPage() {
             description="Badges earned" 
           />
         </div>
+
+        {/* Active Challenges */}
+        <div className="animate-scale-up animation-delay-450">
+          <MetricCard 
+            title="Active Challenges" 
+            value={summary?.activeChallengesCount?.toString() || "0"} 
+            icon={Target}
+            description={`${summary?.completedChallengesCount || 0} completed`} 
+          />
+        </div>
       </div>
 
       {/* Bottom Section */}
       <div className="grid gap-5 md:grid-cols-3 lg:grid-cols-4 items-start">
         {/* Activity Feed */}
-        <div className="md:col-span-2 lg:col-span-3 animate-scale-up animation-delay-450">
+        <div className="md:col-span-2 lg:col-span-3 animate-scale-up animation-delay-500">
           <ActivityFeed activities={recentActivities} />
         </div>
         

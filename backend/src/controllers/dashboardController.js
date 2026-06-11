@@ -71,6 +71,17 @@ const getDashboardSummary = async (req, res) => {
     const totalAchievementsUnlocked = userAchievements.length;
     const latestAchievement = totalAchievementsUnlocked > 0 ? userAchievements[0].achievementId : null;
 
+    // Challenges
+    const UserChallenge = require('../models/UserChallenge');
+    const userChallenges = await UserChallenge.find({ userId }).populate('challengeId');
+    
+    // An active challenge is joined but not completed, and the challenge itself is active and not expired
+    const now = new Date();
+    const activeChallengesCount = userChallenges.filter(uc => 
+      !uc.completed && uc.challengeId && uc.challengeId.isActive && new Date(uc.challengeId.endDate) > now
+    ).length;
+    const completedChallengesCount = userChallenges.filter(uc => uc.completed).length;
+
     return res.status(200).json({
       success: true,
       data: {
@@ -80,7 +91,9 @@ const getDashboardSummary = async (req, res) => {
         currentMonthCarbon,
         currentWeekCarbon,
         totalAchievementsUnlocked,
-        latestAchievement
+        latestAchievement,
+        activeChallengesCount,
+        completedChallengesCount
       }
     });
 

@@ -192,10 +192,88 @@ const updateChallengeProgress = async (req, res) => {
   }
 };
 
+// @desc    Get unified challenge status
+// @route   GET /api/challenges/status
+// @access  Private
+const getChallengeStatus = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // 1. Fetch all active challenges
+    const allActiveChallenges = await Challenge.find({ isActive: true }).lean();
+    
+    // 2. Fetch user's challenge progress
+    const userChallenges = await UserChallenge.find({ userId }).lean();
+    
+    // Create a map for quick lookup
+    const userChallengeMap = {};
+    userChallenges.forEach(uc => {
+      userChallengeMap[uc.challengeId.toString()] = uc;
+    });
+
+    const active = [];
+    const completed = [];
+    const upcoming = []; // If start date is in future
+    const available = []; // Active but not joined
+
+    const now = new Date();
+
+    allActiveChallenges.forEach(challenge => {
+      const isUpcoming = new Date(challenge.startDate) > now;
+      const userStatus = userChallengeMap[challenge._id.toString()];
+
+      const formattedChallenge = {
+        ...challenge,
+        joined: !!userStatus,
+        completed: userStatus ? userStatus.completed : false,
+        progress: userStatus ? userStatus.progress : 0,
+        joinedAt: userStatus ? userStatus.joinedAt : null
+      };
+
+      if (isUpcoming) {
+        upcoming.push(formattedChallenge);
+      } else if (userStatus) {
+        if (userStatus.completed) {
+          completed.push(formattedChallenge);
+        } else {
+          active.push(formattedChallenge);
+        }
+      } else {
+        available.push(formattedChallenge);
+      }
+    });
+
+    // Also include stats
+    const stats = {
+      challengesJoined: userChallenges.length,
+      challengesCompleted: completed.length,
+      pointsEarned: completed.reduce((sum, c) => sum + c.rewardPoints, 0)
+    };
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        active,
+        completed,
+        upcoming,
+        available,
+        stats
+      }
+    });
+  } catch (error) {
+    console.error(`Error in getChallengeStatus: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error'
+    });
+  }
+};
+
 module.exports = {
   getAllChallenges,
   getMyChallenges,
   getChallengeById,
   joinChallenge,
-  updateChallengeProgress
+  updateChallengeProgress,
+  getChallengeStatus
 };
