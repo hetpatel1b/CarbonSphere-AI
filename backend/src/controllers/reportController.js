@@ -1,170 +1,170 @@
-const Activity = require('../models/Activity');
-const CarbonLog = require('../models/CarbonLog');
-const Report = require('../models/Report');
 const mongoose = require('mongoose');
-const { createNotification } = require('./notificationController');
+const Report = require('../models/Report');
+const Activity = require('../models/Activity');
+const OffsetPurchase = require('../models/OffsetPurchase');
+const UserChallenge = require('../models/UserChallenge');
+const UserAchievement = require('../models/UserAchievement');
+const aiService = require('../services/aiService');
 
-// Internal helper to calculate metrics and generate report
-const generateReportLogic = async (userId, reportType, startDate, endDate) => {
-  const objectIdUser = new mongoose.Types.ObjectId(userId);
-  
-  // Base match condition for carbon logs
-  const matchCondition = { userId: objectIdUser };
-  if (startDate || endDate) {
-    matchCondition.createdAt = {};
-    if (startDate) matchCondition.createdAt.$gte = startDate;
-    if (endDate) matchCondition.createdAt.$lte = endDate;
-  }
-  
-  // Base match condition for activities
-  const activityMatch = { userId: objectIdUser };
-  if (startDate || endDate) {
-    activityMatch.date = {};
-    if (startDate) activityMatch.date.$gte = startDate;
-    if (endDate) activityMatch.date.$lte = endDate;
-  }
-
-  // 1. Calculate Total Activities
-  const totalActivities = await Activity.countDocuments(activityMatch);
-
-  // 2. Calculate Total Carbon Emission
-  const carbonAgg = await CarbonLog.aggregate([
-    { $match: matchCondition },
-    { $group: { _id: null, total: { $sum: '$carbonEmission' } } }
-  ]);
-  const totalCarbon = carbonAgg.length > 0 ? carbonAgg[0].total : 0;
-
-  // 3. Calculate Sustainability Score
-  let sustainabilityScore = 50;
-  if (totalActivities > 0) {
-    const avgCarbon = totalCarbon / totalActivities;
-    // Lower average carbon = higher score. More activities = higher score
-    sustainabilityScore = Math.max(0, Math.min(100, 100 - (avgCarbon / 10) + (totalActivities * 2)));
-    sustainabilityScore = Math.round(sustainabilityScore);
-  } else {
-    sustainabilityScore = 0;
-  }
-
-  // 4. Generate Recommendations
-  const recommendations = [];
-  if (sustainabilityScore < 50) {
-    recommendations.push("Consider taking public transport to lower your carbon footprint.");
-    recommendations.push("Join a new sustainability challenge to boost your score.");
-  } else {
-    recommendations.push("Great job keeping your carbon footprint low!");
-    recommendations.push("Share your achievements with friends to inspire them.");
-    recommendations.push("Consider offsetting your remaining emissions.");
-  }
-
-  // Set titles based on type
-  let title = "Summary Report";
-  let description = "Overall sustainability summary";
-  if (reportType === 'monthly') {
-    title = "Monthly Report";
-    description = "Your sustainability progress for the month";
-  } else if (reportType === 'weekly') {
-    title = "Weekly Report";
-    description = "Your sustainability progress for the week";
-  }
-
-  // 5. Store generated report
-  const report = await Report.create({
-    userId,
-    reportType,
-    title,
-    description,
-    totalActivities,
-    totalCarbon,
-    sustainabilityScore,
-    recommendations
-  });
-
-  // Trigger Notification
-  await createNotification(
-    userId,
-    "New Report Generated",
-    `Your ${reportType} report is ready. Sustainability Score: ${sustainabilityScore}.`,
-    'report'
-  );
-
-  return report;
-};
-
-// @desc    Generate Monthly Report
-// @route   POST /api/reports/generate/monthly
+// @desc    Generate a new sustainability report
+// @route   POST /api/reports/generate
 // @access  Private
-const generateMonthlyReport = async (req, res) => {
+const generateReport = async (req, res) => {
   try {
+    const userId = req.user.id;
+    const { reportType } = req.body; // 'monthly', 'annual', 'comprehensive'
+    const objectIdUser = new mongoose.Types.ObjectId(userId);
+
+    // Filter by dates if needed (for simplicity, we grab all-time for comprehensive, but we can filter)
+    let dateFilter = {};
     const now = new Date();
-    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    if (reportType === 'monthly') {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      dateFilter = { $gte: startOfMonth };
+    } else if (reportType === 'annual') {
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      dateFilter = { $gte: startOfYear };
+    }
 
-    const report = await generateReportLogic(req.user.id, 'monthly', startDate, endDate);
+    const activityMatch = { userId: objectIdUser };
+    if (dateFilter.$gte) activityMatch.date = dateFilter;
 
-    return res.status(201).json({
-      success: true,
-      data: report
-    });
-  } catch (error) {
-    console.error(`Error in generateMonthlyReport: ${error.message}`);
-    return res.status(500).json({ success: false, message: 'Server Error' });
-  }
-};
-
-// @desc    Generate Weekly Report
-// @route   POST /api/reports/generate/weekly
-// @access  Private
-const generateWeeklyReport = async (req, res) => {
-  try {
-    const now = new Date();
-    const day = now.getDay();
-    const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Start of week (Monday)
+    // 1. Aggregating Activities (Emissions Analysis)
+    const emissionsAgg = await Activity.aggregate([
+      { $match: activityMatch },
+      { $group: { _id: '$category', total: { $sum: '$carbonEmission' }, count: { $sum: 1 } } },
+      { $sort: { total: -1 } }
+    ]);
     
-    const startDate = new Date(now.setDate(diff));
-    startDate.setHours(0, 0, 0, 0);
-    
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 6);
-    endDate.setHours(23, 59, 59, 999);
-
-    const report = await generateReportLogic(req.user.id, 'weekly', startDate, endDate);
-
-    return res.status(201).json({
-      success: true,
-      data: report
+    let totalEmissions = 0;
+    const categoryBreakdown = emissionsAgg.map(item => {
+      totalEmissions += item.total;
+      return { category: item._id, amount: item.total, activitiesCount: item.count };
     });
+
+    // 2. Aggregating Offsets
+    const offsetMatch = { userId: objectIdUser };
+    if (dateFilter.$gte) offsetMatch.createdAt = dateFilter;
+
+    const offsetAgg = await OffsetPurchase.aggregate([
+      { $match: offsetMatch },
+      { $group: { _id: null, totalCredits: { $sum: '$credits' }, totalCost: { $sum: '$cost' }, count: { $sum: 1 } } }
+    ]);
+
+    const offsetContributions = offsetAgg.length > 0 ? {
+      totalCredits: offsetAgg[0].totalCredits,
+      totalCost: offsetAgg[0].totalCost,
+      projectsSupported: offsetAgg[0].count,
+      treesEquivalent: Math.round(offsetAgg[0].totalCredits * 50)
+    } : { totalCredits: 0, totalCost: 0, projectsSupported: 0, treesEquivalent: 0 };
+
+    // 3. Community Participation
+    const challengeMatch = { userId: objectIdUser };
+    if (dateFilter.$gte) challengeMatch.joinedAt = dateFilter;
+    const challengesJoined = await UserChallenge.countDocuments(challengeMatch);
+    const challengesCompleted = await UserChallenge.countDocuments({ ...challengeMatch, status: 'completed' });
+
+    // 4. Achievements
+    const achievementMatch = { userId: objectIdUser };
+    if (dateFilter.$gte) achievementMatch.earnedAt = dateFilter;
+    const achievementsEarned = await UserAchievement.countDocuments(achievementMatch);
+
+    // 5. Net Impact & Sustainability Score
+    const netCarbonImpact = Math.max(0, totalEmissions - offsetContributions.totalCredits);
+    let sustainabilityScore = 50; // Base score
+    if (totalEmissions > 0) {
+      const offsetRatio = Math.min(1, offsetContributions.totalCredits / totalEmissions);
+      sustainabilityScore = Math.round(50 + (offsetRatio * 30) + Math.min(20, (achievementsEarned * 2) + (challengesCompleted * 2)));
+    } else if (totalEmissions === 0 && offsetContributions.totalCredits > 0) {
+      sustainabilityScore = 100;
+    } else {
+      sustainabilityScore = 0; // No data
+    }
+
+    // 6. Generate AI Insights
+    let aiInsights = {
+      executiveSummary: "You have just started your sustainability journey. Keep logging activities!",
+      keyFindings: ["Low activity logging."],
+      riskAssessment: "Not enough data to calculate risk.",
+      improvementOpportunities: ["Start logging daily transit."]
+    };
+
+    if (totalEmissions > 0 || offsetContributions.totalCredits > 0) {
+      const prompt = `
+        Act as an expert ESG analyst. Write a concise sustainability report.
+        Data: 
+        - Total Emissions: ${totalEmissions.toFixed(2)} tCO2e
+        - Top categories: ${categoryBreakdown.map(c => `${c.category} (${c.amount.toFixed(2)})`).join(', ')}
+        - Offsets: ${offsetContributions.totalCredits} tCO2e
+        - Challenges Completed: ${challengesCompleted}
+        
+        Return exactly this JSON format with no markdown wrappers:
+        {
+          "executiveSummary": "1 paragraph summary",
+          "keyFindings": ["Point 1", "Point 2", "Point 3"],
+          "riskAssessment": "1 paragraph identifying highest emission risks",
+          "improvementOpportunities": ["Action 1", "Action 2", "Action 3"]
+        }
+      `;
+
+      try {
+        const aiResponse = await aiService.generateAssistantResponse(prompt);
+        const parsed = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
+        aiInsights = {
+          executiveSummary: parsed.executiveSummary || aiInsights.executiveSummary,
+          keyFindings: parsed.keyFindings || aiInsights.keyFindings,
+          riskAssessment: parsed.riskAssessment || aiInsights.riskAssessment,
+          improvementOpportunities: parsed.improvementOpportunities || aiInsights.improvementOpportunities
+        };
+      } catch (err) {
+        console.warn("AI Insight generation failed, using defaults:", err.message);
+      }
+    }
+
+    // 7. Assemble Report Data
+    const reportData = {
+      summary: {
+        totalEmissions,
+        netCarbonImpact,
+        sustainabilityScore,
+        period: reportType,
+        generatedDate: new Date().toISOString()
+      },
+      emissionsAnalysis: {
+        categoryBreakdown,
+        totalActivities: categoryBreakdown.reduce((acc, curr) => acc + curr.activitiesCount, 0)
+      },
+      offsetContributions,
+      community: {
+        challengesJoined,
+        challengesCompleted,
+        achievementsEarned
+      },
+      aiInsights
+    };
+
+    // 8. Save to MongoDB
+    const report = await Report.create({
+      userId,
+      reportType,
+      reportData
+    });
+
+    return res.status(201).json({ success: true, data: report });
   } catch (error) {
-    console.error(`Error in generateWeeklyReport: ${error.message}`);
+    console.error(`Error generating report: ${error.message}`);
     return res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
 
-// @desc    Generate Summary Report
-// @route   POST /api/reports/generate/summary
-// @access  Private
-const generateSummaryReport = async (req, res) => {
-  try {
-    // No date constraints for overall summary
-    const report = await generateReportLogic(req.user.id, 'summary', null, null);
-
-    return res.status(201).json({
-      success: true,
-      data: report
-    });
-  } catch (error) {
-    console.error(`Error in generateSummaryReport: ${error.message}`);
-    return res.status(500).json({ success: false, message: 'Server Error' });
-  }
-};
-
-// @desc    Get user's reports
+// @desc    Get user's generated reports
 // @route   GET /api/reports
 // @access  Private
 const getMyReports = async (req, res) => {
   try {
     const reports = await Report.find({ userId: req.user.id })
-      .populate('userId', 'name email avatar')
-      .sort({ generatedAt: -1 });
+      .sort({ generatedAt: -1 })
+      .select('-reportData'); // Omit heavy payload for list view
 
     return res.status(200).json({
       success: true,
@@ -177,32 +177,41 @@ const getMyReports = async (req, res) => {
   }
 };
 
-// @desc    Get report by id
+// @desc    Get specific report by ID
 // @route   GET /api/reports/:id
 // @access  Private
 const getReportById = async (req, res) => {
   try {
-    const report = await Report.findOne({ _id: req.params.id, userId: req.user.id })
-      .populate('userId', 'name email avatar');
-
+    const report = await Report.findOne({ _id: req.params.id, userId: req.user.id });
     if (!report) {
       return res.status(404).json({ success: false, message: 'Report not found' });
     }
-
-    return res.status(200).json({
-      success: true,
-      data: report
-    });
+    return res.status(200).json({ success: true, data: report });
   } catch (error) {
     console.error(`Error in getReportById: ${error.message}`);
     return res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
 
+// @desc    Delete a report
+// @route   DELETE /api/reports/:id
+// @access  Private
+const deleteReport = async (req, res) => {
+  try {
+    const report = await Report.findOneAndDelete({ _id: req.params.id, userId: req.user.id });
+    if (!report) {
+      return res.status(404).json({ success: false, message: 'Report not found' });
+    }
+    return res.status(200).json({ success: true, message: 'Report deleted successfully' });
+  } catch (error) {
+    console.error(`Error in deleteReport: ${error.message}`);
+    return res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
 module.exports = {
-  generateMonthlyReport,
-  generateWeeklyReport,
-  generateSummaryReport,
+  generateReport,
   getMyReports,
-  getReportById
+  getReportById,
+  deleteReport
 };

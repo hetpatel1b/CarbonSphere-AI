@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -44,7 +44,7 @@ export default function OffsetMarketplacePage() {
   const [purchasing, setPurchasing] = useState(false)
   const [purchaseSuccess, setPurchaseSuccess] = useState(false)
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -66,12 +66,12 @@ export default function OffsetMarketplacePage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page])
 
   // Effect to load data, specifically separating it so it doesn't trigger synchronous setState warnings
   useEffect(() => {
     Promise.resolve().then(() => loadData())
-  }, [page])
+  }, [loadData])
 
   const openPurchaseModal = (project: any) => {
     setSelectedProject(project)

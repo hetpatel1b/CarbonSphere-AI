@@ -9,31 +9,12 @@ const ReportSchema = new mongoose.Schema(
     },
     reportType: {
       type: String,
-      enum: ['monthly', 'weekly', 'summary'],
+      enum: ['monthly', 'annual', 'comprehensive'],
       required: true
     },
-    title: {
-      type: String,
+    reportData: {
+      type: mongoose.Schema.Types.Mixed,
       required: true
-    },
-    description: {
-      type: String
-    },
-    totalActivities: {
-      type: Number,
-      default: 0
-    },
-    totalCarbon: {
-      type: Number,
-      default: 0
-    },
-    sustainabilityScore: {
-      type: Number,
-      default: 0
-    },
-    recommendations: {
-      type: [String],
-      default: []
     },
     generatedAt: {
       type: Date,
