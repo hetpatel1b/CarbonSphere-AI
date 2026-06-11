@@ -5,7 +5,7 @@ import { MobileNav } from "./MobileNav";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import { NotificationDropdown } from "./NotificationDropdown";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAccountMenu } from "./UserAccountMenu";
 
 export function TopHeader() {
   return (
@@ -16,10 +16,7 @@ export function TopHeader() {
       <div className="flex items-center gap-1.5">
         <NotificationDropdown />
         <ThemeToggle />
-        <Avatar className="w-8 h-8 ml-1.5 cursor-pointer ring-2 ring-transparent transition-all hover:ring-emerald-500/40">
-          <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-          <AvatarFallback>U</AvatarFallback>
-        </Avatar>
+        <UserAccountMenu />
       </div>
     </header>
   );
