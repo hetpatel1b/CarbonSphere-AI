@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     try {
       await authService.login(email, password);
-      router.push('/dashboard' as any);
+      router.push('/' as any);
     } catch (err: any) {
       setError(err.message || 'An error occurred during login');
     } finally {

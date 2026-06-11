@@ -11,16 +11,21 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const checkAuth = () => {
-      // Allow access to public routes
-      if (pathname === '/login' || pathname === '/register' || pathname === '/') {
-        setIsChecking(false);
-        return;
-      }
+      const auth = isAuthenticated();
+      const isPublicPath = pathname === '/login' || pathname === '/register';
 
-      if (!isAuthenticated()) {
-        router.push('/login' as any);
+      if (isPublicPath) {
+        if (auth) {
+          router.replace('/' as any);
+        } else {
+          setIsChecking(false);
+        }
       } else {
-        setIsChecking(false);
+        if (!auth) {
+          router.replace('/login' as any);
+        } else {
+          setIsChecking(false);
+        }
       }
     };
 
