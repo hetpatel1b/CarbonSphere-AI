@@ -32,7 +32,7 @@ export default function LoginPage() {
     toast.promise(loginPromise, {
       loading: "Authenticating...",
       success: () => {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
         return "Successfully logged in";
       },
       error: (err: Error | unknown) => {
@@ -60,7 +60,7 @@ export default function LoginPage() {
       email: 'demo@carbonsphere.ai'
     }));
     toast.success("Demo Mode Activated", { description: "Welcome, Demo Explorer!" });
-    window.location.href = '/';
+    window.location.href = '/dashboard';
   };
 
   return (
@@ -97,6 +97,7 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 {...register("email")}
+                data-testid="login-email-input"
                 className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 placeholder="you@example.com"
               />
@@ -111,6 +112,7 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 {...register("password")}
+                data-testid="login-password-input"
                 className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 placeholder="••••••••"
               />
@@ -120,6 +122,7 @@ export default function LoginPage() {
 
           <Button
             type="submit"
+            data-testid="login-submit-button"
             className="w-full h-11 text-base font-semibold"
             disabled={isLoading}
           >
@@ -149,6 +152,7 @@ export default function LoginPage() {
 
         <Button
           type="button"
+          data-testid="demo-login-button"
           variant="outline"
           className="w-full h-11 text-base font-semibold border-primary/50 hover:bg-primary/5 text-primary"
           onClick={handleDemoLogin}

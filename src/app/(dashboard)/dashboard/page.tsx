@@ -145,7 +145,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div data-testid="dashboard-loaded" className="flex flex-col gap-8">
       {/* AI Hero Section */}
       <div className="animate-scale-up">
         <AIHeroSection />

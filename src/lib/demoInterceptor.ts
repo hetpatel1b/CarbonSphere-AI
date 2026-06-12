@@ -30,12 +30,17 @@ export async function handleDemoRequest(method: string, path: string, body?: unk
 
   // Reports
   if (normalizedPath === '/reports') return { success: true, data: demoData.DEMO_REPORTS };
+  if (normalizedPath === '/reports/generate') return { success: true, data: { _id: 'rep-new', reportType: 'Monthly', generatedAt: new Date().toISOString(), reportData: { summary: { sustainabilityScore: 92, totalEmissions: 450.5, netCarbonImpact: 350.5 }, aiInsights: { executiveSummary: "Great progress this month.", keyFindings: ["Reduced flights"], improvementOpportunities: ["Optimize heating"] }, offsetContributions: { totalCredits: 100, treesEquivalent: 5 }, emissionsAnalysis: { categoryBreakdown: [{ category: "Transport", amount: 200, percentage: 44, activitiesCount: 5 }] }, community: { challengesJoined: 2, challengesCompleted: 1, achievementsEarned: 3 } } } };
 
   // Marketplace
-  if (normalizedPath === '/offset-marketplace') return { success: true, data: demoData.DEMO_OFFSETS };
+  if (normalizedPath === '/offsets/projects') return { success: true, data: demoData.DEMO_OFFSETS };
+  if (normalizedPath === '/offsets/stats') return { success: true, data: { totalCredits: 1500, totalEmissions: 10000, offsetPercentage: 15, treesEquivalent: 75 } };
+  if (normalizedPath === '/offsets/history') return { success: true, data: [], pagination: { pages: 1 } };
+  if (normalizedPath === '/offsets/recommendations') return { success: true, data: { insight: { suggestedCategory: "Forestry", reason: "Best impact." } } };
+  if (normalizedPath === '/offsets/purchase') return { success: true, data: { _id: "new-purchase" } };
 
   // Simulator
-  if (normalizedPath === '/simulator/run') return { success: true, data: { currentEmissions: 5000, simulatedEmissions: 3500, carbonReduction: 1500, percentageImprovement: 30, treesEquivalent: 75, costEstimate: 500, annualSavings: 1200, roiEstimate: "2.5 years", aiInsights: { environmentalSummary: "Significant reduction.", longTermBenefits: ["Cost savings", "Lower impact"], recommendedActions: ["Do it"], riskReduction: "High" } } };
+  if (normalizedPath === '/simulator/run') return { success: true, data: { results: { currentEmissions: 5000, simulatedEmissions: 3500, carbonReduction: 1500, percentageImprovement: 30, treesEquivalent: 75, costEstimate: 500, annualSavings: 1200, roiEstimate: "2.5 years", aiInsights: { environmentalSummary: "Significant reduction.", longTermBenefits: ["Cost savings", "Lower impact"], recommendedActions: ["Do it"], riskReduction: "High" } } } };
 
   // Forecasting
   if (normalizedPath === '/forecast/data') return { success: true, data: demoData.DEMO_FORECAST };

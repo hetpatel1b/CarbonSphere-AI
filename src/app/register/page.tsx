@@ -95,6 +95,7 @@ export default function RegisterPage() {
               type="text"
               autoComplete="name"
               {...register("name")}
+              data-testid="register-name-input"
               className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               placeholder="Jane Doe"
             />
@@ -109,6 +110,7 @@ export default function RegisterPage() {
               type="email"
               autoComplete="email"
               {...register("email")}
+              data-testid="register-email-input"
               className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               placeholder="you@example.com"
             />
@@ -122,6 +124,7 @@ export default function RegisterPage() {
               id="password"
               type="password"
               {...register("password")}
+              data-testid="register-password-input"
               className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               placeholder="••••••••"
             />
@@ -135,6 +138,7 @@ export default function RegisterPage() {
               id="confirmPassword"
               type="password"
               {...register("confirmPassword")}
+              data-testid="register-confirm-password-input"
               className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               placeholder="••••••••"
             />
@@ -143,6 +147,7 @@ export default function RegisterPage() {
 
           <Button
             type="submit"
+            data-testid="register-submit-button"
             className="w-full h-11 text-base font-semibold mt-6"
             disabled={isLoading}
           >

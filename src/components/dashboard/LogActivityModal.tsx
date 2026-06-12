@@ -178,7 +178,7 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
                 <Select value={formData.category} onValueChange={(val) => handleSelectChange('category', val)} required>
-                  <SelectTrigger id="category">
+                  <SelectTrigger id="category" data-testid="activity-category-select">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -197,6 +197,7 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
                   placeholder="e.g. Flight, Commute"
                   value={formData.activityType}
                   onChange={handleChange}
+                  data-testid="activity-type-input"
                   required
                 />
               </div>
@@ -210,6 +211,7 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
                 placeholder="e.g. Morning train ride"
                 value={formData.title}
                 onChange={handleChange}
+                data-testid="activity-title-input"
                 required
               />
             </div>
@@ -377,7 +379,7 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
             <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} data-testid="activity-submit-button">
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLoading ? "Saving..." : activityToEdit ? "Update Activity" : "Save Activity"}
             </Button>

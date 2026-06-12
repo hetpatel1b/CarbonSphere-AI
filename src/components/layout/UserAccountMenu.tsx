@@ -74,7 +74,7 @@ export function UserAccountMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="w-8 h-8 ml-1.5 cursor-pointer ring-2 ring-transparent transition-all hover:ring-emerald-500/40 focus:outline-none">
+        <Avatar data-testid="user-account-menu" className="w-8 h-8 ml-1.5 cursor-pointer ring-2 ring-transparent transition-all hover:ring-emerald-500/40 focus:outline-none">
           <AvatarImage src={user.avatar || undefined} alt={user.name} />
           <AvatarFallback className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 font-semibold text-sm">
             {user.name?.charAt(0)?.toUpperCase() || "U"}
@@ -130,6 +130,7 @@ export function UserAccountMenu() {
         
         <DropdownMenuItem 
           onClick={handleLogout} 
+          data-testid="logout-button"
           className="cursor-pointer p-2 rounded-lg m-0.5 text-red-600 dark:text-red-400 focus:bg-red-50 focus:text-red-700 dark:focus:bg-red-500/10 dark:focus:text-red-300"
         >
           <LogOut className="mr-2 h-4 w-4" />

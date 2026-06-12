@@ -101,8 +101,8 @@ export const DEMO_REPORTS = [
 ];
 
 export const DEMO_OFFSETS = [
-  { _id: "off-1", project: "Amazon Reforestation", provider: "EcoTrust", type: "Forestry", carbonOffset: 1000, cost: 50, status: "Active" },
-  { _id: "off-2", project: "Texas Wind Farm", provider: "CleanEnergy", type: "Renewable", carbonOffset: 500, cost: 20, status: "Completed" }
+  { _id: "off-1", title: "Amazon Reforestation", category: "Forestry", location: "Brazil", costPerTon: 50, description: "Reforestation of the Amazon.", rating: "A+", availableCredits: 1000, provider: "EcoTrust", status: "Active" },
+  { _id: "off-2", title: "Texas Wind Farm", category: "Renewable", location: "USA", costPerTon: 20, description: "Wind power.", rating: "B", availableCredits: 500, provider: "CleanEnergy", status: "Completed" }
 ];
 
 export const DEMO_COACH = {

@@ -69,6 +69,7 @@ export function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
+                data-testid={`sidebar-nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                 className={cn(
                   "group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                   isActive

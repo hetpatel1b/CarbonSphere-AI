@@ -263,7 +263,7 @@ export default function OffsetMarketplacePage() {
                     <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-[10px]">
                       {p.rating}
                     </Badge>
-                    <span className="text-[10px] text-muted-foreground">{p.availableCredits.toLocaleString()} tCO₂e left</span>
+                    <span className="text-[10px] text-muted-foreground">{(p.availableCredits || 0).toLocaleString()} tCO₂e left</span>
                   </div>
                 </CardContent>
                 <CardFooter>
