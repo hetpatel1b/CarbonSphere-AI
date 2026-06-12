@@ -154,7 +154,7 @@ export interface SimulatorScenario {
   name: string;
   description: string;
   category: string;
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
   icon?: string;
 }
 
@@ -198,7 +198,7 @@ export interface OffsetProject {
   location: string;
   image?: string;
   verifier?: string;
-  sdgs?: string[];
+  rating?: string;
 }
 
 export interface OffsetPurchase {
@@ -213,10 +213,10 @@ export interface OffsetPurchase {
 }
 
 export interface OffsetStats {
-  totalCreditsPurchased: number;
-  totalSpent: number;
-  carbonOffset: number;
-  projectsSupportedCount: number;
+  totalCredits: number;
+  totalEmissions: number;
+  offsetPercentage: number;
+  treesEquivalent: number;
 }
 
 // Achievement / Challenge
@@ -267,7 +267,7 @@ export interface Report {
   periodStart: string;
   periodEnd: string;
   summary: string;
-  sections: Record<string, any>;
+  sections: Record<string, unknown>;
   pdfUrl?: string;
   createdAt: string;
 }

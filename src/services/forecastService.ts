@@ -8,7 +8,7 @@ export const fetchForecastData = async (): Promise<ForecastData & { needsGenerat
   } catch (error: unknown) {
     const err = error as { status?: number; data?: unknown; message?: string };
     if (err.status === 404) {
-      return { ...(err.data || {}), needsGeneration: true } as any;
+      return { ...(err.data || {}), needsGeneration: true } as unknown as ForecastData;
     }
     throw error;
   }
@@ -18,6 +18,6 @@ export const generateForecast = async (): Promise<ApiResponse<ForecastData>> => 
   return apiClient.post<ApiResponse<ForecastData>>('/forecast/generate');
 };
 
-export const applyAction = async (data: { title: string; reduction: number; difficulty: string; impact: string }): Promise<ApiResponse<any>> => {
-  return apiClient.post<ApiResponse<any>>('/actions/apply', data);
+export const applyAction = async (data: { title: string; reduction: number; difficulty: string; impact: string }): Promise<ApiResponse<unknown>> => {
+  return apiClient.post<ApiResponse<unknown>>('/actions/apply', data);
 };

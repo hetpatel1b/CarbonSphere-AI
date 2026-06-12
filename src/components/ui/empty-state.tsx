@@ -33,7 +33,7 @@ export function EmptyState({
       
       {actionLabel && (
         actionHref ? (
-          <Link href={actionHref as any}>
+          <Link href={actionHref as React.ComponentProps<typeof Link>["href"]}>
             <Button variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
               {actionLabel}
             </Button>

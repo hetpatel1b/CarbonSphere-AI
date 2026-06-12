@@ -14,20 +14,33 @@ import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import { toast } from "sonner"
 
+interface ReportItem {
+  _id: string;
+  reportType: string;
+  generatedAt: string;
+  reportData: {
+    summary: { sustainabilityScore: number; totalEmissions: number; netCarbonImpact: number };
+    aiInsights: { executiveSummary: string; keyFindings: string[]; improvementOpportunities: string[] };
+    offsetContributions: { totalCredits: number; treesEquivalent: number };
+    emissionsAnalysis: { categoryBreakdown: { category: string; amount: number; percentage: number; activitiesCount: number }[] };
+    community: { challengesJoined: number; challengesCompleted: number; achievementsEarned: number };
+  };
+}
+
 export default function ImpactReportsPage() {
-  const [reports, setReports] = useState<any[]>([])
+  const [reports, setReports] = useState<ReportItem[]>([])
   const [loading, setLoading] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Report viewing
-  const [activeReport, setActiveReport] = useState<any>(null)
+  const [activeReport, setActiveReport] = useState<ReportItem | null>(null)
 
   const loadReports = async () => {
     try {
       setLoading(true)
       const res = await fetchReports()
-      setReports(res.data)
+      setReports(res.data as unknown as ReportItem[])
     } catch (err: unknown) { setError((err as Error).message)
     } finally {
       setLoading(false)
@@ -42,7 +55,7 @@ export default function ImpactReportsPage() {
     setIsGenerating(true)
     try {
       const res = await generateReport(type)
-      setActiveReport(res.data)
+      setActiveReport(res.data as unknown as ReportItem)
       loadReports() // Refresh history
       toast.success("Report generated successfully")
     } catch (err: unknown) {
@@ -132,9 +145,9 @@ export default function ImpactReportsPage() {
             {reportData.emissionsAnalysis.categoryBreakdown.length > 0 ? (
               <div className="space-y-3">
                 {reportData.emissionsAnalysis.categoryBreakdown.map((cat: { category: string; amount: number; percentage: number }) => (
-                  <div key={(cat as any).category} className="flex justify-between items-center p-3 border rounded-lg bg-white/50 dark:bg-zinc-900/50">
-                    <span className="text-sm font-semibold">{(cat as any).category}</span>
-                    <span className="text-sm font-mono">{(cat as any).amount.toFixed(2)} tCO₂e ({(cat as any).activitiesCount} logs)</span>
+                  <div key={cat.category} className="flex justify-between items-center p-3 border rounded-lg bg-white/50 dark:bg-zinc-900/50">
+                    <span className="text-sm font-semibold">{cat.category}</span>
+                    <span className="text-sm font-mono">{cat.amount.toFixed(2)} tCO₂e ({(cat as unknown as { activitiesCount: number }).activitiesCount} logs)</span>
                   </div>
                 ))}
               </div>
@@ -290,7 +303,7 @@ export default function ImpactReportsPage() {
                         setIsGenerating(true);
                         try {
                           const res = await fetchReportById(report._id);
-                          setActiveReport(res.data);
+                          setActiveReport(res.data as unknown as ReportItem);
                         } catch (err: unknown) {
                           alert((err as Error).message || "Failed to load report");
                         } finally {

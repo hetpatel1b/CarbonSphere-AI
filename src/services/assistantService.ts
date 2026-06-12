@@ -8,10 +8,11 @@ export interface AssistantResponse {
 
 export const assistantService = {
   chat: async (message: string): Promise<AssistantResponse> => {
-    const data = await apiClient.post<any>('/assistant/chat', { message });
+    const response = await apiClient.post<unknown>('/assistant/chat', { message });
     
     // Defensive parsing
-    let parsedContent = data?.data?.content || data?.content || data?.message?.content || data?.data;
+    const safeData = response as Record<string, any>;
+    let parsedContent = safeData?.data?.content || safeData?.content || safeData?.message?.content || safeData?.data;
     
     // If the backend somehow returned a stringified JSON string for content
     if (typeof parsedContent === 'string' && parsedContent.trim().startsWith('{')) {
@@ -30,8 +31,8 @@ export const assistantService = {
     
     return {
       content: typeof parsedContent === 'string' ? parsedContent : String(parsedContent),
-      impact: data?.data?.impact,
-      actionability: data?.data?.actionability
+      impact: safeData?.data?.impact,
+      actionability: safeData?.data?.actionability
     };
   }
 };

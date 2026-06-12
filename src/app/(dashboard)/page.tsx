@@ -221,7 +221,7 @@ export default function DashboardPage() {
         
         {/* Active Actions Widget */}
         <div className="md:col-span-1 lg:col-span-1 animate-scale-up animation-delay-375">
-          <ActiveActionsWidget actions={(summary as any)?.activeActions || []} />
+          <ActiveActionsWidget actions={(summary as { activeActions?: React.ComponentProps<typeof ActiveActionsWidget>["actions"] })?.activeActions || []} />
         </div>
         
         {/* AI Insight Spotlight Card */}

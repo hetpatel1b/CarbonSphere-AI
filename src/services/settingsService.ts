@@ -56,8 +56,8 @@ export const updatePassword = async (data: PasswordData): Promise<ApiResponse<vo
   return apiClient.put<ApiResponse<void>>('/settings/password', data);
 };
 
-export const exportData = async (): Promise<ApiResponse<any>> => {
-  return apiClient.get<ApiResponse<any>>('/settings/export');
+export const exportData = async (): Promise<ApiResponse<unknown>> => {
+  return apiClient.get<ApiResponse<unknown>>('/settings/export');
 };
 
 export const deleteAccount = async (): Promise<ApiResponse<void>> => {

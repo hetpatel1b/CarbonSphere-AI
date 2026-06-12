@@ -1,7 +1,7 @@
 import { logout } from './auth';
 
 const cache = new Map<string, { data: unknown; timestamp: number }>();
-const inFlightRequests = new Map<string, Promise<any>>();
+const inFlightRequests = new Map<string, Promise<unknown>>();
 
 const CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 

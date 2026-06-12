@@ -39,7 +39,7 @@ export const challengeService = {
     return res.data;
   },
 
-  async joinChallenge(id: string): Promise<any> {
+  async joinChallenge(id: string): Promise<unknown> {
     const res = await apiClient.post<{ success: boolean; data: unknown }>(`/challenges/join/${id}`);
     return res.data;
   }

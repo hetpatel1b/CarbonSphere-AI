@@ -87,7 +87,7 @@ export default function SettingsPage() {
         })
       }
       
-      const stats = analyticsRes as any || {};
+      const stats = (analyticsRes as Record<string, number>) || {};
       setAnalytics({
         score: stats.sustainabilityScore || 0,
         achievements: stats.totalAchievementsUnlocked || stats.totalAchievements || 0,

@@ -116,19 +116,19 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
         ? activityService.updateActivity(activityToEdit._id, submitData)
         : activityService.createActivity(submitData);
 
-      toast.promise(savePromise, {
+      toast.promise(savePromise as Promise<unknown>, {
         loading: activityToEdit ? "Updating activity..." : "Logging activity...",
-        success: (data: any) => {
+        success: (data: unknown) => {
           if (!activityToEdit) {
-            const { newlyUnlocked, newlyCompletedChallenges } = data || {};
-            if (newlyUnlocked && newlyUnlocked.length > 0) {
+            const { newlyUnlocked, newlyCompletedChallenges } = (data as Record<string, unknown>) || {};
+            if (Array.isArray(newlyUnlocked) && newlyUnlocked.length > 0) {
               setTimeout(() => {
                 toast.success("🏆 Achievement Unlocked!", {
                   description: `You just unlocked ${newlyUnlocked.length} new achievement(s)!`,
                 });
               }, 500);
             }
-            if (newlyCompletedChallenges && newlyCompletedChallenges.length > 0) {
+            if (Array.isArray(newlyCompletedChallenges) && newlyCompletedChallenges.length > 0) {
               setTimeout(() => {
                 toast.success("🏆 Challenge Completed!", {
                   description: `You completed ${newlyCompletedChallenges.length} challenge(s)!`,

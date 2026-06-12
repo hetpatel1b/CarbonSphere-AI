@@ -16,13 +16,13 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
       if (isPublicPath) {
         if (auth) {
-          router.replace('/' as any);
+          router.replace('/');
         } else {
           setIsChecking(false);
         }
       } else {
         if (!auth) {
-          router.replace('/login' as any);
+          router.replace('/login');
         } else {
           setIsChecking(false);
         }

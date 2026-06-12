@@ -21,6 +21,7 @@ import {
   fetchOffsetHistory, 
   fetchOffsetStats 
 } from "@/services/offsetService"
+import { OffsetStats, OffsetProject, OffsetPurchase } from "@/types"
 
 const CERTIFICATES = [
   { title: "Verified Impact", description: "Gold Standard Certified", icon: CheckCircle },
@@ -32,10 +33,10 @@ export default function OffsetMarketplacePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  const [stats, setStats] = useState<any>(null)
-  const [projects, setProjects] = useState<any[]>([])
-  const [history, setHistory] = useState<any[]>([])
-  const [recommendations, setRecommendations] = useState<any>(null)
+  const [stats, setStats] = useState<OffsetStats | null>(null)
+  const [projects, setProjects] = useState<OffsetProject[]>([])
+  const [history, setHistory] = useState<OffsetPurchase[]>([])
+  const [recommendations, setRecommendations] = useState<{ insight?: { suggestedCategory?: string, reason?: string } } | null>(null)
   
   // Pagination state
   const [page, setPage] = useState(1)
@@ -43,7 +44,7 @@ export default function OffsetMarketplacePage() {
 
   // Purchase Modal State
   const [purchaseModalOpen, setPurchaseModalOpen] = useState(false)
-  const [selectedProject, setSelectedProject] = useState<any>(null)
+  const [selectedProject, setSelectedProject] = useState<OffsetProject | null>(null)
   const [creditsToBuy, setCreditsToBuy] = useState<number>(1)
   const [purchasing, setPurchasing] = useState(false)
   const [purchaseSuccess, setPurchaseSuccess] = useState(false)
@@ -64,7 +65,7 @@ export default function OffsetMarketplacePage() {
       setProjects(projectsRes.data)
       setHistory(historyRes.data)
       setTotalPages(historyRes.pagination?.pages || 1)
-      setRecommendations(recRes.data)
+      setRecommendations(recRes.data as { insight?: { suggestedCategory?: string, reason?: string } })
     } catch (err: unknown) {
       setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load marketplace data.")
     } finally {
@@ -77,7 +78,7 @@ export default function OffsetMarketplacePage() {
     Promise.resolve().then(() => loadData())
   }, [loadData])
 
-  const openPurchaseModal = (project: { id: string; name: string; pricePerTon: number; [key: string]: unknown }) => {
+  const openPurchaseModal = (project: OffsetProject) => {
     setSelectedProject(project)
     setCreditsToBuy(1)
     setPurchaseSuccess(false)
@@ -249,7 +250,7 @@ export default function OffsetMarketplacePage() {
                   <div className="z-10">{getCategoryIcon(p.category)}</div>
                 </div>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold">{p.name}</CardTitle>
+                  <CardTitle className="text-sm font-semibold">{p.title}</CardTitle>
                   <CardDescription className="text-xs text-muted-foreground">{p.location} • {p.category}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 space-y-3">
@@ -297,10 +298,10 @@ export default function OffsetMarketplacePage() {
                   {history.map((h) => (
                     <TableRow key={h._id}>
                       <TableCell className="text-xs">{new Date(h.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-xs font-medium">{h.projectId?.name || "Unknown Project"}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{h.projectId?.category || "-"}</TableCell>
+                      <TableCell className="text-xs font-medium">{(h.projectId as OffsetProject)?.title || h.projectName || "Unknown Project"}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{(h.projectId as OffsetProject)?.category || "-"}</TableCell>
                       <TableCell className="text-right text-xs font-bold text-emerald-600 dark:text-emerald-400">{h.credits}</TableCell>
-                      <TableCell className="text-right text-xs">${h.cost.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-xs">${h.totalCost.toFixed(2)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -353,7 +354,7 @@ export default function OffsetMarketplacePage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold">Purchase Successful!</h3>
-                <p className="text-sm text-muted-foreground mt-2">Thank you for supporting {selectedProject?.name}. You have officially offset {creditsToBuy} tCO₂e.</p>
+                <p className="text-sm text-muted-foreground mt-2">Thank you for supporting {selectedProject?.title}. You have officially offset {creditsToBuy} tCO₂e.</p>
               </div>
             </div>
           ) : (
@@ -361,7 +362,7 @@ export default function OffsetMarketplacePage() {
               <DialogHeader>
                 <DialogTitle>Fund Project</DialogTitle>
                 <DialogDescription>
-                  You are supporting <span className="font-semibold text-foreground">{selectedProject?.name}</span>.
+                  You are supporting <span className="font-semibold text-foreground">{selectedProject?.title}</span>.
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4 flex flex-col gap-4">
@@ -389,7 +390,7 @@ export default function OffsetMarketplacePage() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setPurchaseModalOpen(false)}>Cancel</Button>
-                <Button onClick={handlePurchase} disabled={purchasing || creditsToBuy <= 0 || creditsToBuy > selectedProject?.availableCredits}>
+                <Button onClick={handlePurchase} disabled={purchasing || creditsToBuy <= 0 || creditsToBuy > (selectedProject?.availableCredits ?? 0)}>
                   {purchasing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {purchasing ? "Processing..." : "Confirm Purchase"}
                 </Button>

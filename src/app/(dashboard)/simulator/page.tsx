@@ -8,6 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Car, Train, Bike, Footprints, Zap, TrendingDown, Leaf, Shield, History, Sparkles, DollarSign, Trees, Loader2 } from "lucide-react"
 import { runSimulation, fetchSimulationHistory } from "@/services/simulatorService"
 import { EmptyState } from "@/components/ui/empty-state"
+import { SimulationRecord } from "@/types"
 import { toast } from "sonner"
 
 const SCENARIOS = [
@@ -22,8 +23,8 @@ const SCENARIOS = [
 export default function SimulatorPage() {
   const [selectedScenario, setSelectedScenario] = useState("switch_to_ev")
   const [isRunning, setIsRunning] = useState(false)
-  const [results, setResults] = useState<any>(null)
-  const [history, setHistory] = useState<any[]>([])
+  const [results, setResults] = useState<SimulationRecord["results"] | null>(null)
+  const [history, setHistory] = useState<SimulationRecord[]>([])
   const [error, setError] = useState<string | null>(null)
 
   const loadHistory = async () => {
