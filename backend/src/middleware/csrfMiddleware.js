@@ -24,6 +24,12 @@ const verifyCsrfToken = (req, res, next) => {
     return next();
   }
 
+  // Skip CSRF for auth initialization routes
+  const skipRoutes = ['/api/auth/login', '/api/auth/register'];
+  if (skipRoutes.includes(req.path)) {
+    return next();
+  }
+
   // Skip CSRF verification in test environment
   if (process.env.NODE_ENV === 'test') {
     return next();
