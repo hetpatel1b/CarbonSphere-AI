@@ -18,13 +18,14 @@ export async function handleDemoRequest(method: string, path: string, body?: unk
 
   // Activity
   if (normalizedPath === '/activity/stats') return { success: true, data: demoData.DEMO_ACTIVITY_STATS };
-  if (normalizedPath === '/activity') {
-    if (method === 'GET') return { success: true, data: demoData.DEMO_ACTIVITIES };
+  if (normalizedPath === '/activities') {
+    if (method === 'GET') return { success: true, data: demoData.DEMO_ACTIVITIES.activities, pagination: { total: 3, page: 1, pages: 1 } };
     if (method === 'POST') return { success: true, data: { _id: Date.now().toString(), ...((body as any) || {}) } };
   }
-  if (normalizedPath.startsWith('/activity/')) {
+  if (normalizedPath.startsWith('/activities/')) {
     if (method === 'DELETE') return { success: true, message: 'Deleted successfully' };
     if (method === 'PUT') return { success: true, data: { _id: normalizedPath.split('/').pop(), ...((body as any) || {}) } };
+    if (method === 'GET') return { success: true, data: demoData.DEMO_ACTIVITIES.activities[0] };
   }
 
   // Reports
@@ -34,12 +35,14 @@ export async function handleDemoRequest(method: string, path: string, body?: unk
   if (normalizedPath === '/offset-marketplace') return { success: true, data: demoData.DEMO_OFFSETS };
 
   // Simulator
-  if (normalizedPath === '/simulator/run') return { success: true, data: { currentEmissions: 5000, simulatedEmissions: 3500, reductions: { Transport: 1000, Energy: 500 } } };
+  if (normalizedPath === '/simulator/run') return { success: true, data: { currentEmissions: 5000, simulatedEmissions: 3500, carbonReduction: 1500, percentageImprovement: 30, treesEquivalent: 75, costEstimate: 500, annualSavings: 1200, roiEstimate: "2.5 years", aiInsights: { environmentalSummary: "Significant reduction.", longTermBenefits: ["Cost savings", "Lower impact"], recommendedActions: ["Do it"], riskReduction: "High" } } };
 
   // Forecasting
-  if (normalizedPath === '/forecast') return { success: true, data: { predictions: [ { month: 'Jul', carbon: 300 }, { month: 'Aug', carbon: 280 } ], confidence: 85 } };
+  if (normalizedPath === '/forecast/data') return { success: true, data: demoData.DEMO_FORECAST };
+  if (normalizedPath === '/forecast/generate') return { success: true, data: demoData.DEMO_FORECAST };
 
   // Challenges
+  if (normalizedPath === '/challenges/status') return { success: true, data: demoData.DEMO_CHALLENGES };
   if (normalizedPath === '/challenges/user') return { success: true, data: demoData.DEMO_CHALLENGES.active };
   if (normalizedPath === '/challenges') return { success: true, data: demoData.DEMO_CHALLENGES.available };
 
@@ -48,7 +51,8 @@ export async function handleDemoRequest(method: string, path: string, body?: unk
   if (normalizedPath === '/community/feed') return { success: true, data: demoData.DEMO_COMMUNITY.feed };
 
   // AI Coach
-  if (normalizedPath === '/assistant/coach') return { success: true, data: demoData.DEMO_COACH.recommendations };
+  if (normalizedPath === '/ai-coach/latest') return { success: true, data: demoData.DEMO_COACH };
+  if (normalizedPath === '/ai-coach/analyze') return { success: true, data: demoData.DEMO_COACH };
   
   // Settings
   if (normalizedPath === '/settings/profile') {

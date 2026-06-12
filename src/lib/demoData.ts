@@ -67,12 +67,20 @@ export const DEMO_ACTIVITIES = {
 
 export const DEMO_CHALLENGES = {
   active: [
-    { _id: "chal-1", title: "Zero Waste Week", description: "Produce zero landfill waste for 7 days.", progress: 50, reward: "Zero Waste Badge" },
-    { _id: "chal-2", title: "Carpool Month", description: "Share rides to work 10 times.", progress: 80, reward: "Carpool Hero" }
+    { _id: "chal-1", title: "Zero Waste Week", description: "Produce zero landfill waste for 7 days.", progress: 50, rewardPoints: 100, category: "Lifestyle", difficulty: "medium", startDate: new Date().toISOString(), endDate: new Date(Date.now() + 86400000 * 7).toISOString(), targetValue: 7, isActive: true, icon: "Leaf", color: "bg-emerald-500", joined: true }
   ],
+  completed: [
+    { _id: "chal-2", title: "Carpool Month", description: "Share rides to work 10 times.", progress: 100, rewardPoints: 300, category: "Transport", difficulty: "hard", startDate: new Date(Date.now() - 86400000 * 30).toISOString(), endDate: new Date().toISOString(), targetValue: 10, isActive: false, icon: "Car", color: "bg-blue-500", joined: true, completed: true }
+  ],
+  upcoming: [],
   available: [
-    { _id: "chal-3", title: "Solar Power Transition", description: "Install solar panels or switch to a green energy plan.", reward: "Solar Pioneer" }
-  ]
+    { _id: "chal-3", title: "Solar Power Transition", description: "Install solar panels or switch to a green energy plan.", rewardPoints: 500, category: "Energy", difficulty: "hard", startDate: new Date(Date.now() + 86400000 * 5).toISOString(), endDate: new Date(Date.now() + 86400000 * 35).toISOString(), targetValue: 1, isActive: true, icon: "Sun", color: "bg-amber-500", joined: false }
+  ],
+  stats: {
+    challengesJoined: 3,
+    challengesCompleted: 1,
+    pointsEarned: 300
+  }
 };
 
 export const DEMO_COMMUNITY = {
@@ -98,10 +106,51 @@ export const DEMO_OFFSETS = [
 ];
 
 export const DEMO_COACH = {
+  insight: {
+    executiveSummary: "You are doing great on reducing meat consumption, but your transport emissions remain a primary area for improvement.",
+    score: 85,
+    topEmissionSources: ["Flights", "Car Commute"],
+    strengths: ["Plant-based diet", "Renewable energy usage"],
+    weaknesses: ["Frequent short-haul flights"],
+    riskAssessment: "Medium",
+    monthlyImprovementPlan: "Reduce flights by 1 this month.",
+    carbonReductionOpportunities: "15% reduction possible.",
+    challengeSuggestion: "Join the No-Fly Month Challenge!",
+    generatedAt: new Date().toISOString()
+  },
   recommendations: [
-    { id: "rec-1", title: "Optimize Home Heating", description: "Lowering your thermostat by 2 degrees can save 15% on energy.", impact: "High", estimatedSavings: 200 },
-    { id: "rec-2", title: "Switch to EV", description: "Your transport emissions are high. Consider an EV for your next vehicle.", impact: "Very High", estimatedSavings: 1500 },
-    { id: "rec-3", title: "Local Produce", description: "Buying local reduces transport emissions associated with food.", impact: "Medium", estimatedSavings: 50 }
+    { id: "rec-1", title: "Optimize Home Heating", description: "Lowering your thermostat by 2 degrees can save 15% on energy.", category: "Energy", impact: "High", estimatedCarbonSaving: 200 },
+    { id: "rec-2", title: "Switch to EV", description: "Your transport emissions are high. Consider an EV.", category: "Transport", impact: "Very High", estimatedCarbonSaving: 1500 },
+    { id: "rec-3", title: "Local Produce", description: "Buying local reduces transport emissions.", category: "Food", impact: "Medium", estimatedCarbonSaving: 50 }
+  ]
+};
+
+export const DEMO_FORECAST = {
+  historicalSeries: [
+    { month: "Jan", actual: 600 },
+    { month: "Feb", actual: 550 },
+    { month: "Mar", actual: 520 },
+    { month: "Apr", actual: 480 },
+    { month: "May", actual: 450 },
+    { month: "Jun", actual: 420 }
+  ],
+  predictionSeries: [
+    { month: "Jul", predicted: 400 },
+    { month: "Aug", predicted: 380 },
+    { month: "Sep", predicted: 350 }
+  ],
+  riskLevel: "MEDIUM",
+  previousMonth: 450,
+  currentMonth: 420,
+  forecastNextMonth: 400,
+  trendDirection: "Decreasing",
+  aiInsights: {
+    insight: "Your carbon footprint is consistently decreasing. Keep it up!",
+    highestRiskArea: "Transport",
+    potentialIncrease: "If you take the planned flight in August, emissions will spike."
+  },
+  actionPlan: [
+    { title: "Switch to EV", reduction: 1500, difficulty: "Hard", impact: "High" }
   ]
 };
 
