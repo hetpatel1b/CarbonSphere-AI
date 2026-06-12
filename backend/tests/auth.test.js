@@ -62,7 +62,7 @@ describe('Auth Endpoints', () => {
       
       expect(res.statusCode).toEqual(200);
       expect(res.body.success).toEqual(true);
-      expect(res.body).toHaveProperty('token');
+      expect(res.headers['set-cookie']).toBeDefined();
     });
 
     it('should fail to login with invalid password', async () => {

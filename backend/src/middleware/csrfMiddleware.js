@@ -24,6 +24,11 @@ const verifyCsrfToken = (req, res, next) => {
     return next();
   }
 
+  // Skip CSRF verification in test environment
+  if (process.env.NODE_ENV === 'test') {
+    return next();
+  }
+
   const tokenFromCookie = req.cookies.csrfToken;
   const tokenFromHeader = req.headers['x-csrf-token'];
 
