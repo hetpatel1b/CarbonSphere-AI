@@ -16,7 +16,7 @@ const protect = async (req, res, next) => {
   if (token) {
     try {
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Verify user exists and is active in database
       const user = await User.findById(decoded.id);

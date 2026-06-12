@@ -1,6 +1,11 @@
 require('dotenv').config();
 console.log("Server starting...");
 
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.trim() === '') {
+  console.error("CRITICAL CONFIGURATION ERROR: JWT_SECRET environment variable is missing!");
+  process.exit(1);
+}
+
 const logger = require('./src/utils/logger.js');
 const mongoose = require('mongoose');
 

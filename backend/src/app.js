@@ -43,9 +43,51 @@ const cookieParser = require('cookie-parser');
 // 1. Set Security Headers
 app.use(helmet());
 
+// Dynamic origin check helper
+const isOriginAllowed = (origin) => {
+  if (!origin) return false;
+  
+  if (process.env.FRONTEND_URL) {
+    try {
+      const allowedUrl = new URL(process.env.FRONTEND_URL);
+      const originUrl = new URL(origin);
+      if (originUrl.host === allowedUrl.host) {
+        return true;
+      }
+    } catch (e) {
+      // Ignore URL parsing errors
+    }
+  }
+
+  if (
+    origin.startsWith('http://localhost:') || 
+    origin.startsWith('http://127.0.0.1:') || 
+    origin === 'http://localhost'
+  ) {
+    return true;
+  }
+
+  try {
+    const originUrl = new URL(origin);
+    if (originUrl.hostname.endsWith('.vercel.app')) {
+      return true;
+    }
+  } catch (e) {
+    // Ignore URL parsing errors
+  }
+
+  return false;
+};
+
 // Apply CORS with credentials enabled for cookies
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin || isOriginAllowed(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
@@ -53,19 +95,18 @@ app.use(cookieParser());
 
 // CSRF Protection Middleware
 app.use((req, res, next) => {
-  const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
   const origin = req.headers.origin || req.headers.referer;
   
   if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
     if (origin) {
-      try {
-        const originUrl = new URL(origin);
-        const allowedUrl = new URL(allowedOrigin);
-        if (originUrl.host !== allowedUrl.host) {
-          return res.status(403).json({ success: false, message: 'CSRF validation failed: origin mismatch' });
-        }
-      } catch (err) {
-        return res.status(403).json({ success: false, message: 'CSRF validation failed: invalid origin header' });
+      if (!origin.startsWith('http://') && !origin.startsWith('https://')) {
+        return res.status(403).json({ success: false, message: 'CSRF validation failed: missing protocol' });
+      }
+      
+      if (isOriginAllowed(origin)) {
+        return next();
+      } else {
+        return res.status(403).json({ success: false, message: 'CSRF validation failed: origin mismatch' });
       }
     }
   }
