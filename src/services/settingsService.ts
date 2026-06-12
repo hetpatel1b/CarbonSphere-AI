@@ -10,8 +10,19 @@ const getHeaders = () => {
   };
 };
 
+const fetchWithCreds = (url: string, options: RequestInit = {}) => {
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...getHeaders(),
+      ...options.headers,
+    },
+    credentials: 'include'
+  });
+};
+
 export const fetchProfile = async () => {
-  const response = await fetch(`${API_URL}/settings/profile`, { headers: getHeaders() });
+  const response = await fetchWithCreds(`${API_URL}/settings/profile`);
   if (!response.ok) throw new Error('Failed to fetch profile');
   return response.json();
 };
@@ -52,9 +63,8 @@ export interface PasswordData {
 }
 
 export const updateProfile = async (data: ProfileData) => {
-  const response = await fetch(`${API_URL}/settings/profile`, {
+  const response = await fetchWithCreds(`${API_URL}/settings/profile`, {
     method: 'PUT',
-    headers: getHeaders(),
     body: JSON.stringify(data)
   });
   if (!response.ok) throw new Error('Failed to update profile');
@@ -62,9 +72,8 @@ export const updateProfile = async (data: ProfileData) => {
 };
 
 export const updatePreferences = async (data: PreferencesData) => {
-  const response = await fetch(`${API_URL}/settings/preferences`, {
+  const response = await fetchWithCreds(`${API_URL}/settings/preferences`, {
     method: 'PUT',
-    headers: getHeaders(),
     body: JSON.stringify(data)
   });
   if (!response.ok) throw new Error('Failed to update preferences');
@@ -72,9 +81,8 @@ export const updatePreferences = async (data: PreferencesData) => {
 };
 
 export const updateNotifications = async (data: NotificationsData) => {
-  const response = await fetch(`${API_URL}/settings/notifications`, {
+  const response = await fetchWithCreds(`${API_URL}/settings/notifications`, {
     method: 'PUT',
-    headers: getHeaders(),
     body: JSON.stringify(data)
   });
   if (!response.ok) throw new Error('Failed to update notifications');
@@ -82,9 +90,8 @@ export const updateNotifications = async (data: NotificationsData) => {
 };
 
 export const updatePassword = async (data: PasswordData) => {
-  const response = await fetch(`${API_URL}/settings/password`, {
+  const response = await fetchWithCreds(`${API_URL}/settings/password`, {
     method: 'PUT',
-    headers: getHeaders(),
     body: JSON.stringify(data)
   });
   const resData = await response.json();
@@ -93,15 +100,14 @@ export const updatePassword = async (data: PasswordData) => {
 };
 
 export const exportData = async () => {
-  const response = await fetch(`${API_URL}/settings/export`, { headers: getHeaders() });
+  const response = await fetchWithCreds(`${API_URL}/settings/export`);
   if (!response.ok) throw new Error('Failed to export data');
   return response.json();
 };
 
 export const deleteAccount = async () => {
-  const response = await fetch(`${API_URL}/settings/account`, {
-    method: 'DELETE',
-    headers: getHeaders()
+  const response = await fetchWithCreds(`${API_URL}/settings/account`, {
+    method: 'DELETE'
   });
   if (!response.ok) throw new Error('Failed to delete account');
   return response.json();

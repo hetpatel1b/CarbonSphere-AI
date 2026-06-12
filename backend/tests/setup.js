@@ -15,14 +15,9 @@ beforeAll(async () => {
     await mongoose.disconnect();
   }
   
-  if (process.env.CI || !process.env.MONGODB_URI) {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri);
-  } else {
-    const uri = process.env.MONGODB_URI;
-    await mongoose.connect(uri, { dbName: 'carbonsphere_test' });
-  }
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+  await mongoose.connect(uri);
 });
 
 afterAll(async () => {

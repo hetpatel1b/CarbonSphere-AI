@@ -44,6 +44,7 @@ export const fetchNotifications = async (): Promise<Notification[]> => {
   const response = await fetch(`${API_URL}/notifications`, {
     method: 'GET',
     headers: getHeaders(),
+    credentials: 'include',
   });
   return handleResponse(response);
 };
@@ -52,6 +53,7 @@ export const markNotificationAsRead = async (id: string): Promise<Notification> 
   const response = await fetch(`${API_URL}/notifications/read/${id}`, {
     method: 'PATCH',
     headers: getHeaders(),
+    credentials: 'include',
   });
   return handleResponse(response);
 };
@@ -60,6 +62,7 @@ export const markAllNotificationsAsRead = async (): Promise<void> => {
   const response = await fetch(`${API_URL}/notifications/read-all`, {
     method: 'PATCH',
     headers: getHeaders(),
+    credentials: 'include',
   });
   
   if (response.status === 401) {

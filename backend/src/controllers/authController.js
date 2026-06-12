@@ -91,6 +91,13 @@ const loginUser = async (req, res) => {
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     return res.status(200).json({
       success: true,
       message: "Login successful",
@@ -110,6 +117,19 @@ const loginUser = async (req, res) => {
       message: "Server error"
     });
   }
+};
+
+const logoutUser = async (req, res) => {
+  res.cookie('token', '', {
+    httpOnly: true,
+    expires: new Date(0),
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
+  });
+  return res.status(200).json({
+    success: true,
+    message: "Logout successful"
+  });
 };
 
 const getCurrentUser = async (req, res) => {
@@ -139,5 +159,6 @@ const getCurrentUser = async (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
+  logoutUser,
   getCurrentUser
 };

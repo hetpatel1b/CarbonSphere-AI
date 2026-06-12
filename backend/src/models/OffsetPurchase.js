@@ -26,4 +26,6 @@ const OffsetPurchaseSchema = new mongoose.Schema(
   }
 );
 
+OffsetPurchaseSchema.index({ userId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('OffsetPurchase', OffsetPurchaseSchema);

@@ -26,4 +26,6 @@ const ReportSchema = new mongoose.Schema(
   }
 );
 
+ReportSchema.index({ userId: 1, generatedAt: -1 });
+
 module.exports = mongoose.model('Report', ReportSchema);

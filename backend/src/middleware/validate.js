@@ -17,10 +17,11 @@ const validate = (schema) => (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === 'ZodError') {
+      const issues = error.errors || error.issues || [];
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: error.errors.map(err => ({
+        errors: issues.map(err => ({
           path: err.path.join('.'),
           message: err.message
         }))

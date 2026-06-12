@@ -146,7 +146,7 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
                 <Select value={formData.category} onValueChange={(val) => handleSelectChange('category', val)} required>
-                  <SelectTrigger>
+                  <SelectTrigger id="category">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>

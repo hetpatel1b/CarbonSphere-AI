@@ -75,6 +75,7 @@ export const activityService = {
     const response = await fetch(`${API_URL}/activities`, {
       method: 'POST',
       headers: getHeaders(),
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     
@@ -100,6 +101,7 @@ export const activityService = {
     const response = await fetch(`${API_URL}/activities/${id}`, {
       method: 'PUT',
       headers: getHeaders(),
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     return handleResponse(response);
@@ -109,6 +111,7 @@ export const activityService = {
     const response = await fetch(`${API_URL}/activities/${id}`, {
       method: 'DELETE',
       headers: getHeaders(),
+      credentials: 'include',
     });
     await handleResponse(response);
   }

@@ -42,4 +42,6 @@ const RecommendationSchema = new mongoose.Schema(
   }
 );
 
+RecommendationSchema.index({ userId: 1, priority: 1, generatedAt: -1 });
+
 module.exports = mongoose.model('Recommendation', RecommendationSchema);

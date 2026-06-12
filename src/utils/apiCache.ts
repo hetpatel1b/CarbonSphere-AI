@@ -6,9 +6,14 @@ const inFlightRequests = new Map<string, Promise<any>>();
 const CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 
 export const fetchWithCache = async (url: string, options: RequestInit = {}, forceRefresh = false) => {
+  const requestOptions: RequestInit = {
+    ...options,
+    credentials: options.credentials || 'include'
+  };
+
   // Only cache GET requests
   if (options.method && options.method !== 'GET') {
-    const res = await fetch(url, options);
+    const res = await fetch(url, requestOptions);
     if (res.status === 401) {
       logout();
       if (typeof window !== 'undefined') window.location.href = '/login';
@@ -41,7 +46,7 @@ export const fetchWithCache = async (url: string, options: RequestInit = {}, for
     return inFlightRequests.get(cacheKey);
   }
 
-  const promise = fetch(url, options).then(async (res) => {
+  const promise = fetch(url, requestOptions).then(async (res) => {
     if (res.status === 401) {
       logout();
       if (typeof window !== 'undefined') window.location.href = '/login';

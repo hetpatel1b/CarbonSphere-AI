@@ -76,6 +76,7 @@ export const challengeService = {
     const response = await fetch(`${API_URL}/challenges/join/${id}`, {
       method: 'POST',
       headers: getHeaders(),
+      credentials: 'include',
     });
     return handleResponse(response);
   }

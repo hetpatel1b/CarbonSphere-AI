@@ -42,4 +42,6 @@ const UserActionSchema = new mongoose.Schema({
   timestamps: true
 });
 
+UserActionSchema.index({ userId: 1, status: 1 });
+
 module.exports = mongoose.model('UserAction', UserActionSchema);

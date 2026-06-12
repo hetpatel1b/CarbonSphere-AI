@@ -32,4 +32,6 @@ const CarbonLogSchema = new mongoose.Schema(
   }
 );
 
+CarbonLogSchema.index({ userId: 1, category: 1 });
+
 module.exports = mongoose.model('CarbonLog', CarbonLogSchema);
