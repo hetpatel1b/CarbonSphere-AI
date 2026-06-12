@@ -301,6 +301,7 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
                        <div className="space-y-1">
                          <div>
                            <span className="font-semibold text-foreground">Source:</span>{" "}
+                           {breakdown.sourceOrganization && <span className="font-medium mr-1">{breakdown.sourceOrganization} -</span>}
                            {breakdown.sourceUrl ? (
                              <a href={breakdown.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                                {breakdown.source}

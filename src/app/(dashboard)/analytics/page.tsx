@@ -12,7 +12,7 @@ import {
 import { 
   ArrowDownRight, ArrowUpRight, Cloud, Droplet, Zap, 
   Lightbulb, Compass, Award,
-  Sparkles, ShieldCheck, ChevronRight, Loader2, Activity
+  Sparkles, ShieldCheck, ChevronRight, Loader2, Activity, Info
 } from "lucide-react"
 import { AnimatedChartWrapper } from "@/components/ui/animation-system"
 import { dashboardService, DashboardAnalytics } from "@/services/dashboardService"
@@ -508,6 +508,22 @@ export default function AnalyticsPage() {
                         <span>{action}</span>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2.5 pt-2 border-t border-zinc-200/40 dark:border-zinc-800/40">
+                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">Scientific Credibility</span>
+                  <div className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 p-3 rounded-lg text-xs text-muted-foreground">
+                    <p className="flex items-start gap-1.5 font-medium text-emerald-800 dark:text-emerald-400 mb-2">
+                      <Info className="w-4 h-4 shrink-0" />
+                      Calculations are powered by verified emission factors:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li><span className="font-semibold text-foreground">EPA:</span> eGRID Summary Tables (US Average)</li>
+                      <li><span className="font-semibold text-foreground">DEFRA:</span> UK Govt GHG Conversion Factors</li>
+                      <li><span className="font-semibold text-foreground">IPCC:</span> Special Report on Climate Change and Land</li>
+                      <li><span className="font-semibold text-foreground">GHG Protocol:</span> Scope 3 Evaluator</li>
+                    </ul>
                   </div>
                 </div>
               </CardContent>

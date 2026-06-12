@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts"
-import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2 } from "lucide-react"
+import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { fetchForecastData, applyAction, generateForecast } from "@/services/forecastService"
 import { toast } from "sonner"
@@ -520,6 +520,23 @@ export default function ForecastingPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        
+      {/* Scientific Credibility Block */}
+      <div className="mt-4 pt-6 border-t border-border/40">
+        <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider block mb-3">Scientific Credibility</span>
+        <div className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 p-4 rounded-xl text-sm text-muted-foreground">
+          <p className="flex items-start gap-2 font-medium text-emerald-800 dark:text-emerald-400 mb-3">
+            <Info className="w-5 h-5 shrink-0" />
+            Forecasts and recommendations are modeled using verified emission factors:
+          </p>
+          <ul className="list-disc pl-6 space-y-1.5">
+            <li><span className="font-semibold text-foreground">EPA:</span> eGRID Summary Tables (US Average)</li>
+            <li><span className="font-semibold text-foreground">DEFRA:</span> UK Govt GHG Conversion Factors</li>
+            <li><span className="font-semibold text-foreground">IPCC:</span> Special Report on Climate Change and Land</li>
+            <li><span className="font-semibold text-foreground">GHG Protocol:</span> Scope 3 Evaluator</li>
+          </ul>
+        </div>
+      </div>
         </>
       )}
     </div>

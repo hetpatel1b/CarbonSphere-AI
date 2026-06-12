@@ -16,6 +16,7 @@ export interface CarbonCalculationBreakdown {
   emissionFactor: number;
   factorUnit: string;
   source: string;
+  sourceOrganization?: string;
   sourceUrl?: string;
   region?: string;
   updatedAt?: string;
@@ -83,6 +84,7 @@ export function getCarbonCalculationBreakdown(params: CarbonCalculationParams): 
         emissionFactor: node.factor,
         factorUnit: "kg CO₂e/km",
         source: node.source,
+        sourceOrganization: node.sourceOrganization,
         sourceUrl: node.sourceUrl,
         region: node.region,
         updatedAt: node.updatedAt,
@@ -101,6 +103,7 @@ export function getCarbonCalculationBreakdown(params: CarbonCalculationParams): 
         emissionFactor: node.factor,
         factorUnit: "kg CO₂e/kWh",
         source: node.source,
+        sourceOrganization: node.sourceOrganization,
         sourceUrl: node.sourceUrl,
         region: node.region,
         updatedAt: node.updatedAt,
@@ -119,6 +122,7 @@ export function getCarbonCalculationBreakdown(params: CarbonCalculationParams): 
         emissionFactor: node.factor,
         factorUnit: "kg CO₂e/L",
         source: node.source,
+        sourceOrganization: node.sourceOrganization,
         sourceUrl: node.sourceUrl,
         region: node.region,
         updatedAt: node.updatedAt,
@@ -136,6 +140,7 @@ export function getCarbonCalculationBreakdown(params: CarbonCalculationParams): 
         emissionFactor: node.factor,
         factorUnit: "kg CO₂e/meal",
         source: node.source,
+        sourceOrganization: node.sourceOrganization,
         sourceUrl: node.sourceUrl,
         region: node.region,
         updatedAt: node.updatedAt,
@@ -153,6 +158,7 @@ export function getCarbonCalculationBreakdown(params: CarbonCalculationParams): 
         emissionFactor: node.factor,
         factorUnit: "kg CO₂e/purchase",
         source: node.source,
+        sourceOrganization: node.sourceOrganization,
         sourceUrl: node.sourceUrl,
         region: node.region,
         updatedAt: node.updatedAt,
