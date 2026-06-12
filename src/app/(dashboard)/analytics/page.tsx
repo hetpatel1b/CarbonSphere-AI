@@ -20,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import { toast } from "sonner"
+import { useReducedMotion } from "@/hooks/useReducedMotion"
 
 interface BaseCategory {
   color: string;
@@ -90,6 +91,7 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
+  const reducedMotion = useReducedMotion()
 
   useEffect(() => {
     const loadData = async () => {
@@ -334,7 +336,11 @@ export default function AnalyticsPage() {
                   <CardDescription className="text-xs text-muted-foreground">Historical carbon footprint from your direct database logs.</CardDescription>
                 </CardHeader>
                 <CardContent className="pl-0">
-                  <div className="h-[300px] md:h-[380px] w-full">
+                  <div className="h-[300px] md:h-[380px] w-full focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="analytics-emissions-summary">
+                    <span id="analytics-emissions-summary" className="sr-only">
+                      Emissions trend showing monthly carbon history. 
+                      Latest recorded footprint is {mainChartData[mainChartData.length - 1]?.emissions || 0} kg CO2e.
+                    </span>
                     <AnimatedChartWrapper>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart role="img" aria-label="Emissions History Chart" data={mainChartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
@@ -348,8 +354,8 @@ export default function AnalyticsPage() {
                           <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
                           <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}kg`} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Area type="monotone" name="emissions" dataKey="emissions" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#emissionsGlowGrad)" activeDot={{ r: 6 }} />
-                          <Line type="monotone" name="target" dataKey="target" stroke="#ef4444" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
+                          <Area type="monotone" name="emissions" dataKey="emissions" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#emissionsGlowGrad)" activeDot={{ r: 6 }} isAnimationActive={!reducedMotion} />
+                          <Line type="monotone" name="target" dataKey="target" stroke="#ef4444" strokeWidth={1.5} strokeDasharray="4 4" dot={false} isAnimationActive={!reducedMotion} />
                         </AreaChart>
                       </ResponsiveContainer>
                     </AnimatedChartWrapper>
@@ -366,7 +372,11 @@ export default function AnalyticsPage() {
                   <CardDescription className="text-xs text-muted-foreground">Interactive drill-down mapping your exact logged MongoDB categories.</CardDescription>
                 </CardHeader>
                 <CardContent className="pl-0">
-                  <div className="h-[300px] md:h-[380px] w-full">
+                  <div className="h-[300px] md:h-[380px] w-full focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="analytics-sources-summary">
+                    <span id="analytics-sources-summary" className="sr-only">
+                      Footprint Sources Breakdown. 
+                      Highest emitting category is {Object.keys(mappedCategories)[0] || 'None'}.
+                    </span>
                     <AnimatedChartWrapper>
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart 
@@ -386,7 +396,7 @@ export default function AnalyticsPage() {
                           <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
                           <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
                           <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
-                          <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={50}>
+                          <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={50} isAnimationActive={!reducedMotion}>
                             {Object.keys(mappedCategories).map((key, index) => (
                               <Cell 
                                 key={index} 
@@ -413,7 +423,11 @@ export default function AnalyticsPage() {
                   <CardDescription className="text-xs text-muted-foreground">Projected score mapping (simulated line based on log density).</CardDescription>
                 </CardHeader>
                 <CardContent className="pl-0">
-                  <div className="h-[300px] md:h-[380px] w-full">
+                  <div className="h-[300px] md:h-[380px] w-full focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="analytics-score-summary">
+                    <span id="analytics-score-summary" className="sr-only">
+                      Sustainability Score progression chart.
+                      Current score is {mainChartData[mainChartData.length - 1]?.score || 0}.
+                    </span>
                     <AnimatedChartWrapper>
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart role="img" aria-label="Score History Chart" data={mainChartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
@@ -427,7 +441,7 @@ export default function AnalyticsPage() {
                           <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
                           <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} domain={[550, 900]} />
                           <Tooltip content={<CustomTooltip />} />
-                          <Area type="monotone" name="score" dataKey="score" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#scoreGlowGrad)" activeDot={{ r: 6 }} />
+                          <Area type="monotone" name="score" dataKey="score" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#scoreGlowGrad)" activeDot={{ r: 6 }} isAnimationActive={!reducedMotion} />
                         </AreaChart>
                       </ResponsiveContainer>
                     </AnimatedChartWrapper>

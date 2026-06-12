@@ -223,7 +223,11 @@ export const ExecutiveReportTemplate = React.forwardRef<HTMLDivElement, ReportPr
               <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-emerald-500"></span> Monthly CO₂ Reduction
               </h3>
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="pdf-bar-summary">
+                <span id="pdf-bar-summary" className="sr-only">
+                  Monthly CO2 reduction chart. Total reduction over the last period is tracked.
+                  Current reduction is {monthlyData[monthlyData.length - 1]?.reduction || 0} tonnes.
+                </span>
                 <BarChart role="img" aria-label="Monthly Emissions Chart" width={300} height={200} data={monthlyData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#71717a" }} />
@@ -238,7 +242,11 @@ export const ExecutiveReportTemplate = React.forwardRef<HTMLDivElement, ReportPr
               <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-sky-500"></span> Sustainability Score Trend
               </h3>
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="pdf-area-summary">
+                <span id="pdf-area-summary" className="sr-only">
+                  Sustainability score trend chart. 
+                  Latest score is {scoreData[scoreData.length - 1]?.score || 0}.
+                </span>
                 <AreaChart role="img" aria-label="Score History Chart" width={300} height={200} data={scoreData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
                   <defs>
                     <linearGradient id="pdfScoreGrad" x1="0" y1="0" x2="0" y2="1">
@@ -475,7 +483,10 @@ export const ExecutiveReportTemplate = React.forwardRef<HTMLDivElement, ReportPr
                 <p className="text-xs text-zinc-500 mb-4">Baseline vs Predicted vs Target emissions (tCO₂e)</p>
               </div>
 
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="pdf-forecast-summary">
+                <span id="pdf-forecast-summary" className="sr-only">
+                  Predictive emissions line chart showing Baseline vs Target vs Predicted trajectory.
+                </span>
                 <LineChart role="img" aria-label="Forecasting Chart" width={340} height={200} data={forecastData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#71717a" }} />

@@ -13,11 +13,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import { toast } from "sonner"
+import { useReducedMotion } from "@/hooks/useReducedMotion"
 
 export default function CommunityPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [joiningId, setJoiningId] = useState<string | null>(null)
+  const reducedMotion = useReducedMotion()
   
   const [stats, setStats] = useState<{ totalUsers: number; totalCarbonSaved: number; activeChallengesCount: number; totalBadges: number } | null>(null)
   const [chartData, setChartData] = useState<{ month: string; reduction: number }[]>([])
@@ -196,8 +198,14 @@ export default function CommunityPage() {
             </CardHeader>
             <CardContent className="pt-4 pb-6 min-h-[300px]">
               {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart role="img" aria-label="Community Engagement Chart" data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <div className="w-full h-full focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="community-chart-summary">
+                  <span id="community-chart-summary" className="sr-only">
+                    Community Impact Trend. 
+                    Total collective monthly CO2 reduction history. 
+                    Latest recorded reduction is {chartData[chartData.length - 1]?.reduction || 0} tCO2e.
+                  </span>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart role="img" aria-label="Community Engagement Chart" data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorReduction" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -219,9 +227,11 @@ export default function CommunityPage() {
                       strokeWidth={3}
                       fillOpacity={1}
                       fill="url(#colorReduction)"
+                      isAnimationActive={!reducedMotion}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
+                </div>
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <p className="text-muted-foreground">No trend data available yet.</p>
@@ -234,7 +244,7 @@ export default function CommunityPage() {
           <div className="flex flex-col gap-4">
             <h2 className="text-base font-semibold">Community Challenges</h2>
             {challenges.length > 0 ? (
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-3" aria-live="polite">
                 {challenges.map((challenge) => (
                   <Card key={challenge.id} className="flex flex-col border-border/40 hover:border-emerald-500/30 transition-colors">
                     <CardHeader className="pb-3">
@@ -310,12 +320,13 @@ export default function CommunityPage() {
 
           {/* Section 3: Leaderboard */}
           <div className="flex flex-col gap-3">
-            <h2 className="text-base font-semibold">Top Sustainability Leaders</h2>
+            <h2 className="text-base font-semibold" id="leaderboard-heading">Top Sustainability Leaders</h2>
             {leaderboard.length > 0 ? (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2" role="list" aria-labelledby="leaderboard-heading">
                 {leaderboard.slice(0, 5).map((user) => (
                   <div 
-                    key={user.id} 
+                    key={user.id}
+                    role="listitem" 
                     className={cn(
                       "flex items-center justify-between p-3 rounded-xl border transition-all",
                       user.rank <= 3 
@@ -351,7 +362,7 @@ export default function CommunityPage() {
                       <span className="text-xs text-muted-foreground font-medium">You</span>
                       <div className="h-px bg-border/40 flex-1" />
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-500/5 shadow-sm">
+                    <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-500/5 shadow-sm" role="listitem">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400 text-xs font-bold shrink-0">
                           #{currentUserRank.rank}

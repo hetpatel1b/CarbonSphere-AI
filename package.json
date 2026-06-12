@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",
-    "@playwright/test": "^1.48.1",
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/typography": "^0.5.20",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.0.1",
@@ -83,6 +83,9 @@
       "@prisma/client",
       "prisma",
       "sharp"
-    ]
+    ],
+    "overrides": {
+      "@playwright/test": "^1.60.0"
+    }
   }
 }

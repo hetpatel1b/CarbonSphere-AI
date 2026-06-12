@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
+import { useReducedMotion } from "@/hooks/useReducedMotion"
 
 interface RecommendationAction {
   title: string;
@@ -49,6 +50,7 @@ export default function ForecastingPage() {
   const [isApplying, setIsApplying] = useState(false)
   const [needsGeneration, setNeedsGeneration] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const reducedMotion = useReducedMotion()
 
   const handleApplyAction = async () => {
     if (!selectedAction) return;
@@ -329,8 +331,15 @@ export default function ForecastingPage() {
             </CardHeader>
             <CardContent className="pt-4 pb-6 min-h-[300px] md:min-h-[350px]">
               {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart role="img" aria-label="Forecasting Data Chart" data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <div className="w-full h-full focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="forecast-chart-summary">
+                  <span id="forecast-chart-summary" className="sr-only">
+                    Emission forecast trend chart. 
+                    Current month emissions: {forecast?.currentMonth?.toFixed(2) || "0.00"} tCO2e.
+                    Forecast for next month: {forecast?.forecastNextMonth?.toFixed(2) || "0.00"} tCO2e.
+                    Trend direction: {forecast?.trendDirection}.
+                  </span>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart role="img" aria-label="Forecasting Data Chart" data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground)/0.15)" />
                     <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dy={10} />
                     <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}t`} />
@@ -351,6 +360,7 @@ export default function ForecastingPage() {
                       dot={{ r: 4, strokeWidth: 2 }} 
                       activeDot={{ r: 6, strokeWidth: 0 }} 
                       connectNulls
+                      isAnimationActive={!reducedMotion}
                     />
                     {/* Forecast future data */}
                     <Line 
@@ -362,9 +372,11 @@ export default function ForecastingPage() {
                       dot={{ r: 4, strokeWidth: 2 }} 
                       activeDot={{ r: 6, strokeWidth: 0 }} 
                       connectNulls
+                      isAnimationActive={!reducedMotion}
                     />
                   </LineChart>
                 </ResponsiveContainer>
+                </div>
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <p className="text-muted-foreground">No data available to display chart.</p>
@@ -424,7 +436,7 @@ export default function ForecastingPage() {
       </div>
 
       {/* Section 4: Recommended Actions */}
-      <div>
+      <div aria-live="polite">
         <h2 className="text-base font-semibold mb-4">Recommended Actions</h2>
         {(forecast?.recommendations?.length || 0) > 0 ? (
           <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">

@@ -10,6 +10,7 @@ import { runSimulation, fetchSimulationHistory } from "@/services/simulatorServi
 import { EmptyState } from "@/components/ui/empty-state"
 import { SimulationRecord } from "@/types"
 import { toast } from "sonner"
+import { useReducedMotion } from "@/hooks/useReducedMotion"
 
 const SCENARIOS = [
   { id: "switch_to_ev", label: "Switch to EV", icon: Car, category: 'Transport' },
@@ -26,6 +27,7 @@ export default function SimulatorPage() {
   const [results, setResults] = useState<SimulationRecord["results"] | null>(null)
   const [history, setHistory] = useState<SimulationRecord[]>([])
   const [error, setError] = useState<string | null>(null)
+  const reducedMotion = useReducedMotion()
 
   const loadHistory = async () => {
     try {
@@ -151,7 +153,7 @@ export default function SimulatorPage() {
               />
             </div>
           ) : (
-            <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+            <div className="space-y-6 animate-in slide-in-from-right-4 duration-500" aria-live="polite">
               
               <Card className="relative overflow-hidden border border-emerald-500/15 bg-white/50 backdrop-blur-xl shadow-lg dark:border-emerald-500/10 dark:bg-zinc-950/50">
                 <div className="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-emerald-500/8 blur-[60px] dark:bg-emerald-500/5" />
@@ -197,7 +199,12 @@ export default function SimulatorPage() {
                   </div>
                   
                   {/* Chart */}
-                  <div className="h-[250px] md:h-[300px] w-full pt-4">
+                  <div className="h-[250px] md:h-[300px] w-full pt-4 focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="simulator-chart-summary">
+                    <span id="simulator-chart-summary" className="sr-only">
+                      Simulation indicates a current footprint of {results.currentEmissions.toFixed(0)} kg CO2e. 
+                      The simulated projection reduces this to {results.simulatedEmissions.toFixed(0)} kg CO2e, 
+                      which is a reduction of {results.carbonReduction.toFixed(0)} kg.
+                    </span>
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart role="img" aria-label="Simulation Comparison Chart" data={chartData} margin={{ top: 0, right: 30, left: 0, bottom: 0 }} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--muted-foreground)/0.2)" />
@@ -208,7 +215,7 @@ export default function SimulatorPage() {
                           contentStyle={{ backgroundColor: "hsl(var(--background))", borderRadius: "12px", border: "1px solid hsl(var(--border))", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
                           formatter={(value: number) => [`${value.toFixed(0)} kg CO₂e`, "Emissions"]}
                         />
-                        <Bar dataKey="emissions" radius={[0, 6, 6, 0]} barSize={40}>
+                        <Bar dataKey="emissions" radius={[0, 6, 6, 0]} barSize={40} isAnimationActive={!reducedMotion}>
                           {chartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
