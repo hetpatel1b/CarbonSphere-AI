@@ -49,7 +49,7 @@ export function Sidebar() {
   const { user, isLoading } = useAuth();
 
   return (
-    <aside className="hidden lg:flex w-[var(--layout-sidebar-width)] flex-col border-r border-border/30 bg-card h-screen sticky top-0 print:hidden">
+    <aside className="hidden lg:flex w-[var(--layout-sidebar-width)] flex-col border-r border-border/30 bg-card h-full print:hidden">
       {/* Logo Area */}
       <div className="flex h-[var(--layout-header-height)] items-center px-6 border-b border-border/30">
         <Link href="/" className="flex items-center gap-3 font-semibold text-foreground tracking-tight transition-opacity hover:opacity-80">
