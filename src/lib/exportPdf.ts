@@ -76,6 +76,7 @@ export async function exportExecutiveReportToPdf(
 
     // Save the PDF file
     const formattedDate = new Date().toISOString().split("T")[0]
+    const filename = `CarbonSphere_AI_${reportType.replace(/\s+/g, "_")}_${formattedDate}.pdf`
     pdf.save(filename)
 
     if (onComplete) onComplete()
