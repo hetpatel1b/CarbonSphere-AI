@@ -5,7 +5,10 @@ export function useReducedMotion() {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReducedMotion(mediaQuery.matches);
+    
+    const timeoutId = setTimeout(() => {
+      setReducedMotion(mediaQuery.matches);
+    }, 0);
 
     const handleChange = (event: MediaQueryListEvent) => {
       setReducedMotion(event.matches);
@@ -13,6 +16,7 @@ export function useReducedMotion() {
 
     mediaQuery.addEventListener('change', handleChange);
     return () => {
+      clearTimeout(timeoutId);
       mediaQuery.removeEventListener('change', handleChange);
     };
   }, []);

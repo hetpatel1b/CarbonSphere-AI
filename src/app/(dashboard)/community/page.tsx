@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import dynamic from "next/dynamic"
 import { Users, Globe, Target, Trophy, Flame, TrendingUp, Sparkles, AlertTriangle, UserCircle2, CheckCircle2, History, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { fetchCommunityStats, fetchLeaderboard, fetchCommunityFeed, fetchCommunityChallenges, joinChallenge } from "@/services/communityService"
@@ -14,6 +14,8 @@ import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import { toast } from "sonner"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
+
+const CommunityChart = dynamic(() => import('@/components/charts/CommunityChart'), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> })
 
 export default function CommunityPage() {
   const [loading, setLoading] = useState(true)
@@ -204,33 +206,7 @@ export default function CommunityPage() {
                     Total collective monthly CO2 reduction history. 
                     Latest recorded reduction is {chartData[chartData.length - 1]?.reduction || 0} tCO2e.
                   </span>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart role="img" aria-label="Community Engagement Chart" data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorReduction" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground)/0.15)" />
-                    <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dy={10} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}t`} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: "hsl(var(--background))", borderRadius: "8px", border: "1px solid hsl(var(--border))", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
-                      formatter={(value: number) => [`${value.toFixed(1)} tCO₂e`, "Emissions Logged"]}
-                      labelStyle={{ color: "hsl(var(--muted-foreground))", marginBottom: "4px" }}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="reduction" 
-                      stroke="#10b981" 
-                      strokeWidth={3}
-                      fillOpacity={1}
-                      fill="url(#colorReduction)"
-                      isAnimationActive={!reducedMotion}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                  <CommunityChart chartData={chartData} isAnimationActive={!reducedMotion} />
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full">

@@ -3,12 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { 
-  ResponsiveContainer, 
-  XAxis, YAxis, Tooltip, CartesianGrid, Cell, ReferenceLine,
-  AreaChart, Area, BarChart, Bar, LineChart, Line
-} from "recharts"
+import dynamic from "next/dynamic"
 import { 
   ArrowDownRight, ArrowUpRight, Cloud, Droplet, Zap, 
   Lightbulb, Compass, Award,
@@ -21,6 +16,11 @@ import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import { toast } from "sonner"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+const EmissionsAreaChart = dynamic(() => import('@/components/charts/AnalyticsCharts').then(mod => mod.EmissionsAreaChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
+const SourcesBarChart = dynamic(() => import('@/components/charts/AnalyticsCharts').then(mod => mod.SourcesBarChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
+const ScoreAreaChart = dynamic(() => import('@/components/charts/AnalyticsCharts').then(mod => mod.ScoreAreaChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
 
 interface BaseCategory {
   color: string;
@@ -54,35 +54,7 @@ const defaultChartData: ChartDataItem[] = [
   { name: "Feb", emissions: 0, target: 2.4, score: 650, forecast: null, milestone: "Setup Target" },
 ];
 
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: unknown[]; label?: string }) => {
-  if (active && payload && payload.length) {
-    const data = (payload[0] as { payload: ChartDataItem }).payload
-    return (
-      <div className="bg-zinc-950/95 backdrop-blur-md border border-zinc-800 p-4 rounded-xl shadow-xl space-y-2 text-xs">
-        <p className="font-extrabold text-white text-sm">{label} 2026</p>
-        <div className="space-y-1">
-          {payload.map((p: { value: number | null; color?: string; stroke?: string; name: string } | unknown, idx: number) => {
-            const typedP = p as { value: number | null; color?: string; stroke?: string; name: string };
-            const displayVal = typedP.value !== null ? typedP.value : "N/A"
-            return (
-              <p key={idx} className="font-semibold flex items-center gap-1.5" style={{ color: typedP.color || typedP.stroke }}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: typedP.color || typedP.stroke }} />
-                {typedP.name}: {displayVal} {typedP.name.includes("Score") ? "pts" : "kg"}
-              </p>
-            )
-          })}
-        </div>
-        {data.milestone && (
-          <div className="mt-2.5 pt-2 border-t border-zinc-900 text-[10px] text-emerald-400 font-bold flex items-center gap-1">
-            <Award className="h-3.5 w-3.5" />
-            <span>Milestone: {data.milestone}</span>
-          </div>
-        )}
-      </div>
-    )
-  }
-  return null
-}
+
 
 export default function AnalyticsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("Transport")
@@ -342,22 +314,7 @@ export default function AnalyticsPage() {
                       Latest recorded footprint is {mainChartData[mainChartData.length - 1]?.emissions || 0} kg CO2e.
                     </span>
                     <AnimatedChartWrapper>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart role="img" aria-label="Emissions History Chart" data={mainChartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-                          <defs>
-                            <linearGradient id="emissionsGlowGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
-                              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
-                          <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-                          <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}kg`} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Area type="monotone" name="emissions" dataKey="emissions" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#emissionsGlowGrad)" activeDot={{ r: 6 }} isAnimationActive={!reducedMotion} />
-                          <Line type="monotone" name="target" dataKey="target" stroke="#ef4444" strokeWidth={1.5} strokeDasharray="4 4" dot={false} isAnimationActive={!reducedMotion} />
-                        </AreaChart>
-                      </ResponsiveContainer>
+                      <EmissionsAreaChart data={mainChartData} isAnimationActive={!reducedMotion} />
                     </AnimatedChartWrapper>
                   </div>
                 </CardContent>
@@ -378,37 +335,16 @@ export default function AnalyticsPage() {
                       Highest emitting category is {Object.keys(mappedCategories)[0] || 'None'}.
                     </span>
                     <AnimatedChartWrapper>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart 
-                          role="img" aria-label="Emissions Category Chart" data={Object.keys(mappedCategories).map((key) => ({
-                            name: key,
-                            value: mappedCategories[key].value,
-                            color: mappedCategories[key].color
-                          }))}
-                          margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
-                          onClick={(state) => {
-                            if (state && state.activeLabel) {
-                              setSelectedCategory(state.activeLabel as string)
-                            }
-                          }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
-                          <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-                          <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
-                          <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
-                          <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={50} isAnimationActive={!reducedMotion}>
-                            {Object.keys(mappedCategories).map((key, index) => (
-                              <Cell 
-                                key={index} 
-                                fill={mappedCategories[key].color} 
-                                className="cursor-pointer transition-opacity duration-300 hover:opacity-80"
-                                stroke={selectedCategory === key ? "#ffffff" : "none"}
-                                strokeWidth={selectedCategory === key ? 2 : 0}
-                              />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
+                      <SourcesBarChart 
+                        data={Object.keys(mappedCategories).map((key) => ({
+                          name: key,
+                          value: mappedCategories[key].value,
+                          color: mappedCategories[key].color
+                        }))}
+                        selectedCategory={selectedCategory}
+                        onSelect={setSelectedCategory}
+                        isAnimationActive={!reducedMotion}
+                      />
                     </AnimatedChartWrapper>
                   </div>
                 </CardContent>
@@ -429,21 +365,7 @@ export default function AnalyticsPage() {
                       Current score is {mainChartData[mainChartData.length - 1]?.score || 0}.
                     </span>
                     <AnimatedChartWrapper>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart role="img" aria-label="Score History Chart" data={mainChartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-                          <defs>
-                            <linearGradient id="scoreGlowGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25}/>
-                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                            </linearGradient>
-                          </defs>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
-                          <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-                          <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} domain={[550, 900]} />
-                          <Tooltip content={<CustomTooltip />} />
-                          <Area type="monotone" name="score" dataKey="score" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#scoreGlowGrad)" activeDot={{ r: 6 }} isAnimationActive={!reducedMotion} />
-                        </AreaChart>
-                      </ResponsiveContainer>
+                      <ScoreAreaChart data={mainChartData} isAnimationActive={!reducedMotion} />
                     </AnimatedChartWrapper>
                   </div>
                 </CardContent>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts"
+import dynamic from "next/dynamic"
 import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { fetchForecastData, applyAction, generateForecast } from "@/services/forecastService"
@@ -14,6 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
+
+const ForecastingChart = dynamic(() => import('@/components/charts/ForecastingChart'), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> })
 
 interface RecommendationAction {
   title: string;
@@ -338,44 +340,7 @@ export default function ForecastingPage() {
                     Forecast for next month: {forecast?.forecastNextMonth?.toFixed(2) || "0.00"} tCO2e.
                     Trend direction: {forecast?.trendDirection}.
                   </span>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart role="img" aria-label="Forecasting Data Chart" data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground)/0.15)" />
-                    <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} dy={10} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}t`} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: "hsl(var(--background))", borderRadius: "8px", border: "1px solid hsl(var(--border))", boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
-                      formatter={(value: number, name: string) => [
-                        `${value} tCO₂e`, 
-                        name === "actual" ? "Actual" : "Predicted"
-                      ]}
-                      labelStyle={{ color: "hsl(var(--muted-foreground))", marginBottom: "4px" }}
-                    />
-                    {/* Actual past data */}
-                    <Line 
-                      type="monotone" 
-                      dataKey="actual" 
-                      stroke="hsl(var(--foreground))" 
-                      strokeWidth={3} 
-                      dot={{ r: 4, strokeWidth: 2 }} 
-                      activeDot={{ r: 6, strokeWidth: 0 }} 
-                      connectNulls
-                      isAnimationActive={!reducedMotion}
-                    />
-                    {/* Forecast future data */}
-                    <Line 
-                      type="monotone" 
-                      dataKey="predicted" 
-                      stroke="#10b981" 
-                      strokeWidth={3} 
-                      strokeDasharray="6 6" 
-                      dot={{ r: 4, strokeWidth: 2 }} 
-                      activeDot={{ r: 6, strokeWidth: 0 }} 
-                      connectNulls
-                      isAnimationActive={!reducedMotion}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                  <ForecastingChart chartData={chartData} isAnimationActive={!reducedMotion} />
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full">

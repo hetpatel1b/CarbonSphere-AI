@@ -4,13 +4,16 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
+import dynamic from "next/dynamic"
 import { Car, Train, Bike, Footprints, Zap, TrendingDown, Leaf, Shield, History, Sparkles, DollarSign, Trees, Loader2 } from "lucide-react"
 import { runSimulation, fetchSimulationHistory } from "@/services/simulatorService"
 import { EmptyState } from "@/components/ui/empty-state"
 import { SimulationRecord } from "@/types"
 import { toast } from "sonner"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
+import { Skeleton } from "@/components/ui/skeleton"
+
+const SimulatorChart = dynamic(() => import('@/components/charts/SimulatorChart'), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> })
 
 const SCENARIOS = [
   { id: "switch_to_ev", label: "Switch to EV", icon: Car, category: 'Transport' },
@@ -205,23 +208,7 @@ export default function SimulatorPage() {
                       The simulated projection reduces this to {results.simulatedEmissions.toFixed(0)} kg CO2e, 
                       which is a reduction of {results.carbonReduction.toFixed(0)} kg.
                     </span>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart role="img" aria-label="Simulation Comparison Chart" data={chartData} margin={{ top: 0, right: 30, left: 0, bottom: 0 }} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--muted-foreground)/0.2)" />
-                        <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${val} kg`} />
-                        <YAxis dataKey="name" type="category" width={120} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} fontWeight={700} />
-                        <Tooltip 
-                          cursor={{ fill: 'hsl(var(--muted)/0.5)' }}
-                          contentStyle={{ backgroundColor: "hsl(var(--background))", borderRadius: "12px", border: "1px solid hsl(var(--border))", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
-                          formatter={(value: number) => [`${value.toFixed(0)} kg CO₂e`, "Emissions"]}
-                        />
-                        <Bar dataKey="emissions" radius={[0, 6, 6, 0]} barSize={40} isAnimationActive={!reducedMotion}>
-                          {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+                    <SimulatorChart data={chartData} isAnimationActive={!reducedMotion} />
                   </div>
 
                 </CardContent>

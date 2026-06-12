@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Leaf, Shield, Globe, CheckCircle, TreeDeciduous, Wind, Droplets, Droplet, Sprout, AlertTriangle, Sparkles, AlertCircle, Loader2 } from "lucide-react"
+import { Leaf, Shield, Globe, CheckCircle, AlertTriangle, Sparkles, AlertCircle, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
@@ -22,6 +22,12 @@ import {
   fetchOffsetStats 
 } from "@/services/offsetService"
 import { OffsetStats, OffsetProject, OffsetPurchase } from "@/types"
+import dynamic from "next/dynamic"
+
+const MarketplaceCard = dynamic(() => import('@/components/marketplace/MarketplaceCard'), { 
+  ssr: false, 
+  loading: () => <Skeleton className="w-full h-80 rounded-xl" /> 
+})
 
 const CERTIFICATES = [
   { title: "Verified Impact", description: "Gold Standard Certified", icon: CheckCircle },
@@ -124,16 +130,7 @@ export default function OffsetMarketplacePage() {
     }
   }
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'Reforestation': return <TreeDeciduous className="w-12 h-12 text-white" />
-      case 'Renewable Energy': return <Wind className="w-12 h-12 text-white" />
-      case 'Ocean Cleanup': return <Droplets className="w-12 h-12 text-white" />
-      case 'Water Conservation': return <Droplet className="w-12 h-12 text-white" />
-      case 'Sustainable Agriculture': return <Sprout className="w-12 h-12 text-white" />
-      default: return <Globe className="w-12 h-12 text-white" />
-    }
-  }
+
 
   if (loading && !stats) {
     return (
@@ -241,37 +238,12 @@ export default function OffsetMarketplacePage() {
           {projects.map((p) => {
             const isRecommended = recommendations?.insight?.suggestedCategory === p.category;
             return (
-              <Card key={p._id} className={cn("flex flex-col transition-shadow hover:shadow-xl border-border/40 bg-white/50 dark:bg-zinc-950/30 backdrop-blur-xl relative", isRecommended && "border-emerald-500/50 shadow-emerald-500/10")}>
-                {isRecommended && (
-                  <Badge className="absolute -top-3 -right-2 z-10 shadow-sm bg-emerald-500 text-white">Recommended</Badge>
-                )}
-                <div className="flex items-center justify-center h-40 bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 rounded-t-md relative overflow-hidden">
-                  <div className="absolute inset-0 bg-black/10" />
-                  <div className="z-10">{getCategoryIcon(p.category)}</div>
-                </div>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold">{p.title}</CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground">{p.location} • {p.category}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 space-y-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-muted-foreground">Cost per ton</span>
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400">${p.costPerTon} / tCO₂e</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2" title={p.description}>{p.description}</p>
-                  <div className="flex items-center justify-between">
-                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-[10px]">
-                      {p.rating}
-                    </Badge>
-                    <span className="text-[10px] text-muted-foreground">{(p.availableCredits || 0).toLocaleString()} tCO₂e left</span>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button onClick={() => openPurchaseModal(p)} className="w-full" variant="default">
-                    Select Project
-                  </Button>
-                </CardFooter>
-              </Card>
+              <MarketplaceCard 
+                key={p._id} 
+                project={p} 
+                isRecommended={isRecommended} 
+                onPurchase={openPurchaseModal} 
+              />
             );
           })}
         </div>
