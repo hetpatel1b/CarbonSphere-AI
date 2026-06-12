@@ -49,7 +49,7 @@ export function UserAccountMenu() {
       }
       return res.json();
     }).then(() => {
-      window.location.href = "/";
+      window.location.href = "/dashboard";
     });
 
     toast.promise(resetPromise, {
