@@ -40,7 +40,7 @@ export const challengeService = {
   },
 
   async joinChallenge(id: string): Promise<any> {
-    const res = await apiClient.post<{ success: boolean; data: any }>(`/challenges/join/${id}`);
+    const res = await apiClient.post<{ success: boolean; data: unknown }>(`/challenges/join/${id}`);
     return res.data;
   }
 };

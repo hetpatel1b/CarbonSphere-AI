@@ -7,34 +7,46 @@ import { authService } from '@/services/authService';
 import { Leaf, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const registerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+  });
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    const registerPromise = authService.register(name, email, password);
+  const onSubmit = async (data: RegisterFormValues) => {
+    const registerPromise = authService.register(data.name, data.email, data.password);
 
     toast.promise(registerPromise, {
       loading: "Creating account...",
       success: () => {
-        router.push('/login' as any);
+        router.push('/login');
         return "Account created successfully";
       },
-      error: (err: any) => {
-        setError(err.message || 'An error occurred during registration');
+      error: (err: Error | unknown) => {
+        setError((err as Error).message || 'An error occurred during registration');
         return "Registration failed";
       }
     });
@@ -43,7 +55,7 @@ export default function RegisterPage() {
       setIsLoading(true);
       setError('');
       await registerPromise;
-    } catch (err) {
+    } catch (err: unknown) {
       // Handled in toast error
     } finally {
       setIsLoading(false);
@@ -73,22 +85,20 @@ export default function RegisterPage() {
           </div>
         )}
 
-        <form className="mt-8 space-y-4" onSubmit={handleRegister}>
+        <form className="mt-8 space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
               Full Name
             </label>
             <input
               id="name"
-              name="name"
               type="text"
               autoComplete="name"
-              required
+              {...register("name")}
               className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               placeholder="Jane Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
             />
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
@@ -96,15 +106,13 @@ export default function RegisterPage() {
             </label>
             <input
               id="email"
-              name="email"
               type="email"
               autoComplete="email"
-              required
+              {...register("email")}
               className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
             />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
@@ -112,14 +120,12 @@ export default function RegisterPage() {
             </label>
             <input
               id="password"
-              name="password"
               type="password"
-              required
+              {...register("password")}
               className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
             />
+            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
           </div>
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
@@ -127,14 +133,12 @@ export default function RegisterPage() {
             </label>
             <input
               id="confirmPassword"
-              name="confirmPassword"
               type="password"
-              required
+              {...register("confirmPassword")}
               className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
             />
+            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
           </div>
 
           <Button
@@ -152,7 +156,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-zinc-600 dark:text-zinc-400 mt-6">
           Already have an account?{' '}
-          <Link href={"/login" as any} className="font-semibold text-primary hover:text-primary/80 transition-colors">
+          <Link href="/login" className="font-semibold text-primary hover:text-primary/80 transition-colors">
             Sign in
           </Link>
         </p>

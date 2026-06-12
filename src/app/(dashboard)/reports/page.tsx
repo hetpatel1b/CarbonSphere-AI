@@ -28,8 +28,7 @@ export default function ImpactReportsPage() {
       setLoading(true)
       const res = await fetchReports()
       setReports(res.data)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) { setError((err as Error).message)
     } finally {
       setLoading(false)
     }
@@ -46,8 +45,8 @@ export default function ImpactReportsPage() {
       setActiveReport(res.data)
       loadReports() // Refresh history
       toast.success("Report generated successfully")
-    } catch (err: any) {
-      toast.error(err.message || "Failed to generate report")
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Failed to generate report")
     } finally {
       setIsGenerating(false)
     }
@@ -71,8 +70,8 @@ export default function ImpactReportsPage() {
       await deleteReport(id)
       if (activeReport?._id === id) setActiveReport(null)
       loadReports()
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete report')
+    } catch (err: unknown) {
+      alert((err as Error).message || 'Failed to delete report')
     }
   }
 
@@ -132,10 +131,10 @@ export default function ImpactReportsPage() {
             <h3 className="text-lg font-bold mb-4 border-b pb-2">Emissions Analysis</h3>
             {reportData.emissionsAnalysis.categoryBreakdown.length > 0 ? (
               <div className="space-y-3">
-                {reportData.emissionsAnalysis.categoryBreakdown.map((cat: any) => (
-                  <div key={cat.category} className="flex justify-between items-center p-3 border rounded-lg bg-white/50 dark:bg-zinc-900/50">
-                    <span className="text-sm font-semibold">{cat.category}</span>
-                    <span className="text-sm font-mono">{cat.amount.toFixed(2)} tCO₂e ({cat.activitiesCount} logs)</span>
+                {reportData.emissionsAnalysis.categoryBreakdown.map((cat: { category: string; amount: number; percentage: number }) => (
+                  <div key={(cat as any).category} className="flex justify-between items-center p-3 border rounded-lg bg-white/50 dark:bg-zinc-900/50">
+                    <span className="text-sm font-semibold">{(cat as any).category}</span>
+                    <span className="text-sm font-mono">{(cat as any).amount.toFixed(2)} tCO₂e ({(cat as any).activitiesCount} logs)</span>
                   </div>
                 ))}
               </div>
@@ -292,8 +291,8 @@ export default function ImpactReportsPage() {
                         try {
                           const res = await fetchReportById(report._id);
                           setActiveReport(res.data);
-                        } catch (err: any) {
-                          alert(err.message || "Failed to load report");
+                        } catch (err: unknown) {
+                          alert((err as Error).message || "Failed to load report");
                         } finally {
                           setIsGenerating(false);
                         }

@@ -26,8 +26,8 @@ export default function AICoachPage() {
       setIsLoading(true)
       const res = await aiCoachService.getLatestInsight()
       setData(res)
-    } catch (err: any) {
-      setError(err.message || "Failed to load AI insights")
+    } catch (err: unknown) {
+      setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load AI insights")
     } finally {
       setIsLoading(false)
     }
@@ -42,8 +42,8 @@ export default function AICoachPage() {
         setData(res)
         return "AI analysis generated"
       },
-      error: (err: any) => {
-        setError(err.message || "Failed to generate new analysis")
+      error: (err: Error | unknown) => {
+        setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to generate new analysis")
         return "AI service temporarily unavailable"
       }
     })
@@ -66,8 +66,8 @@ export default function AICoachPage() {
         setIsLoading(true)
         const res = await aiCoachService.getLatestInsight()
         if (mounted) setData(res)
-      } catch (err: any) {
-        if (mounted) setError(err.message || "Failed to load AI insights")
+      } catch (err: unknown) {
+        if (mounted) setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load AI insights")
       } finally {
         if (mounted) setIsLoading(false)
       }

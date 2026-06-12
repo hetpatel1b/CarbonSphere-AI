@@ -53,7 +53,7 @@ export function UserAccountMenu() {
     toast.promise(resetPromise, {
       loading: "Resetting Demo Data...",
       success: "Demo Data Restored Successfully",
-      error: (err: any) => err.message || "Failed to reset demo data"
+      error: (err: Error | unknown) => (err as Error).message || "Failed to reset demo data"
     });
   };
 

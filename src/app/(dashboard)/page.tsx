@@ -56,8 +56,8 @@ export default function DashboardPage() {
           setAnalytics(data[1]);
           return "Dashboard refreshed";
         },
-        error: (err: any) => {
-          setError(err.message || 'Failed to load dashboard data');
+        error: (err: Error | unknown) => {
+          setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || 'Failed to load dashboard data');
           return "Unable to load dashboard data";
         }
       });

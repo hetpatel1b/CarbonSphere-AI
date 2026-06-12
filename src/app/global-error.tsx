@@ -20,7 +20,7 @@ export default function GlobalError({
           <div style={{ maxWidth: '400px', width: '100%', padding: '2rem', textAlign: 'center', border: '1px solid #fecdd3', borderRadius: '1rem', backgroundColor: '#fff1f2', color: '#e11d48' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Something went wrong</h2>
             <p style={{ fontSize: '0.875rem', marginBottom: '1.5rem', opacity: 0.8 }}>
-              {error.message || "A critical error occurred while loading the application."}
+              {(error as Error).message || "A critical error occurred while loading the application."}
             </p>
             <button
               onClick={() => {

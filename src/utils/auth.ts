@@ -11,7 +11,7 @@ export const getToken = (): string | null => {
   return null;
 };
 
-export const setUser = (user: any) => {
+export const setUser = (user: unknown) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('user', JSON.stringify(user));
   }

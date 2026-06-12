@@ -33,8 +33,8 @@ export default function ChallengesPage() {
     try {
       const result = await challengeService.getChallengeStatus();
       setData(result);
-    } catch (err: any) {
-      setError(err.message || "Failed to load challenges");
+    } catch (err: unknown) {
+      setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load challenges");
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +55,7 @@ export default function ChallengesPage() {
         loadData();
         return "Challenge joined successfully";
       },
-      error: (err: any) => {
+      error: (err: Error | unknown) => {
         return "Unable to update challenge";
       }
     });

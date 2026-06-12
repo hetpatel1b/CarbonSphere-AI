@@ -47,8 +47,8 @@ export default function LogActivityPage() {
       if (res.pagination) {
         setTotalPages(res.pagination.pages || 1)
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to load activities")
+    } catch (err: unknown) {
+      setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load activities")
     } finally {
       setIsLoading(false)
     }
@@ -63,8 +63,8 @@ export default function LogActivityPage() {
     try {
       await activityService.deleteActivity(id);
       loadActivities();
-    } catch (err: any) {
-      alert(err.message || "Failed to delete");
+    } catch (err: unknown) {
+      alert((err as Error).message || "Failed to delete");
     }
   }
 

@@ -65,8 +65,8 @@ export default function OffsetMarketplacePage() {
       setHistory(historyRes.data)
       setTotalPages(historyRes.pagination?.pages || 1)
       setRecommendations(recRes.data)
-    } catch (err: any) {
-      setError(err.message || "Failed to load marketplace data.")
+    } catch (err: unknown) {
+      setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load marketplace data.")
     } finally {
       setLoading(false)
     }
@@ -77,7 +77,7 @@ export default function OffsetMarketplacePage() {
     Promise.resolve().then(() => loadData())
   }, [loadData])
 
-  const openPurchaseModal = (project: any) => {
+  const openPurchaseModal = (project: { id: string; name: string; pricePerTon: number; [key: string]: unknown }) => {
     setSelectedProject(project)
     setCreditsToBuy(1)
     setPurchaseSuccess(false)
@@ -108,8 +108,8 @@ export default function OffsetMarketplacePage() {
         setTimeout(() => setPurchaseModalOpen(false), 2000)
         return "Offset purchased successfully"
       },
-      error: (err: any) => {
-        return err.message || "Transaction failed"
+      error: (err: Error | unknown) => {
+        return (err as Error).message || "Transaction failed"
       }
     })
 

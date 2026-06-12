@@ -48,8 +48,8 @@ export default function CommunityPage() {
       }
       setLeaderboard(leaderboardRes.data)
       setChartData(cData || [])
-    } catch (err: any) {
-      setError(err.message || "Failed to load community data.")
+    } catch (err: unknown) {
+      setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load community data.")
       toast.error("Unable to load community data")
     } finally {
       setLoading(false)
@@ -72,8 +72,8 @@ export default function CommunityPage() {
         ))
         return "Challenge joined successfully"
       },
-      error: (err: any) => {
-        return err.message || "Failed to join challenge"
+      error: (err: Error | unknown) => {
+        return (err as Error).message || "Failed to join challenge"
       }
     })
 

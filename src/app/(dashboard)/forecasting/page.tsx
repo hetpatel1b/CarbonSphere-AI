@@ -44,8 +44,8 @@ export default function ForecastingPage() {
         setSelectedAction(null);
         return `Successfully added "${selectedAction.title}" to your plan.`;
       },
-      error: (err: any) => {
-        return err.response?.data?.message || err.message || "Failed to apply action";
+      error: (err: Error | unknown) => {
+        return (err as { response?: { data?: { message?: string } } })?.response?.data?.message || (err as Error).message || "Failed to apply action";
       }
     });
 
@@ -70,8 +70,8 @@ export default function ForecastingPage() {
         } else {
           setForecast(res)
         }
-      } catch (err: any) {
-        setError(err.response?.data?.message || err.message || "Failed to load forecasting data.")
+      } catch (err: unknown) {
+        setError((err as { response?: { data?: { message?: string } } })?.response?.data?.message || (err as Error).message || "Failed to load forecasting data.")
       } finally {
         setLoading(false)
       }
@@ -87,8 +87,8 @@ export default function ForecastingPage() {
       setForecast(res.data)
       setNeedsGeneration(false)
       toast.success("Forecast generated successfully")
-    } catch (err: any) {
-      toast.error(err.message || "Failed to generate forecast")
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Failed to generate forecast")
     } finally {
       setIsGenerating(false)
     }
@@ -152,29 +152,32 @@ export default function ForecastingPage() {
   const hasSufficientData = forecast?.historicalSeries?.length > 0
   
   // Prepare chart data
-  const chartMap = new Map();
-  let lastActual: any = null;
+  const chartMap = new Map<string, { month: string; actual?: number; predicted?: number }>();
+  let lastActual: { month: string; val: number } | null = null;
 
   if (forecast?.historicalSeries) {
-    forecast.historicalSeries.forEach((item: any) => {
-      chartMap.set(item.month, { month: item.month, actual: parseFloat(item.actual.toFixed(2)) });
-      lastActual = { month: item.month, val: parseFloat(item.actual.toFixed(2)) };
+    forecast.historicalSeries.forEach((item: Record<string, unknown>) => {
+      chartMap.set((item as { month: string; [key: string]: unknown }).month, { month: (item as { month: string; [key: string]: unknown }).month, actual: parseFloat((item as any).actual.toFixed(2)) });
+      lastActual = { month: (item as { month: string; [key: string]: unknown }).month, val: parseFloat((item as any).actual.toFixed(2)) };
     });
   }
 
   if (forecast?.predictionSeries) {
     // To connect lines visually, inject the last actual point as the first prediction point
     if (lastActual) {
-      if (chartMap.has(lastActual.month)) {
-        chartMap.get(lastActual.month).predicted = lastActual.val;
+      const la = lastActual as { month: string; val: number };
+      if (chartMap.has(la.month)) {
+        const item = chartMap.get(la.month);
+        if (item) item.predicted = la.val;
       }
     }
 
-    forecast.predictionSeries.forEach((item: any) => {
-      if (chartMap.has(item.month)) {
-        chartMap.get(item.month).predicted = parseFloat(item.predicted.toFixed(2));
+    forecast.predictionSeries.forEach((item: Record<string, unknown>) => {
+      if (chartMap.has((item as { month: string; [key: string]: unknown }).month)) {
+        const ci = chartMap.get((item as { month: string; [key: string]: unknown }).month);
+        if (ci) ci.predicted = parseFloat((item as any).predicted.toFixed(2));
       } else {
-        chartMap.set(item.month, { month: item.month, predicted: parseFloat(item.predicted.toFixed(2)) });
+        chartMap.set((item as { month: string; [key: string]: unknown }).month, { month: (item as { month: string; [key: string]: unknown }).month, predicted: parseFloat((item as any).predicted.toFixed(2)) });
       }
     });
   }
@@ -400,27 +403,27 @@ export default function ForecastingPage() {
         <h2 className="text-base font-semibold mb-4">Recommended Actions</h2>
         {forecast?.recommendations?.length > 0 ? (
           <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            {forecast.recommendations.map((action: any, i: number) => (
+            {forecast.recommendations.map((action: Record<string, unknown>, i: number) => (
               <Card key={i} className="flex flex-col group hover:border-emerald-500/30 transition-colors">
                 <CardHeader className="pb-3 flex-1">
-                  <CardTitle className="text-sm font-semibold leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{action.title}</CardTitle>
+                  <CardTitle className="text-sm font-semibold leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{(action as any).title}</CardTitle>
                   <CardDescription className="text-xs leading-relaxed mt-1">
-                    {action.description}
+                    {(action as any).description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pb-4">
                   <div className="flex flex-col gap-2 p-3 rounded-lg bg-muted/30 border border-border/40">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-muted-foreground">Reduction</span>
-                      <span className="font-medium text-emerald-600 dark:text-emerald-400">{action.reduction}</span>
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">{(action as { reduction: string; [key: string]: unknown }).reduction}</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-muted-foreground">Difficulty</span>
-                      <span className="font-medium">{action.difficulty}</span>
+                      <span className="font-medium">{(action as { difficulty: string; [key: string]: unknown }).difficulty}</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-muted-foreground">Impact</span>
-                      <span className="font-medium">{action.impact}</span>
+                      <span className="font-medium">{(action as { impact: string; [key: string]: unknown }).impact}</span>
                     </div>
                   </div>
                 </CardContent>

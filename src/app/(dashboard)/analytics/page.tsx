@@ -47,9 +47,9 @@ const defaultChartData: ChartDataItem[] = [
   { name: "Feb", emissions: 0, target: 2.4, score: 650, forecast: null, milestone: "Setup Target" },
 ];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: unknown[]; label?: string }) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload
+    const data = (payload[0] as any).payload
     return (
       <div className="bg-zinc-950/95 backdrop-blur-md border border-zinc-800 p-4 rounded-xl shadow-xl space-y-2 text-xs">
         <p className="font-extrabold text-white text-sm">{label} 2026</p>
@@ -97,8 +97,8 @@ export default function AnalyticsPage() {
           }
           return "Analytics updated";
         },
-        error: (err: any) => {
-          setError(err.message || "Failed to load analytics");
+        error: (err: Error | unknown) => {
+          setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load analytics");
           return "Analytics could not be loaded";
         }
       });

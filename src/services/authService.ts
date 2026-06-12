@@ -5,8 +5,8 @@ interface AuthResponse {
   success: boolean;
   message?: string;
   token?: string;
-  user?: any;
-  data?: any;
+  user?: unknown;
+  data?: unknown;
 }
 
 export const authService = {

@@ -39,7 +39,7 @@ export const apiClient = {
     }, forceRefresh);
   },
 
-  async post<T>(path: string, body?: any, options: RequestInit = {}): Promise<T> {
+  async post<T>(path: string, body?: unknown, options: RequestInit = {}): Promise<T> {
     const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;
     const response = await fetch(fullUrl, {
       ...options,
@@ -51,7 +51,7 @@ export const apiClient = {
     return handleResponse(response);
   },
 
-  async put<T>(path: string, body?: any, options: RequestInit = {}): Promise<T> {
+  async put<T>(path: string, body?: unknown, options: RequestInit = {}): Promise<T> {
     const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;
     const response = await fetch(fullUrl, {
       ...options,
@@ -63,7 +63,7 @@ export const apiClient = {
     return handleResponse(response);
   },
 
-  async patch<T>(path: string, body?: any, options: RequestInit = {}): Promise<T> {
+  async patch<T>(path: string, body?: unknown, options: RequestInit = {}): Promise<T> {
     const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;
     const response = await fetch(fullUrl, {
       ...options,

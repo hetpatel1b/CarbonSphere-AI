@@ -18,7 +18,7 @@ export default function Error({
     <div className="flex flex-col items-center justify-center min-h-[60vh] p-4">
       <ErrorState 
         title="Something went wrong"
-        message={error.message || "An unexpected error occurred. Please try again."}
+        message={(error as Error).message || "An unexpected error occurred. Please try again."}
         onRetry={() => {
           reset()
           // Fallback reload if reset fails

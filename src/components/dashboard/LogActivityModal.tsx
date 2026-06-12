@@ -143,8 +143,8 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
       await savePromise;
       onSave(); // Trigger parent refresh
       onClose(); // Close modal
-    } catch (err: any) {
-      setError(err.message || "Failed to save activity");
+    } catch (err: unknown) {
+      setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to save activity");
     } finally {
       setIsLoading(false);
     }

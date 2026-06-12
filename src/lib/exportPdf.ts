@@ -6,7 +6,7 @@ interface ExportOptions {
   onStart?: () => void
   onProgress?: (progress: number) => void
   onComplete?: () => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }
 
 export async function exportExecutiveReportToPdf(

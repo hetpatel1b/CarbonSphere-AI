@@ -1,6 +1,6 @@
 import { logout } from './auth';
 
-const cache = new Map<string, { data: any; timestamp: number }>();
+const cache = new Map<string, { data: unknown; timestamp: number }>();
 const inFlightRequests = new Map<string, Promise<any>>();
 
 const CACHE_TTL = 3 * 60 * 1000; // 3 minutes
@@ -21,11 +21,11 @@ export const fetchWithCache = async (url: string, options: RequestInit = {}, for
     }
     const contentType = res.headers.get("content-type");
     if (!res.ok) {
-        const error: any = new Error('API request failed');
+        const error = new Error('API request failed') as Error & { status?: number; data?: unknown };
         error.status = res.status;
         if (contentType && contentType.indexOf("application/json") !== -1) {
             const errJson = await res.json();
-            error.message = errJson.message || 'API request failed';
+            (error as Error).message = errJson.message || 'API request failed';
             error.data = errJson;
         }
         throw error;
@@ -54,11 +54,11 @@ export const fetchWithCache = async (url: string, options: RequestInit = {}, for
     }
     const contentType = res.headers.get("content-type");
     if (!res.ok) {
-        const error: any = new Error('API request failed');
+        const error = new Error('API request failed') as Error & { status?: number; data?: unknown };
         error.status = res.status;
         if (contentType && contentType.indexOf("application/json") !== -1) {
             const errJson = await res.json();
-            error.message = errJson.message || 'API request failed';
+            (error as Error).message = errJson.message || 'API request failed';
             error.data = errJson;
         }
         throw error;

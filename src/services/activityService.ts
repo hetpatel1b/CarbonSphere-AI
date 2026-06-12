@@ -27,8 +27,8 @@ export interface CreateActivityDTO {
 interface CreateActivityResponse {
   success: boolean;
   data: ActivityDocument;
-  newlyUnlocked?: any[];
-  newlyCompletedChallenges?: any[];
+  newlyUnlocked?: unknown[];
+  newlyCompletedChallenges?: unknown[];
 }
 
 export const activityService = {
@@ -47,7 +47,7 @@ export const activityService = {
     return res.data;
   },
 
-  async createActivity(data: CreateActivityDTO): Promise<{ activity: ActivityDocument, newlyUnlocked: any[], newlyCompletedChallenges: any[] }> {
+  async createActivity(data: CreateActivityDTO): Promise<{ activity: ActivityDocument, newlyUnlocked: unknown[], newlyCompletedChallenges: unknown[] }> {
     const res = await apiClient.post<CreateActivityResponse>('/activities', data);
     return {
       activity: res.data,

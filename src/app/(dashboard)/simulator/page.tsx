@@ -47,8 +47,8 @@ export default function SimulatorPage() {
       setResults(res.data.results)
       loadHistory()
       toast.success("Simulation completed")
-    } catch (err: any) {
-      setError(err.message || 'Failed to run simulation')
+    } catch (err: unknown) {
+      setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || 'Failed to run simulation')
       toast.error("Simulation failed")
     } finally {
       setIsRunning(false)

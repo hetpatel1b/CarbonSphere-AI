@@ -7,18 +7,27 @@ import { authService } from '@/services/authService';
 import { Leaf, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(1, "Password is required"),
+});
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const loginPromise = authService.login(email, password);
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormValues) => {
+    const loginPromise = authService.login(data.email, data.password);
 
     toast.promise(loginPromise, {
       loading: "Authenticating...",
@@ -26,8 +35,8 @@ export default function LoginPage() {
         window.location.href = '/';
         return "Successfully logged in";
       },
-      error: (err: any) => {
-        setError(err.message || 'An error occurred during login');
+      error: (err: Error | unknown) => {
+        setError((err as Error).message || 'An error occurred during login');
         return "Invalid credentials";
       }
     });
@@ -36,7 +45,7 @@ export default function LoginPage() {
       setIsLoading(true);
       setError('');
       await loginPromise;
-    } catch (err) {
+    } catch (err: unknown) {
       // Handled in toast error
     } finally {
       setIsLoading(false);
@@ -66,7 +75,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
@@ -74,15 +83,13 @@ export default function LoginPage() {
               </label>
               <input
                 id="email"
-                name="email"
                 type="email"
                 autoComplete="email"
-                required
+                {...register("email")}
                 className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
               />
+              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
@@ -90,15 +97,13 @@ export default function LoginPage() {
               </label>
               <input
                 id="password"
-                name="password"
                 type="password"
                 autoComplete="current-password"
-                required
+                {...register("password")}
                 className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
               />
+              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
             </div>
           </div>
 
@@ -117,7 +122,7 @@ export default function LoginPage() {
 
         <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
           Don&apos;t have an account?{' '}
-          <Link href={"/register" as any} className="font-semibold text-primary hover:text-primary/80 transition-colors">
+          <Link href="/register" className="font-semibold text-primary hover:text-primary/80 transition-colors">
             Sign up
           </Link>
         </p>

@@ -11,8 +11,8 @@ export interface ApiResponse<T> {
     total: number;
     pages: number;
   };
-  newlyUnlocked?: any[];
-  newlyCompletedChallenges?: any[];
+  newlyUnlocked?: unknown[];
+  newlyCompletedChallenges?: unknown[];
 }
 
 // User profile & preferences

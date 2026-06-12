@@ -74,8 +74,8 @@ export default function AchievementsPage() {
       try {
         const data = await achievementService.getAchievementStatus();
         setAchievements(data);
-      } catch (err: any) {
-        setError(err.message || "Failed to load achievements");
+      } catch (err: unknown) {
+        setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load achievements");
       } finally {
         setIsLoading(false);
       }

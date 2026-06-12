@@ -167,7 +167,7 @@ export default function SettingsPage() {
       setPasswordUpdated(true)
       setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
       setTimeout(() => setPasswordUpdated(false), 3000)
-    } catch (err: any) { setErrorMsg(err.message) }
+    } catch (err: unknown) { setErrorMsg((err as Error).message) }
     setIsUpdatingPassword(false)
   }
 

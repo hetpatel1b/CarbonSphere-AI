@@ -96,8 +96,8 @@ export default function AssistantPage() {
         actionability: aiResponse.actionability
       }
       setMessages((prev) => [...prev, aiMsg])
-    } catch (error: any) {
-      toast.error(error.message || "Failed to communicate with AI Assistant. Please try again.")
+    } catch (error: unknown) {
+      toast.error((error as Error).message || "Failed to communicate with AI Assistant. Please try again.")
     } finally {
       setIsTyping(false)
     }

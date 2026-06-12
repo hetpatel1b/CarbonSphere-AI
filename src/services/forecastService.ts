@@ -6,7 +6,7 @@ export const fetchForecastData = async (): Promise<ForecastData & { needsGenerat
     const response = await apiClient.get<ApiResponse<ForecastData>>('/forecast/data');
     return response.data;
   } catch (error: unknown) {
-    const err = error as { status?: number; data?: any; message?: string };
+    const err = error as { status?: number; data?: unknown; message?: string };
     if (err.status === 404) {
       return { ...(err.data || {}), needsGeneration: true } as any;
     }
