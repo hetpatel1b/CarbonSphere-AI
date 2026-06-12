@@ -4,18 +4,7 @@ const app = require('../src/app');
 const User = require('../src/models/User');
 const jwt = require('jsonwebtoken');
 
-// Mock groqService
-vi.mock('../src/services/groqService', () => ({
-  generateAICoachInsights: vi.fn().mockResolvedValue({
-    message: 'Mocked AI insights',
-    actionableSteps: ['Step 1', 'Step 2']
-  }),
-  generateForecastInsights: vi.fn().mockResolvedValue({
-    insight: 'Mocked forecast insight',
-    highestRiskArea: 'Transport',
-    potentialReduction: '10%'
-  })
-}));
+
 
 describe('AI Endpoints', () => {
   let token;
