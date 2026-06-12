@@ -8,9 +8,12 @@ const {
   deleteActivity
 } = require('../controllers/activityController');
 const { protect } = require('../middleware/authMiddleware');
+const validate = require('../middleware/validate');
+const activitySchemas = require('../validations/activity.schema');
 
+// Routes
 router.route('/')
-  .post(protect, createActivity)
+  .post(protect, validate(activitySchemas.logActivity), createActivity)
   .get(protect, getActivities);
 
 router.route('/:id')

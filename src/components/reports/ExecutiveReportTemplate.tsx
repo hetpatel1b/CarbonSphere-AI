@@ -224,7 +224,7 @@ export const ExecutiveReportTemplate = React.forwardRef<HTMLDivElement, ReportPr
                 <span className="h-2 w-2 rounded-full bg-emerald-500"></span> Monthly CO₂ Reduction
               </h3>
               <div className="flex items-center justify-center">
-                <BarChart width={300} height={200} data={monthlyData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
+                <BarChart role="img" aria-label="Monthly Emissions Chart" width={300} height={200} data={monthlyData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#71717a" }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#71717a" }} />
@@ -239,7 +239,7 @@ export const ExecutiveReportTemplate = React.forwardRef<HTMLDivElement, ReportPr
                 <span className="h-2 w-2 rounded-full bg-sky-500"></span> Sustainability Score Trend
               </h3>
               <div className="flex items-center justify-center">
-                <AreaChart width={300} height={200} data={scoreData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
+                <AreaChart role="img" aria-label="Score History Chart" width={300} height={200} data={scoreData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
                   <defs>
                     <linearGradient id="pdfScoreGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.2}/>
@@ -476,7 +476,7 @@ export const ExecutiveReportTemplate = React.forwardRef<HTMLDivElement, ReportPr
               </div>
 
               <div className="flex items-center justify-center">
-                <LineChart width={340} height={200} data={forecastData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
+                <LineChart role="img" aria-label="Forecasting Chart" width={340} height={200} data={forecastData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
                   <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#71717a" }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#71717a" }} domain={[6, 12]} />

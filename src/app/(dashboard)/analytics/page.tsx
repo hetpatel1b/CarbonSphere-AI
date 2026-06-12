@@ -319,7 +319,7 @@ export default function AnalyticsPage() {
                   <div className="h-[300px] md:h-[380px] w-full">
                     <AnimatedChartWrapper>
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={mainChartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+                        <AreaChart role="img" aria-label="Emissions History Chart" data={mainChartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
                           <defs>
                             <linearGradient id="emissionsGlowGrad" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
@@ -352,7 +352,7 @@ export default function AnalyticsPage() {
                     <AnimatedChartWrapper>
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart 
-                          data={Object.keys(mappedCategories).map((key) => ({
+                          role="img" aria-label="Emissions Category Chart" data={Object.keys(mappedCategories).map((key) => ({
                             name: key,
                             value: mappedCategories[key].value,
                             color: mappedCategories[key].color
@@ -398,7 +398,7 @@ export default function AnalyticsPage() {
                   <div className="h-[300px] md:h-[380px] w-full">
                     <AnimatedChartWrapper>
                       <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={mainChartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+                        <AreaChart role="img" aria-label="Score History Chart" data={mainChartData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
                           <defs>
                             <linearGradient id="scoreGlowGrad" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25}/>

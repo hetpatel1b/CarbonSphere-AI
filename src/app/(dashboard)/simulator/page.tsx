@@ -209,7 +209,7 @@ export default function SimulatorPage() {
                   {/* Chart */}
                   <div className="h-[250px] md:h-[300px] w-full pt-4">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} margin={{ top: 0, right: 30, left: 0, bottom: 0 }} layout="vertical">
+                      <BarChart role="img" aria-label="Simulation Comparison Chart" data={chartData} margin={{ top: 0, right: 30, left: 0, bottom: 0 }} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--muted-foreground)/0.2)" />
                         <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${val} kg`} />
                         <YAxis dataKey="name" type="category" width={120} stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} fontWeight={700} />

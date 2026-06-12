@@ -11,6 +11,9 @@ router.post('/analyze', protect, analyzeWithAI);
 router.get('/latest', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
     // getMyRecommendations is inside recommendationController but it outputs directly to res.
     // Let's just fetch recommendations here to combine them.
     const Recommendation = require('../models/Recommendation');

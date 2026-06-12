@@ -71,7 +71,7 @@ export const activityService = {
     return data.data;
   },
 
-  async createActivity(data: CreateActivityDTO): Promise<{ activity: ActivityDocument, newlyUnlocked: any[], newlyCompletedChallenges: any[] }> {
+  async createActivity(data: CreateActivityDTO): Promise<{ activity: ActivityDocument, newlyUnlocked: unknown[], newlyCompletedChallenges: unknown[] }> {
     const response = await fetch(`${API_URL}/activities`, {
       method: 'POST',
       headers: getHeaders(),

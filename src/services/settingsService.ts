@@ -16,7 +16,42 @@ export const fetchProfile = async () => {
   return response.json();
 };
 
-export const updateProfile = async (data: any) => {
+export interface ProfileData {
+  name?: string;
+  email?: string;
+  avatar?: string;
+  bio?: string;
+}
+
+export interface PreferencesData {
+  goal?: string;
+  transport?: string;
+  energy?: string;
+  dietary?: string;
+  compactView?: boolean;
+  darkMode?: boolean;
+  reduceAnimations?: boolean;
+  currency?: string;
+  measurement?: string;
+  theme?: string;
+}
+
+export interface NotificationsData {
+  emailAlerts?: boolean;
+  weeklyReport?: boolean;
+  weeklyReports?: boolean;
+  pushNotifications?: boolean;
+  aiInsights?: boolean;
+  challengeUpdates?: boolean;
+  marketplaceUpdates?: boolean;
+}
+
+export interface PasswordData {
+  currentPassword?: string;
+  newPassword?: string;
+}
+
+export const updateProfile = async (data: ProfileData) => {
   const response = await fetch(`${API_URL}/settings/profile`, {
     method: 'PUT',
     headers: getHeaders(),
@@ -26,7 +61,7 @@ export const updateProfile = async (data: any) => {
   return response.json();
 };
 
-export const updatePreferences = async (data: any) => {
+export const updatePreferences = async (data: PreferencesData) => {
   const response = await fetch(`${API_URL}/settings/preferences`, {
     method: 'PUT',
     headers: getHeaders(),
@@ -36,7 +71,7 @@ export const updatePreferences = async (data: any) => {
   return response.json();
 };
 
-export const updateNotifications = async (data: any) => {
+export const updateNotifications = async (data: NotificationsData) => {
   const response = await fetch(`${API_URL}/settings/notifications`, {
     method: 'PUT',
     headers: getHeaders(),
@@ -46,7 +81,7 @@ export const updateNotifications = async (data: any) => {
   return response.json();
 };
 
-export const updatePassword = async (data: any) => {
+export const updatePassword = async (data: PasswordData) => {
   const response = await fetch(`${API_URL}/settings/password`, {
     method: 'PUT',
     headers: getHeaders(),

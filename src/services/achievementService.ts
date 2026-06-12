@@ -12,7 +12,7 @@ export interface AchievementDocument {
   badgeIcon: string;
   points: number;
   category: string;
-  criteria: any;
+  criteria: Record<string, unknown>;
   isActive: boolean;
   unlocked: boolean;
   progress: number;

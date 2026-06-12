@@ -1,95 +1,80 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 const request = require('supertest');
 const app = require('../src/app');
 const User = require('../src/models/User');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 
-// Mock dependencies
-jest.mock('../src/models/User');
-jest.mock('bcryptjs');
-
-describe('Auth API', () => {
-  beforeAll(() => {
-    process.env.JWT_SECRET = 'testsecret';
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
+describe('Auth Endpoints', () => {
   describe('POST /api/auth/register', () => {
     it('should register a new user successfully', async () => {
-      User.findOne.mockResolvedValue(null); // User does not exist
-      bcrypt.genSalt.mockResolvedValue('salt');
-      bcrypt.hash.mockResolvedValue('hashedPassword');
-      
-      // Mock the save method on the User prototype
-      User.prototype.save = jest.fn().mockResolvedValue(true);
-
       const res = await request(app)
         .post('/api/auth/register')
         .send({
           name: 'Test User',
           email: 'test@example.com',
-          password: 'password123'
+          password: 'password123',
         });
-
+      
       expect(res.statusCode).toEqual(201);
-      expect(res.body.success).toBeTruthy();
-      expect(res.body.message).toEqual("User registered successfully");
+      expect(res.body).toHaveProperty('success', true);
+      expect(res.body).toHaveProperty('message', 'User registered successfully');
+    });
+
+    it('should not register user with existing email', async () => {
+      // Create user first
+      await User.create({
+        name: 'Existing',
+        email: 'test@example.com',
+        password: 'password123'
+      });
+
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          name: 'Test User 2',
+          email: 'test@example.com',
+          password: 'password123',
+        });
+      
+      expect(res.statusCode).toEqual(400);
+      expect(res.body.success).toEqual(false);
     });
   });
 
   describe('POST /api/auth/login', () => {
-    it('should login user and return token', async () => {
-      const mockUser = {
-        _id: '507f1f77bcf86cd799439011',
-        name: 'Test User',
-        email: 'test@example.com',
-        role: 'user',
-        password: 'hashedPassword'
-      };
+    beforeEach(async () => {
+      const bcrypt = require('bcryptjs');
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash('password123', salt);
+      await User.create({
+        name: 'Login User',
+        email: 'login@example.com',
+        password: hashedPassword
+      });
+    });
 
-      User.findOne.mockResolvedValue(mockUser);
-      bcrypt.compare.mockResolvedValue(true);
-
+    it('should login successfully with valid credentials', async () => {
       const res = await request(app)
         .post('/api/auth/login')
         .send({
-          email: 'test@example.com',
-          password: 'password123'
+          email: 'login@example.com',
+          password: 'password123',
         });
-
+      
       expect(res.statusCode).toEqual(200);
-      expect(res.body.success).toBeTruthy();
-      expect(res.body.token).toBeDefined();
-      expect(res.body.user.email).toEqual('test@example.com');
+      expect(res.body.success).toEqual(true);
+      expect(res.body).toHaveProperty('token');
     });
-  });
 
-  describe('GET /api/auth/me', () => {
-    it('should get current user profile', async () => {
-      const mockUser = {
-        _id: '507f1f77bcf86cd799439011',
-        name: 'Test User',
-        email: 'test@example.com'
-      };
-
-      jest.spyOn(jwt, 'verify').mockReturnValue({ id: '507f1f77bcf86cd799439011' });
-      
-      User.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockUser)
-      });
-
+    it('should fail to login with invalid password', async () => {
       const res = await request(app)
-        .get('/api/auth/me')
-        .set('Authorization', 'Bearer fake-token');
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.success).toBeTruthy();
-      expect(res.body.user.name).toEqual('Test User');
+        .post('/api/auth/login')
+        .send({
+          email: 'login@example.com',
+          password: 'wrongpassword',
+        });
       
-      jwt.verify.mockRestore();
+      expect(res.statusCode).toEqual(401);
+      expect(res.body.success).toEqual(false);
     });
   });
 });

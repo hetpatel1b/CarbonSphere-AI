@@ -15,10 +15,12 @@ export const fetchForecastData = async () => {
   try {
     const response = await fetchWithCache(`${API_URL}/forecast/data`, { headers: getHeaders() });
     return response.data; // backend wraps in data for success
-  } catch (error: any) {
-    if (error.status === 404) {
-      return { ...(error.data || {}), needsGeneration: true };
+  } catch (error: unknown) {
+    const err = error as { status?: number, data?: any, message?: string };
+    if (err.status === 404) {
+      return { ...(err.data || {}), needsGeneration: true };
     }
+    console.error('Error fetching forecast:', err.message);
     throw error;
   }
 };
