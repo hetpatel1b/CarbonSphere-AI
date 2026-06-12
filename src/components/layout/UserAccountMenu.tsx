@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { User, Settings, FileText, LogOut } from "lucide-react";
+import { User, Settings, FileText, LogOut, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -34,6 +34,26 @@ export function UserAccountMenu() {
         return "Logged out successfully";
       },
       error: "Failed to logout"
+    });
+  };
+  const handleResetDemoData = () => {
+    const resetPromise = fetch(process.env.NEXT_PUBLIC_API_URL + '/demo/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }).then(async (res) => {
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Failed to reset demo data');
+      }
+      return res.json();
+    }).then(() => {
+      window.location.href = "/";
+    });
+
+    toast.promise(resetPromise, {
+      loading: "Resetting Demo Data...",
+      success: "Demo Data Restored Successfully",
+      error: (err: any) => err.message || "Failed to reset demo data"
     });
   };
 
@@ -92,6 +112,19 @@ export function UserAccountMenu() {
         </DropdownMenuItem>
         
         <DropdownMenuSeparator className="bg-border/30" />
+        
+        {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
+          <>
+            <DropdownMenuItem 
+              onClick={handleResetDemoData} 
+              className="cursor-pointer p-2 rounded-lg m-0.5 text-emerald-600 dark:text-emerald-400 focus:bg-emerald-50 focus:text-emerald-700 dark:focus:bg-emerald-500/10 dark:focus:text-emerald-300"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              <span>Reset Demo Data</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-border/30" />
+          </>
+        )}
         
         <DropdownMenuItem 
           onClick={handleLogout} 
