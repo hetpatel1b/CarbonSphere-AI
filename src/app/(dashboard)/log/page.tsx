@@ -113,7 +113,7 @@ export default function LogActivityPage() {
               <CardDescription>A complete history of your logged events.</CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto items-center">
-              <Button variant="outline" size="icon" onClick={() => loadActivities(page)} disabled={isLoading}>
+              <Button variant="outline" size="icon" onClick={() => loadActivities(page)} disabled={isLoading} aria-label="Refresh activities">
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
               <div className="relative w-full sm:w-64">
@@ -212,10 +212,10 @@ export default function LogActivityPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="ghost" size="icon" onClick={() => openEditModal(activity)}>
+                          <Button variant="ghost" size="icon" onClick={() => openEditModal(activity)} aria-label="Edit activity">
                             <Edit2 className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(activity._id)}>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(activity._id)} aria-label="Delete activity">
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </TableCell>

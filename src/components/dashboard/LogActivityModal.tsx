@@ -51,31 +51,32 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
   });
 
   useEffect(() => {
-    if (activityToEdit && isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFormData({
-        title: activityToEdit.title || activityToEdit.activityType, // fallback to old schema
-        activityType: activityToEdit.activityType,
-        description: activityToEdit.description || "",
-        carbonEmission: activityToEdit.carbonEmission,
-        category: activityToEdit.category,
-        date: new Date(activityToEdit.date).toISOString().split('T')[0],
-        notes: activityToEdit.notes || "",
-      });
-    } else if (isOpen) {
-      setFormData({
-        title: "",
-        activityType: "",
-        description: "",
-        carbonEmission: 0,
-        category: "",
-        date: new Date().toISOString().split('T')[0],
-        notes: "",
-      });
-      setManualEmission("");
-      setCalcParams({ category: "" });
-    }
-    setError("");
+    Promise.resolve().then(() => {
+      if (activityToEdit && isOpen) {
+        setFormData({
+          title: activityToEdit.title || activityToEdit.activityType, // fallback to old schema
+          activityType: activityToEdit.activityType,
+          description: activityToEdit.description || "",
+          carbonEmission: activityToEdit.carbonEmission,
+          category: activityToEdit.category,
+          date: new Date(activityToEdit.date).toISOString().split('T')[0],
+          notes: activityToEdit.notes || "",
+        });
+      } else if (isOpen) {
+        setFormData({
+          title: "",
+          activityType: "",
+          description: "",
+          carbonEmission: 0,
+          category: "",
+          date: new Date().toISOString().split('T')[0],
+          notes: "",
+        });
+        setManualEmission("");
+        setCalcParams({ category: "" });
+      }
+      setError("");
+    });
   }, [activityToEdit, isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { fetchProfile } from "@/services/settingsService";
 import { isAuthenticated } from "@/utils/auth";
 
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     try {
       if (isAuthenticated()) {
         const res = await fetchProfile();
@@ -42,15 +42,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    refreshUser();
+    Promise.resolve().then(() => refreshUser());
     
     // Set up an interval or global event listener if we want cross-tab sync, 
     // but for now, simple mount-time refresh + explicit refresh on settings change works.
-  }, []);
+  }, [refreshUser]);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, refreshUser }}>

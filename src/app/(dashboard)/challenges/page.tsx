@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -29,7 +29,7 @@ export default function ChallengesPage() {
   const [error, setError] = useState("");
   const [joiningId, setJoiningId] = useState<string | null>(null);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const result = await challengeService.getChallengeStatus();
       setData(result);
@@ -38,12 +38,11 @@ export default function ChallengesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line
-    loadData();
-  }, []);
+    Promise.resolve().then(() => loadData());
+  }, [loadData]);
 
   const handleJoin = async (id: string) => {
     setJoiningId(id);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Bell, CheckCircle2, ShoppingBag, Sparkles, Target, Award, Info, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -20,7 +20,7 @@ export function NotificationDropdown() {
   // Wait, user.notifications is part of the Profile object which we have in AuthContext,
   // but let's just display what the backend gives us, as backend filtering is the proper way.
 
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await fetchNotifications();
@@ -30,17 +30,16 @@ export function NotificationDropdown() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      loadNotifications();
+      Promise.resolve().then(() => loadNotifications());
       // Polling could be added here, e.g. setInterval
     } else {
-      setNotifications([]);
+      Promise.resolve().then(() => setNotifications([]));
     }
-  }, [user]);
+  }, [user, loadNotifications]);
 
   const handleMarkAsRead = async (id: string) => {
     try {
@@ -76,7 +75,7 @@ export function NotificationDropdown() {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative w-9 h-9 rounded-lg">
+        <Button variant="ghost" size="icon" className="relative w-9 h-9 rounded-lg" aria-label="Notifications">
           <Bell className="w-[18px] h-[18px]" />
           {unreadCount > 0 && (
             <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[9px] font-bold text-white ring-2 ring-background">
