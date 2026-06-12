@@ -16,9 +16,10 @@ import {
   Download, Trash2, Leaf, BarChart3, 
   Target, Award, Zap, Car, Sparkles,
   Lock, AlertTriangle, CheckCircle2,
-  LogOut, Flame, Key, ShieldAlert, Check, RefreshCw, Mail, MapPin, Globe, Clock
+  LogOut, Flame, Key, ShieldAlert, Check, RefreshCw, Mail, MapPin, Globe, Clock, Loader2
 } from "lucide-react"
 import { StaggerContainer, StaggerItem, MotionCard, AnimatedCounter } from "@/components/ui/animation-system"
+import { Skeleton } from "@/components/ui/skeleton"
 import { 
   fetchProfile, updateProfile, 
   updatePreferences, updateNotifications, 
@@ -35,6 +36,7 @@ export default function SettingsPage() {
   const [notifications, setNotifications] = useState({ weeklyReports: true, aiInsights: true, challengeUpdates: true, achievementAlerts: true, marketplaceUpdates: false })
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" })
   const [analytics, setAnalytics] = useState({ score: 0, achievements: 0, streak: 0, co2Saved: 0 })
+  const [isLoading, setIsLoading] = useState(true)
   
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
@@ -74,6 +76,8 @@ export default function SettingsPage() {
       })
     } catch (err) {
       console.error(err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -167,6 +171,26 @@ export default function SettingsPage() {
       }
       reader.readAsDataURL(file)
     }
+  }
+
+  if (!isMounted || isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto flex flex-col gap-8 pb-16 w-full animate-in fade-in duration-500">
+        <div className="flex flex-col gap-2 pb-6 border-b">
+          <Skeleton className="h-5 w-32 rounded-full" />
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+        </div>
+        <Skeleton className="h-12 w-full max-w-2xl rounded-xl" />
+        <Skeleton className="h-[400px] w-full rounded-3xl" />
+      </div>
+    )
   }
 
   return (
@@ -451,7 +475,10 @@ export default function SettingsPage() {
             </CardContent>
             <CardFooter className="border-t p-6 px-8 bg-zinc-50/40 rounded-b-3xl justify-end">
               {prefsSaved && <span className="text-xs font-semibold text-emerald-600 mr-4"><Check className="h-4 w-4 inline" /> Saved!</span>}
-              <Button onClick={handleSavePreferences} disabled={isSavingPrefs} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white">Save Preferences</Button>
+              <Button onClick={handleSavePreferences} disabled={isSavingPrefs} className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white">
+                {isSavingPrefs ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                {isSavingPrefs ? "Saving..." : "Save Preferences"}
+              </Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -479,7 +506,10 @@ export default function SettingsPage() {
                 <Label>Confirm Password</Label>
                 <Input type="password" value={passwordForm.confirmPassword} onChange={e=>setPasswordForm({...passwordForm, confirmPassword: e.target.value})} className="rounded-2xl" />
               </div>
-              <Button onClick={handleUpdatePassword} disabled={isUpdatingPassword} className="mt-4 rounded-xl">Update Password</Button>
+              <Button onClick={handleUpdatePassword} disabled={isUpdatingPassword} className="mt-4 rounded-xl">
+                {isUpdatingPassword ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                {isUpdatingPassword ? "Updating..." : "Update Password"}
+              </Button>
               {passwordUpdated && <span className="ml-4 text-emerald-600 text-sm">Updated successfully!</span>}
               
               <div className="border-t pt-6 mt-6">
@@ -525,6 +555,7 @@ export default function SettingsPage() {
                   <p className="font-bold flex items-center justify-center sm:justify-start gap-2"><Download className="h-4 w-4 text-emerald-500" /> Export JSON Archive</p>
                 </div>
                 <Button onClick={handleRequestExport} disabled={isExporting} variant="outline" className="rounded-xl w-full sm:w-auto">
+                  {isExporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                   {isExporting ? "Exporting..." : "Download Data"}
                 </Button>
               </div>

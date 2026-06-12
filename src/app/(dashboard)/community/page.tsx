@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { Users, Globe, Target, Trophy, Flame, TrendingUp, Sparkles, AlertTriangle, UserCircle2, CheckCircle2, History } from "lucide-react"
+import { Users, Globe, Target, Trophy, Flame, TrendingUp, Sparkles, AlertTriangle, UserCircle2, CheckCircle2, History, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { fetchCommunityStats, fetchLeaderboard, fetchCommunityFeed, fetchCommunityChallenges, joinChallenge } from "@/services/communityService"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@/components/ui/error-state"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export default function CommunityPage() {
   const [loading, setLoading] = useState(true)
@@ -66,19 +69,39 @@ export default function CommunityPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      <div className="flex flex-col gap-8 animate-in fade-in duration-500 pb-8">
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-8 w-64 rounded-md" />
+          <Skeleton className="h-4 w-96 rounded-md mt-1" />
+        </div>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            <Skeleton className="h-64 rounded-2xl" />
+            <Skeleton className="h-48 rounded-2xl" />
+          </div>
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <Skeleton className="h-32 rounded-2xl" />
+            <Skeleton className="h-96 rounded-2xl" />
+          </div>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-semibold">Error Loading Community</h2>
-        <p className="text-muted-foreground">{error}</p>
-        <Button onClick={loadData} variant="outline">Try Again</Button>
+      <div className="pt-10">
+        <ErrorState 
+          title="Error Loading Community"
+          message={error}
+          onRetry={loadData}
+        />
       </div>
     )
   }
@@ -218,6 +241,7 @@ export default function CommunityPage() {
                         </Button>
                       ) : (
                         <Button onClick={() => handleJoinChallenge(challenge.id)} disabled={joiningId === challenge.id} variant="secondary" className="w-full text-xs h-8 bg-muted/50 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400 transition-colors">
+                          {joiningId === challenge.id && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
                           {joiningId === challenge.id ? "Joining..." : "Join Movement"}
                         </Button>
                       )}
@@ -226,10 +250,14 @@ export default function CommunityPage() {
                 ))}
               </div>
             ) : (
-              <div className="p-8 text-center border border-dashed rounded-lg border-border/50 bg-muted/20">
-                <Target className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-3" />
-                <p className="text-sm text-muted-foreground">No active challenges available right now.</p>
-              </div>
+              <EmptyState 
+                icon={Target}
+                title="No Challenges Joined"
+                description="Join community challenges and compete with others."
+                actionLabel="Browse Challenges"
+                actionHref="/challenges"
+                className="mt-2 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm"
+              />
             )}
           </div>
         </div>

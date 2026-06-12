@@ -8,6 +8,9 @@ import {
   ShoppingBag, ArrowRight, Lightbulb, Leaf, Loader2, RefreshCw, AlertCircle
 } from "lucide-react"
 import { aiCoachService, AICoachResponse } from "@/services/aiCoachService"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@/components/ui/error-state"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export default function AICoachPage() {
   const [data, setData] = useState<AICoachResponse | null>(null)
@@ -96,8 +99,25 @@ export default function AICoachPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
+      <div className="flex flex-col gap-8 animate-in fade-in duration-500 w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <Skeleton className="h-16 w-64 rounded-md" />
+          <Skeleton className="h-12 w-48 rounded-md" />
+        </div>
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+          <div className="xl:col-span-5 space-y-5">
+            <Skeleton className="h-64 rounded-2xl" />
+            <Skeleton className="h-48 rounded-2xl" />
+          </div>
+          <div className="xl:col-span-7 flex flex-col gap-5">
+            <Skeleton className="h-32 rounded-2xl" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Skeleton className="h-32 rounded-2xl" />
+              <Skeleton className="h-32 rounded-2xl" />
+            </div>
+            <Skeleton className="h-64 rounded-2xl" />
+          </div>
+        </div>
       </div>
     )
   }
@@ -132,21 +152,22 @@ export default function AICoachPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl flex items-center gap-3">
-          <AlertCircle className="h-5 w-5" />
-          <span className="font-semibold text-sm">{error}</span>
-        </div>
+        <ErrorState 
+          title="Failed to run AI Coach"
+          message={error}
+          onRetry={loadLatest}
+        />
       )}
 
       {/* Grid Layout */}
       {!data?.insight ? (
-        <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl bg-zinc-50 dark:bg-zinc-950/50">
-          <Sparkles className="h-10 w-10 text-emerald-500 mb-4 opacity-50" />
-          <h3 className="text-lg font-bold">No Analysis Found</h3>
-          <p className="text-muted-foreground text-sm text-center max-w-md mt-2">
-            Click the &quot;Generate New Analysis&quot; button above to have Groq AI analyze your sustainability data and create personalized recommendations.
-          </p>
-        </div>
+        <EmptyState
+          icon={Sparkles}
+          title="No AI Analysis Available"
+          description="Generate your first sustainability analysis."
+          actionLabel="Generate Analysis"
+          onAction={handleGenerate}
+        />
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
           

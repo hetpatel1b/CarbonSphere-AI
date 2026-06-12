@@ -8,8 +8,11 @@ import { Progress } from "@/components/ui/progress"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Leaf, Shield, Globe, CheckCircle, TreeDeciduous, Wind, Droplets, Droplet, Sprout, AlertTriangle, Sparkles, AlertCircle } from "lucide-react"
+import { Leaf, Shield, Globe, CheckCircle, TreeDeciduous, Wind, Droplets, Droplet, Sprout, AlertTriangle, Sparkles, AlertCircle, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@/components/ui/error-state"
+import { EmptyState } from "@/components/ui/empty-state"
 import { 
   fetchOffsetProjects, 
   fetchOffsetRecommendations, 
@@ -120,19 +123,35 @@ export default function OffsetMarketplacePage() {
 
   if (loading && !stats) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      <div className="flex flex-col gap-8 animate-in fade-in duration-500 pb-8 w-full">
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-8 w-64 rounded-md" />
+          <Skeleton className="h-4 w-96 rounded-md mt-1" />
+        </div>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+        </div>
+        <Skeleton className="h-32 rounded-2xl" />
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <Skeleton className="h-64 rounded-2xl" />
+          <Skeleton className="h-64 rounded-2xl" />
+          <Skeleton className="h-64 rounded-2xl" />
+        </div>
       </div>
     )
   }
 
   if (error && !stats) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-semibold">Error Loading Marketplace</h2>
-        <p className="text-muted-foreground">{error}</p>
-        <Button onClick={() => Promise.resolve().then(() => loadData())} variant="outline">Try Again</Button>
+      <div className="pt-10">
+        <ErrorState 
+          title="Error Loading Marketplace"
+          message={error}
+          onRetry={() => { Promise.resolve().then(() => loadData()) }}
+        />
       </div>
     )
   }
@@ -283,9 +302,13 @@ export default function OffsetMarketplacePage() {
               )}
             </>
           ) : (
-            <div className="p-8 text-center flex flex-col items-center">
-              <AlertCircle className="h-8 w-8 text-muted-foreground mb-2 opacity-50" />
-              <p className="text-sm text-muted-foreground">No offsets purchased yet. Start investing in our planet today!</p>
+            <div className="flex items-center justify-center p-8">
+              <EmptyState 
+                icon={Globe}
+                title="No Marketplace Purchases"
+                description="No offsets purchased yet. Start investing in our planet today!"
+                className="bg-transparent border-none"
+              />
             </div>
           )}
         </Card>
@@ -354,6 +377,7 @@ export default function OffsetMarketplacePage() {
               <DialogFooter>
                 <Button variant="outline" onClick={() => setPurchaseModalOpen(false)}>Cancel</Button>
                 <Button onClick={handlePurchase} disabled={purchasing || creditsToBuy <= 0 || creditsToBuy > selectedProject?.availableCredits}>
+                  {purchasing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {purchasing ? "Processing..." : "Confirm Purchase"}
                 </Button>
               </DialogFooter>

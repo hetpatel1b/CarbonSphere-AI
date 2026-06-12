@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils"
 import { fetchForecastData, applyAction } from "@/services/forecastService"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@/components/ui/error-state"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export default function ForecastingPage() {
   const [loading, setLoading] = useState(true)
@@ -75,19 +78,33 @@ export default function ForecastingPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+      <div className="flex flex-col gap-8 animate-in fade-in duration-500 pb-8">
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-8 w-64 rounded-md" />
+          <Skeleton className="h-4 w-96 rounded-md mt-1" />
+        </div>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-12">
+          <Skeleton className="h-[400px] lg:col-span-8 rounded-2xl" />
+          <Skeleton className="h-[400px] lg:col-span-4 rounded-2xl" />
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <AlertTriangle className="h-12 w-12 text-rose-500" />
-        <h2 className="text-xl font-semibold">Error Loading Forecast</h2>
-        <p className="text-muted-foreground">{error}</p>
-        <Button onClick={() => window.location.reload()} variant="outline">Try Again</Button>
+      <div className="pt-10">
+        <ErrorState 
+          title="Failed to load forecast"
+          message={error}
+          onRetry={() => window.location.reload()}
+        />
       </div>
     )
   }
@@ -157,7 +174,18 @@ export default function ForecastingPage() {
         </p>
       </div>
 
-      {/* Section 1: Forecast Summary */}
+      {!hasSufficientData ? (
+        <EmptyState
+          icon={TrendingUp}
+          title="No Forecast Available"
+          description="Add at least 3 activities to generate an AI forecast."
+          actionLabel="Log Activity"
+          actionHref="/log"
+          className="my-8"
+        />
+      ) : (
+        <>
+          {/* Section 1: Forecast Summary */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-5 flex flex-col gap-1">
@@ -417,6 +445,8 @@ export default function ForecastingPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </>
+      )}
     </div>
   )
 }

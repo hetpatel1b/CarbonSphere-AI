@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Search, Plus, Car, Zap, Apple, ShoppingBag, Leaf, Trash2, Edit2, RefreshCw, Loader2, Droplet, Trash } from "lucide-react"
 import { activityService, ActivityDocument } from "@/services/activityService"
 import { LogActivityModal } from "@/components/dashboard/LogActivityModal"
+import { EmptyState } from "@/components/ui/empty-state"
 
 const getCategoryIcon = (category: string) => {
   switch (category?.toLowerCase()) {
@@ -165,8 +166,17 @@ export default function LogActivityPage() {
                   </TableRow>
                 ) : filteredActivities.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                      No activities found. Log your first activity!
+                    <TableCell colSpan={5} className="h-48 text-center text-muted-foreground border-b-0 hover:bg-transparent">
+                      <div className="flex items-center justify-center py-4">
+                        <EmptyState
+                          icon={Leaf}
+                          title="No Activities Logged Yet"
+                          description="Start tracking your sustainability journey by logging your first activity."
+                          actionLabel="Log Activity"
+                          onAction={openCreateModal}
+                          className="border-none bg-transparent"
+                        />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : (

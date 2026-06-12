@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
-import { Car, Train, Bike, Footprints, Zap, TrendingDown, Leaf, Shield, History, Sparkles, DollarSign, Trees } from "lucide-react"
+import { Car, Train, Bike, Footprints, Zap, TrendingDown, Leaf, Shield, History, Sparkles, DollarSign, Trees, Loader2 } from "lucide-react"
 import { runSimulation, fetchSimulationHistory } from "@/services/simulatorService"
+import { EmptyState } from "@/components/ui/empty-state"
 
 const SCENARIOS = [
   { id: "switch_to_ev", label: "Switch to EV", icon: Car, category: 'Transport' },
@@ -104,7 +105,8 @@ export default function SimulatorPage() {
                 disabled={isRunning}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 rounded-xl"
               >
-                {isRunning ? "Simulating Quantum Trajectories..." : "Run Simulation"}
+                {isRunning && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isRunning ? "Running Simulation..." : "Run Simulation"}
               </Button>
               
             </CardContent>
@@ -136,14 +138,13 @@ export default function SimulatorPage() {
         {/* Right Panel: Impact Projection */}
         <div className="lg:col-span-7 flex flex-col gap-6">
           {!results ? (
-            <div className="h-full min-h-[500px] border border-dashed border-border/50 bg-muted/10 rounded-2xl flex flex-col items-center justify-center text-center gap-4">
-              <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center animate-pulse">
-                <TrendingDown className="h-8 w-8 text-emerald-500/50" />
-              </div>
-              <div>
-                <h3 className="font-bold text-foreground">Awaiting Parameters</h3>
-                <p className="text-sm text-muted-foreground mt-1 max-w-sm">Select a scenario and click run to mathematically project your future carbon reduction.</p>
-              </div>
+            <div className="h-full min-h-[500px] flex items-center justify-center">
+              <EmptyState 
+                icon={TrendingDown}
+                title="Awaiting Parameters"
+                description="Select a scenario and click run to mathematically project your future carbon reduction."
+                className="border-none bg-transparent w-full"
+              />
             </div>
           ) : (
             <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">

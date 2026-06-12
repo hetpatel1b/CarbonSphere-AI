@@ -10,11 +10,14 @@ import {
 } from "recharts"
 import { 
   ArrowDownRight, ArrowUpRight, Cloud, Droplet, Zap, 
-  Award, TrendingDown, Target, Lightbulb, Compass,
-  Sparkles, ShieldCheck, ChevronRight, Loader2
+  Lightbulb, Compass, Award,
+  Sparkles, ShieldCheck, ChevronRight, Loader2, Activity
 } from "lucide-react"
 import { AnimatedChartWrapper } from "@/components/ui/animation-system"
 import { dashboardService, DashboardAnalytics } from "@/services/dashboardService"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@/components/ui/error-state"
+import { EmptyState } from "@/components/ui/empty-state"
 
 // Base narratives and colors to keep the beautiful UI intact while data is dynamic
 const baseCategories: Record<string, any> = {
@@ -98,21 +101,28 @@ export default function AnalyticsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="flex flex-col gap-8 animate-in fade-in duration-500 w-full">
+        <div className="grid gap-5 grid-cols-1 md:grid-cols-3">
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+        </div>
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 items-start">
+          <Skeleton className="h-[400px] lg:col-span-2 rounded-2xl" />
+          <Skeleton className="h-[400px] lg:col-span-1 rounded-2xl" />
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-[80vh] w-full gap-4 text-center">
-        <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400">
-          <Cloud className="h-10 w-10" />
-        </div>
-        <h2 className="text-2xl font-bold">Failed to load analytics</h2>
-        <p className="text-muted-foreground">{error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4">Try again</Button>
+      <div className="pt-10">
+        <ErrorState 
+          title="Failed to load analytics"
+          message={error}
+          onRetry={() => window.location.reload()}
+        />
       </div>
     )
   }
@@ -161,6 +171,25 @@ export default function AnalyticsPage() {
   }
 
   const activeCategoryData = mappedCategories[selectedCategory] || Object.values(mappedCategories)[0];
+
+  if (analytics && analytics.recentActivities.length === 0) {
+    return (
+      <div className="flex flex-col gap-8 animate-scale-up">
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-3xl font-black tracking-tight">Analytics & Intelligence</h1>
+          <p className="text-sm text-muted-foreground">Detailed breakdown of your carbon footprint generated from real activity logs.</p>
+        </div>
+        <EmptyState
+          icon={Activity}
+          title="No Data to Analyze"
+          description="Log your sustainability activities to see detailed analytics."
+          actionLabel="Log Activity"
+          actionHref="/log"
+          className="my-8"
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-8 animate-scale-up">

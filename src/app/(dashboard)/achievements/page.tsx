@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Award, Leaf, Zap, Droplet, Wind, Trophy, CheckCircle2, Star, Hexagon, Crown, Sparkles, Target, Flame, Activity, Loader2 } from "lucide-react"
 import { achievementService, AchievementDocument, Rarity } from "@/services/achievementService"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@/components/ui/error-state"
+import { EmptyState } from "@/components/ui/empty-state"
 
 const RARITY_CONFIG = {
   Common: {
@@ -92,21 +95,32 @@ export default function AchievementsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="flex flex-col gap-8 animate-in fade-in duration-500 pb-8 w-full">
+        <div className="flex flex-col gap-1.5">
+          <Skeleton className="h-6 w-48 rounded-full" />
+          <Skeleton className="h-8 w-64 rounded-md mt-1" />
+          <Skeleton className="h-4 w-96 rounded-md" />
+        </div>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+        </div>
+        <Skeleton className="h-48 rounded-2xl" />
+        <Skeleton className="h-48 rounded-2xl" />
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-[80vh] w-full gap-4 text-center">
-        <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400">
-          <Trophy className="h-10 w-10" />
-        </div>
-        <h2 className="text-2xl font-bold">Failed to load achievements</h2>
-        <p className="text-muted-foreground">{error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4">Try again</Button>
+      <div className="pt-10">
+        <ErrorState 
+          title="Failed to load achievements"
+          message={error}
+          onRetry={() => window.location.reload()}
+        />
       </div>
     )
   }
@@ -248,8 +262,13 @@ export default function AchievementsPage() {
 
         <TabsContent value={activeTab} className="mt-0 outline-none">
           {filteredAchievements.length === 0 ? (
-            <div className="text-center p-8 border border-dashed rounded-xl text-muted-foreground">
-              No achievements found in this category.
+            <div className="flex items-center justify-center p-8">
+              <EmptyState 
+                icon={Trophy}
+                title="No Achievements"
+                description="No achievements found in this category."
+                className="bg-transparent border-none"
+              />
             </div>
           ) : (
             <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

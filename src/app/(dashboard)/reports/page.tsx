@@ -6,9 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Badge } from "@/components/ui/badge"
 import { 
   FileText, Download, Target, Award, Globe, 
-  ShieldCheck, Sparkles, CheckCircle2, AlertTriangle, Leaf, Plus
+  ShieldCheck, Sparkles, CheckCircle2, AlertTriangle, Leaf, Plus, Loader2
 } from "lucide-react"
 import { fetchReports, generateReport, deleteReport } from "@/services/reportService"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@/components/ui/error-state"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export default function ImpactReportsPage() {
   const [reports, setReports] = useState<any[]>([])
@@ -206,7 +209,7 @@ export default function ImpactReportsPage() {
               variant="outline"
               className="gap-2 rounded-xl border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
             >
-              <FileText className="h-4.5 w-4.5" />
+              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4.5 w-4.5" />}
               {isGenerating ? "Synthesizing AI..." : "Generate Monthly"}
             </Button>
             <Button 
@@ -214,8 +217,8 @@ export default function ImpactReportsPage() {
               onClick={() => handleGenerate("comprehensive")}
               className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 shadow-sm rounded-xl px-5 py-2.5 font-bold"
             >
-              <Globe className="h-4.5 w-4.5" />
-              Generate Comprehensive
+              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Globe className="h-4.5 w-4.5" />}
+              {isGenerating ? "Synthesizing AI..." : "Generate Comprehensive"}
             </Button>
           </div>
         </div>
@@ -231,13 +234,17 @@ export default function ImpactReportsPage() {
             </h2>
             
             {loading ? (
-              <div className="flex justify-center p-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                <Skeleton className="h-32 rounded-2xl" />
+                <Skeleton className="h-32 rounded-2xl" />
+                <Skeleton className="h-32 rounded-2xl" />
               </div>
             ) : error ? (
-              <div className="p-8 border border-rose-200 bg-rose-50 dark:border-rose-900/50 dark:bg-rose-950/20 text-rose-600 rounded-xl text-center">
-                {error}
-              </div>
+              <ErrorState 
+                title="Error Loading Reports"
+                message={error}
+                onRetry={loadReports}
+              />
             ) : reports.length === 0 ? (
               <div className="p-16 border border-dashed border-border/50 bg-muted/10 rounded-2xl flex flex-col items-center justify-center text-center gap-4">
                 <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center">
@@ -248,7 +255,8 @@ export default function ImpactReportsPage() {
                   <p className="text-sm text-muted-foreground mt-1 max-w-sm">Generate your first AI-powered sustainability report to analyze your footprint and get recommendations.</p>
                 </div>
                 <Button onClick={() => handleGenerate("monthly")} variant="outline" className="mt-2" disabled={isGenerating}>
-                  <Plus className="w-4 h-4 mr-2" /> Start Generation
+                  {isGenerating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                  {isGenerating ? "Generating..." : "Start Generation"}
                 </Button>
               </div>
             ) : (

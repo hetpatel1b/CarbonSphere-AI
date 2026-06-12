@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { Leaf, Target, Zap, Droplet, CheckCircle2, Clock, CalendarClock, Trophy, TrendingUp, Loader2 } from "lucide-react"
 import { challengeService, ChallengeStatusResponse, ChallengeDocument } from "@/services/challengeService"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@/components/ui/error-state"
+import { EmptyState } from "@/components/ui/empty-state"
 
 const getIconComponent = (iconName: string) => {
   switch (iconName) {
@@ -65,21 +68,37 @@ export default function ChallengesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="flex flex-col gap-8 animate-in fade-in duration-500 pb-8 w-full">
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-8 w-64 rounded-md" />
+          <Skeleton className="h-4 w-96 rounded-md mt-1" />
+        </div>
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+        </div>
+        <div className="flex flex-col gap-4">
+          <Skeleton className="h-6 w-48 rounded-md" />
+          <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-48 rounded-2xl" />
+            <Skeleton className="h-48 rounded-2xl" />
+            <Skeleton className="h-48 rounded-2xl" />
+            <Skeleton className="h-48 rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="flex flex-col items-center justify-center h-[80vh] w-full gap-4 text-center">
-        <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400">
-          <Trophy className="h-10 w-10" />
-        </div>
-        <h2 className="text-2xl font-bold">Failed to load challenges</h2>
-        <p className="text-muted-foreground">{error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4">Try again</Button>
+      <div className="pt-10">
+        <ErrorState 
+          title="Failed to load challenges"
+          message={error || "Could not retrieve challenges data."}
+          onRetry={loadData}
+        />
       </div>
     );
   }
@@ -146,7 +165,7 @@ export default function ChallengesPage() {
               className={`w-full mt-4 bg-${challenge.color}-600 hover:bg-${challenge.color}-700 text-white shadow-sm transition-all`}
             >
               {joiningId === challenge._id ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Join Challenge
+              {joiningId === challenge._id ? "Joining..." : "Join Challenge"}
             </Button>
           ) : (
             <Button variant="outline" className="w-full mt-4 text-muted-foreground transition-all">
@@ -189,9 +208,12 @@ export default function ChallengesPage() {
       <div>
         <h2 className="text-base font-semibold mb-4">Active Joined Challenges</h2>
         {active.length === 0 ? (
-          <div className="text-center p-8 border border-dashed rounded-xl text-muted-foreground bg-muted/5">
-            You haven&apos;t joined any active challenges yet. Browse available challenges below!
-          </div>
+          <EmptyState 
+            icon={Target}
+            title="No Challenges Joined"
+            description="You haven't joined any active challenges yet. Browse available challenges below!"
+            className="bg-muted/5 border-dashed"
+          />
         ) : (
           <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {active.map(c => renderChallengeCard(c, false))}

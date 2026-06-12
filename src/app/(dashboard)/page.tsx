@@ -8,8 +8,11 @@ import { ActivityFeed } from "@/components/dashboard/ActivityFeed"
 import { AIInsightCard } from "@/components/dashboard/AIInsightCard"
 import { AIHeroSection } from "@/components/dashboard/AIHeroSection"
 import { ActiveActionsWidget } from "@/components/dashboard/ActiveActionsWidget"
-import { Cloud, Calendar, Trophy, Target, Loader2 } from "lucide-react"
+import { Cloud, Calendar, Trophy, Target, Loader2, Activity } from "lucide-react"
 import { dashboardService, DashboardSummary, DashboardAnalytics } from "@/services/dashboardService"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@/components/ui/error-state"
+import { EmptyState } from "@/components/ui/empty-state"
 
 // Helper to format relative time
 const formatRelativeTime = (dateString: string) => {
@@ -60,8 +63,21 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="flex flex-col gap-8 animate-in fade-in duration-500 w-full">
+        <Skeleton className="h-48 w-full rounded-2xl" />
+        <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+        </div>
+        <div className="grid gap-5 grid-cols-1 md:grid-cols-3 lg:grid-cols-4 items-start">
+          <Skeleton className="h-96 md:col-span-1 lg:col-span-2 rounded-2xl" />
+          <Skeleton className="h-96 md:col-span-1 lg:col-span-1 rounded-2xl" />
+          <Skeleton className="h-96 md:col-span-1 lg:col-span-1 rounded-2xl" />
+        </div>
       </div>
     );
   }
@@ -70,30 +86,16 @@ export default function DashboardPage() {
     const isRateLimited = error.toLowerCase().includes('too many requests') || error.includes('429');
     
     return (
-      <div className="flex flex-col items-center justify-center h-[80vh] w-full gap-4 text-center">
-        <div className="p-4 rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400">
-          <Cloud className="h-10 w-10" />
-        </div>
-        <h2 className="text-2xl font-bold">
-          {isRateLimited ? "Too Many Requests" : "Failed to load dashboard"}
-        </h2>
-        <p className="text-muted-foreground max-w-md">
-          {isRateLimited 
-            ? "You've hit the API rate limit for this IP address. Please wait 15 minutes before trying again."
-            : error}
-        </p>
-        {!isRateLimited && (
-          <button 
-            onClick={() => {
-              loadingRef.current = false;
-              setIsLoading(true);
-              setError('');
-            }} 
-            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 transition-colors"
-          >
-            Try again
-          </button>
-        )}
+      <div className="pt-10">
+        <ErrorState 
+          title={isRateLimited ? "Too Many Requests" : "Failed to load dashboard"}
+          message={isRateLimited ? "You've hit the API rate limit for this IP address. Please wait 15 minutes before trying again." : error}
+          onRetry={!isRateLimited ? () => {
+            loadingRef.current = false;
+            setIsLoading(true);
+            setError('');
+          } : undefined}
+        />
       </div>
     );
   }
@@ -112,6 +114,22 @@ export default function DashboardPage() {
   const currentMonthDisplay = currentMonthValue > 1000 
     ? `${(currentMonthValue / 1000).toFixed(2)} tCO2e` 
     : `${currentMonthValue.toFixed(1)} kgCO2e`;
+
+  if (summary?.totalActivities === 0) {
+    return (
+      <div className="flex flex-col gap-8 animate-scale-up">
+        <AIHeroSection />
+        <EmptyState
+          icon={Activity}
+          title="No Activities Logged Yet"
+          description="Start tracking your sustainability journey by logging your first activity."
+          actionLabel="Log Activity"
+          actionHref="/log"
+          className="my-8"
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-8">
