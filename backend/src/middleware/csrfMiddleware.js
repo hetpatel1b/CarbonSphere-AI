@@ -3,7 +3,8 @@ const generateCsrfToken = (req, res, next) => {
   if (!req.cookies.csrfToken) {
     const crypto = require('crypto');
     const token = crypto.randomBytes(32).toString('hex');
-    const isProd = process.env.NODE_ENV === 'production';
+    // Always use secure cross-origin cookies for decoupled Vercel/Railway architecture
+    const isProd = true;
     res.cookie('csrfToken', token, {
       httpOnly: false, // Must be false so the frontend can read it
       secure: isProd,

@@ -91,7 +91,8 @@ const loginUser = async (req, res) => {
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    const isProd = process.env.NODE_ENV === 'production';
+    // Always use secure cross-origin cookies for decoupled Vercel/Railway architecture
+    const isProd = true;
     res.cookie('token', token, {
       httpOnly: true,
       secure: isProd,
@@ -120,7 +121,8 @@ const loginUser = async (req, res) => {
 };
 
 const logoutUser = async (req, res) => {
-  const isProd = process.env.NODE_ENV === 'production';
+  // Always use secure cross-origin cookies for decoupled Vercel/Railway architecture
+  const isProd = true;
   res.cookie('token', '', {
     httpOnly: true,
     expires: new Date(0),
