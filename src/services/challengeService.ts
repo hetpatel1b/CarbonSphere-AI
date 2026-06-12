@@ -1,4 +1,5 @@
 import { getToken, logout } from '../utils/auth';
+import { fetchWithCache } from '../utils/apiCache';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -64,11 +65,11 @@ const handleResponse = async (response: Response) => {
 
 export const challengeService = {
   async getChallengeStatus(): Promise<ChallengeStatusResponse> {
-    const response = await fetch(`${API_URL}/challenges/status`, {
+    const data = await fetchWithCache(`${API_URL}/challenges/status`, {
       method: 'GET',
       headers: getHeaders(),
     });
-    return handleResponse(response);
+    return data.data;
   },
 
   async joinChallenge(id: string): Promise<any> {

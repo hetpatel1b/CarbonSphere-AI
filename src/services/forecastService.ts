@@ -1,4 +1,5 @@
 import { getToken } from '../utils/auth';
+import { fetchWithCache } from '../utils/apiCache';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -11,38 +12,30 @@ const getHeaders = () => {
 };
 
 export const fetchForecastData = async () => {
-  const response = await fetch(`${API_URL}/forecast/data`, { headers: getHeaders() });
-  
-  if (response.status === 404) {
-    const data = await response.json();
-    return { ...data, needsGeneration: true };
+  try {
+    const response = await fetchWithCache(`${API_URL}/forecast/data`, { headers: getHeaders() });
+    return response.data; // backend wraps in data for success
+  } catch (error: any) {
+    if (error.status === 404) {
+      return { ...(error.data || {}), needsGeneration: true };
+    }
+    throw error;
   }
-
-  if (!response.ok) throw new Error('Failed to fetch forecast data');
-  return response.json();
 };
 
 export const generateForecast = async () => {
-  const response = await fetch(`${API_URL}/forecast/generate`, {
+  const response = await fetchWithCache(`${API_URL}/forecast/generate`, {
     method: 'POST',
     headers: getHeaders()
   });
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to generate forecast');
-  }
-  return response.json();
+  return response;
 };
 
 export const applyAction = async (data: { title: string, reduction: number, difficulty: string, impact: string }) => {
-  const response = await fetch(`${API_URL}/actions/apply`, {
+  const response = await fetchWithCache(`${API_URL}/actions/apply`, {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify(data)
   });
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to apply action');
-  }
-  return response.json();
+  return response;
 };

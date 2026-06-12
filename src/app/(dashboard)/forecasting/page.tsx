@@ -4,7 +4,12 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import dynamic from "next/dynamic";
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+
+const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
+// @ts-ignore
+const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false });
 import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { fetchForecastData, applyAction, generateForecast } from "@/services/forecastService"

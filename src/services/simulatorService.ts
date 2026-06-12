@@ -1,4 +1,5 @@
 import { getToken } from '../utils/auth';
+import { fetchWithCache } from '../utils/apiCache';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -11,17 +12,14 @@ const getHeaders = () => {
 };
 
 export const runSimulation = async (scenarioId: string) => {
-  const response = await fetch(`${API_URL}/simulator/run`, {
+  const response = await fetchWithCache(`${API_URL}/simulator/run`, {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify({ scenarioId })
   });
-  if (!response.ok) throw new Error('Failed to run simulation');
-  return response.json();
+  return response;
 };
 
 export const fetchSimulationHistory = async () => {
-  const response = await fetch(`${API_URL}/simulator/history`, { headers: getHeaders() });
-  if (!response.ok) throw new Error('Failed to fetch history');
-  return response.json();
+  return fetchWithCache(`${API_URL}/simulator/history`, { headers: getHeaders() });
 };

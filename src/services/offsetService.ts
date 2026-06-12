@@ -1,4 +1,5 @@
 import { getToken } from '../utils/auth';
+import { fetchWithCache } from '../utils/apiCache';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -11,38 +12,26 @@ const getHeaders = () => {
 };
 
 export const fetchOffsetProjects = async () => {
-  const response = await fetch(`${API_URL}/offsets/projects`, { headers: getHeaders() });
-  if (!response.ok) throw new Error('Failed to fetch projects');
-  return response.json();
+  return fetchWithCache(`${API_URL}/offsets/projects`, { headers: getHeaders() });
 };
 
 export const fetchOffsetRecommendations = async () => {
-  const response = await fetch(`${API_URL}/offsets/recommendations`, { headers: getHeaders() });
-  if (!response.ok) throw new Error('Failed to fetch recommendations');
-  return response.json();
+  return fetchWithCache(`${API_URL}/offsets/recommendations`, { headers: getHeaders() });
 };
 
 export const purchaseOffset = async (projectId: string, credits: number) => {
-  const response = await fetch(`${API_URL}/offsets/purchase`, {
+  const response = await fetchWithCache(`${API_URL}/offsets/purchase`, {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify({ projectId, credits })
   });
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.message || 'Failed to purchase offset');
-  }
-  return response.json();
+  return response;
 };
 
 export const fetchOffsetHistory = async (page: number = 1, limit: number = 10) => {
-  const response = await fetch(`${API_URL}/offsets/history?page=${page}&limit=${limit}`, { headers: getHeaders() });
-  if (!response.ok) throw new Error('Failed to fetch history');
-  return response.json();
+  return fetchWithCache(`${API_URL}/offsets/history?page=${page}&limit=${limit}`, { headers: getHeaders() });
 };
 
 export const fetchOffsetStats = async () => {
-  const response = await fetch(`${API_URL}/offsets/stats`, { headers: getHeaders() });
-  if (!response.ok) throw new Error('Failed to fetch stats');
-  return response.json();
+  return fetchWithCache(`${API_URL}/offsets/stats`, { headers: getHeaders() });
 };

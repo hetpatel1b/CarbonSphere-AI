@@ -34,4 +34,6 @@ const ForecastSchema = new mongoose.Schema(
   }
 );
 
+ForecastSchema.index({ userId: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Forecast', ForecastSchema);

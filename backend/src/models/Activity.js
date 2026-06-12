@@ -38,4 +38,7 @@ const ActivitySchema = new mongoose.Schema(
   }
 );
 
+ActivitySchema.index({ userId: 1, date: -1 });
+ActivitySchema.index({ userId: 1, category: 1 });
+
 module.exports = mongoose.model('Activity', ActivitySchema);

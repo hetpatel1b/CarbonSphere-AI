@@ -1,4 +1,5 @@
 import { getToken, logout } from '../utils/auth';
+import { fetchWithCache } from '../utils/apiCache';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -54,18 +55,19 @@ const handleResponse = async (response: Response) => {
 
 export const aiCoachService = {
   async getLatestInsight(): Promise<AICoachResponse> {
-    const response = await fetch(`${API_URL}/ai-coach/latest`, {
+    const data = await fetchWithCache(`${API_URL}/ai-coach/latest`, {
       method: 'GET',
       headers: getHeaders(),
     });
-    return handleResponse(response);
+    return data.data; // Because fetchWithCache returns raw json, and data is inside .data
   },
 
   async generateNewAnalysis(): Promise<AICoachResponse> {
-    const response = await fetch(`${API_URL}/ai-coach/analyze`, {
+    // POST request, fetchWithCache will bypass cache and return raw json
+    const data = await fetchWithCache(`${API_URL}/ai-coach/analyze`, {
       method: 'POST',
       headers: getHeaders(),
     });
-    return handleResponse(response);
+    return data.data;
   }
 };

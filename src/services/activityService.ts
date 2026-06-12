@@ -1,4 +1,5 @@
 import { getToken, logout } from '../utils/auth';
+import { fetchWithCache } from '../utils/apiCache';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -55,19 +56,19 @@ const handleResponse = async (response: Response) => {
 
 export const activityService = {
   async getActivities(): Promise<ActivityDocument[]> {
-    const response = await fetch(`${API_URL}/activities`, {
+    const data = await fetchWithCache(`${API_URL}/activities`, {
       method: 'GET',
       headers: getHeaders(),
     });
-    return handleResponse(response);
+    return data.data;
   },
 
   async getActivity(id: string): Promise<ActivityDocument> {
-    const response = await fetch(`${API_URL}/activities/${id}`, {
+    const data = await fetchWithCache(`${API_URL}/activities/${id}`, {
       method: 'GET',
       headers: getHeaders(),
     });
-    return handleResponse(response);
+    return data.data;
   },
 
   async createActivity(data: CreateActivityDTO): Promise<{ activity: ActivityDocument, newlyUnlocked: any[], newlyCompletedChallenges: any[] }> {
