@@ -224,7 +224,7 @@ export default function ForecastingPage() {
                 <CardDescription>Historical data vs Future predictions</CardDescription>
               </div>
             </CardHeader>
-            <CardContent className="pt-4 pb-6 min-h-[350px]">
+            <CardContent className="pt-4 pb-6 min-h-[300px] md:min-h-[350px]">
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>

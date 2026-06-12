@@ -185,7 +185,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased text-sm md:text-base lg:text-lg;
   }
 }
 

@@ -192,7 +192,7 @@ export default function SimulatorPage() {
                   </div>
                   
                   {/* Chart */}
-                  <div className="h-[250px] w-full pt-4">
+                  <div className="h-[250px] md:h-[300px] w-full pt-4">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData} margin={{ top: 0, right: 30, left: 0, bottom: 0 }} layout="vertical">
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--muted-foreground)/0.2)" />

@@ -272,8 +272,8 @@ export default function SettingsPage() {
       </StaggerContainer>
 
       <Tabs defaultValue="profile" className="space-y-8">
-        <div className="flex justify-start sm:justify-center">
-          <TabsList className="bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/50 dark:border-zinc-800/50 p-1.5 rounded-2xl w-full sm:w-auto shadow-sm backdrop-blur-md">
+        <div className="flex justify-start sm:justify-center w-full overflow-x-auto pb-2 scrollbar-hide">
+          <TabsList className="bg-zinc-100/80 dark:bg-zinc-900/60 border border-zinc-200/50 dark:border-zinc-800/50 p-1.5 rounded-2xl w-max sm:w-auto shadow-sm backdrop-blur-md inline-flex">
             <TabsTrigger value="profile" className="px-5 py-2.5 rounded-xl text-xs font-semibold tracking-wide uppercase transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-950 data-[state=active]:text-emerald-500 shadow-sm">Profile</TabsTrigger>
             <TabsTrigger value="preferences" className="px-5 py-2.5 rounded-xl text-xs font-semibold tracking-wide uppercase transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-950 data-[state=active]:text-emerald-500 shadow-sm">Preferences</TabsTrigger>
             <TabsTrigger value="security" className="px-5 py-2.5 rounded-xl text-xs font-semibold tracking-wide uppercase transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-950 data-[state=active]:text-emerald-500 shadow-sm">Security</TabsTrigger>
@@ -520,11 +520,11 @@ export default function SettingsPage() {
           <Card className="border-zinc-200/50 bg-white/40 backdrop-blur-md shadow-xl rounded-3xl">
             <CardHeader className="p-8 pb-4"><CardTitle className="text-xl font-bold">Data Management</CardTitle></CardHeader>
             <CardContent className="p-8 pt-4 space-y-5">
-              <div className="flex justify-between items-center p-5 rounded-2xl border bg-zinc-50/30">
+              <div className="flex flex-col sm:flex-row justify-between items-center p-5 gap-4 rounded-2xl border bg-zinc-50/30 text-center sm:text-left">
                 <div>
-                  <p className="font-bold flex items-center gap-2"><Download className="h-4 w-4 text-emerald-500" /> Export JSON Archive</p>
+                  <p className="font-bold flex items-center justify-center sm:justify-start gap-2"><Download className="h-4 w-4 text-emerald-500" /> Export JSON Archive</p>
                 </div>
-                <Button onClick={handleRequestExport} disabled={isExporting} variant="outline" className="rounded-xl">
+                <Button onClick={handleRequestExport} disabled={isExporting} variant="outline" className="rounded-xl w-full sm:w-auto">
                   {isExporting ? "Exporting..." : "Download Data"}
                 </Button>
               </div>
@@ -534,9 +534,9 @@ export default function SettingsPage() {
           <Card className="border-red-500/30 bg-red-500/5 shadow-xl rounded-3xl">
             <CardHeader className="p-8 pb-4"><CardTitle className="text-xl font-bold text-red-600">Danger Zone</CardTitle></CardHeader>
             <CardContent className="p-8 pt-4">
-              <div className="flex justify-between items-center p-5 rounded-2xl border border-red-500/20 bg-white/50">
+              <div className="flex flex-col sm:flex-row justify-between items-center p-5 gap-4 rounded-2xl border border-red-500/20 bg-white/50 text-center sm:text-left">
                 <p className="font-bold text-red-600">Permanently Delete Account</p>
-                <Button onClick={handleDeleteAccount} variant="destructive" className="bg-red-600 hover:bg-red-700 rounded-xl">Delete Account</Button>
+                <Button onClick={handleDeleteAccount} variant="destructive" className="bg-red-600 hover:bg-red-700 rounded-xl w-full sm:w-auto">Delete Account</Button>
               </div>
             </CardContent>
           </Card>
