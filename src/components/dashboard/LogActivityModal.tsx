@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { activityService, CreateActivityDTO, ActivityDocument } from "@/services/activityService";
+import { calculateCarbonImpact, CarbonCalculationParams } from "@/utils/carbonCalculator";
 import { toast } from "sonner";
 
 interface LogActivityModalProps {
@@ -41,6 +42,14 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
     notes: "",
   });
 
+  const [calcParams, setCalcParams] = useState<CarbonCalculationParams>({ category: "" });
+  const [manualEmission, setManualEmission] = useState<string>("");
+
+  const estimatedCarbon = calculateCarbonImpact({
+    ...calcParams,
+    category: formData.category
+  });
+
   useEffect(() => {
     if (activityToEdit && isOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -63,6 +72,8 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
         date: new Date().toISOString().split('T')[0],
         notes: "",
       });
+      setManualEmission("");
+      setCalcParams({ category: "" });
     }
     setError("");
   }, [activityToEdit, isOpen]);
@@ -71,8 +82,16 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === "carbonEmission" ? parseFloat(value) || 0 : value
+      [name]: value
     }));
+  };
+
+  const handleManualEmissionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setManualEmission(e.target.value);
+  };
+
+  const handleCalcParamChange = (name: string, value: string | number) => {
+    setCalcParams(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -85,9 +104,16 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
     setError("");
 
     try {
+      const finalEmission = manualEmission !== "" ? parseFloat(manualEmission) : (estimatedCarbon > 0 ? estimatedCarbon : formData.carbonEmission);
+      
+      const submitData = {
+        ...formData,
+        carbonEmission: finalEmission
+      };
+
       const savePromise = activityToEdit
-        ? activityService.updateActivity(activityToEdit._id, formData)
-        : activityService.createActivity(formData);
+        ? activityService.updateActivity(activityToEdit._id, submitData)
+        : activityService.createActivity(submitData);
 
       toast.promise(savePromise, {
         loading: activityToEdit ? "Updating activity..." : "Logging activity...",
@@ -182,6 +208,79 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
               />
             </div>
 
+            {formData.category === "Transport" && (
+              <div className="grid grid-cols-2 gap-4 bg-muted/50 p-3 rounded-lg border">
+                <div className="space-y-2">
+                  <Label>Vehicle Type</Label>
+                  <Select value={calcParams.vehicleType || ""} onValueChange={(val) => handleCalcParamChange("vehicleType", val)}>
+                    <SelectTrigger><SelectValue placeholder="Select vehicle" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Petrol Car">Petrol Car</SelectItem>
+                      <SelectItem value="Diesel Car">Diesel Car</SelectItem>
+                      <SelectItem value="Electric Vehicle">Electric Vehicle</SelectItem>
+                      <SelectItem value="Bus">Bus</SelectItem>
+                      <SelectItem value="Train">Train</SelectItem>
+                      <SelectItem value="Flight">Flight</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Distance (km)</Label>
+                  <Input type="number" min="0" step="0.1" value={calcParams.distance || ""} onChange={(e) => handleCalcParamChange("distance", parseFloat(e.target.value) || 0)} placeholder="e.g. 15" />
+                </div>
+              </div>
+            )}
+            
+            {formData.category === "Energy" && (
+              <div className="space-y-2 bg-muted/50 p-3 rounded-lg border">
+                <Label>Electricity Consumption (kWh)</Label>
+                <Input type="number" min="0" step="0.1" value={calcParams.electricity || ""} onChange={(e) => handleCalcParamChange("electricity", parseFloat(e.target.value) || 0)} placeholder="e.g. 100" />
+              </div>
+            )}
+
+            {formData.category === "Water" && (
+              <div className="space-y-2 bg-muted/50 p-3 rounded-lg border">
+                <Label>Water Consumption (liters)</Label>
+                <Input type="number" min="0" step="1" value={calcParams.waterUsage || ""} onChange={(e) => handleCalcParamChange("waterUsage", parseFloat(e.target.value) || 0)} placeholder="e.g. 500" />
+              </div>
+            )}
+
+            {formData.category === "Food" && (
+              <div className="space-y-2 bg-muted/50 p-3 rounded-lg border">
+                <Label>Meal Type</Label>
+                <Select value={calcParams.mealType || ""} onValueChange={(val) => handleCalcParamChange("mealType", val)}>
+                  <SelectTrigger><SelectValue placeholder="Select meal" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Beef">Beef</SelectItem>
+                    <SelectItem value="Chicken">Chicken</SelectItem>
+                    <SelectItem value="Vegetarian">Vegetarian</SelectItem>
+                    <SelectItem value="Vegan">Vegan</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {formData.category === "Shopping" && (
+              <div className="space-y-2 bg-muted/50 p-3 rounded-lg border">
+                <Label>Shopping Impact</Label>
+                <Select value={calcParams.shoppingImpact || ""} onValueChange={(val) => handleCalcParamChange("shoppingImpact", val)}>
+                  <SelectTrigger><SelectValue placeholder="Select impact" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Low Impact">Low Impact</SelectItem>
+                    <SelectItem value="Medium Impact">Medium Impact</SelectItem>
+                    <SelectItem value="High Impact">High Impact</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            {formData.category && estimatedCarbon > 0 && (
+              <div className="bg-primary/10 border border-primary/20 p-3 rounded-md flex items-center justify-between">
+                <span className="text-sm font-medium">Estimated Carbon Impact:</span>
+                <span className="text-sm font-bold text-primary">{estimatedCarbon} kg CO2e</span>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Input
@@ -195,7 +294,7 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="carbonEmission">Carbon Impact (kg CO2e) *</Label>
+                <Label htmlFor="carbonEmission">Carbon Impact (kg CO2e) {estimatedCarbon > 0 ? "(Optional override)" : "*"}</Label>
                 <Input
                   id="carbonEmission"
                   name="carbonEmission"
@@ -203,9 +302,10 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
                   step="0.01"
                   min="-10000"
                   max="10000"
-                  value={formData.carbonEmission}
-                  onChange={handleChange}
-                  required
+                  value={manualEmission}
+                  onChange={handleManualEmissionChange}
+                  placeholder={estimatedCarbon > 0 ? `${estimatedCarbon} (Auto-calculated)` : (activityToEdit ? activityToEdit.carbonEmission.toString() : "0")}
+                  required={estimatedCarbon === 0 && !activityToEdit}
                 />
               </div>
               <div className="space-y-2">
