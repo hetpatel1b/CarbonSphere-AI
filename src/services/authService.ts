@@ -29,7 +29,7 @@ export const authService = {
     try {
       await apiClient.post('/auth/logout');
     } catch (err) {
-      console.error('Backend logout failed', err);
+      // Handled silently
     }
     localLogout();
   }

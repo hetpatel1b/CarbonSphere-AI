@@ -95,7 +95,7 @@ export default function SettingsPage() {
         co2Saved: stats.totalCarbon || stats.totalCarbonSaved || 0
       })
     } catch (err) {
-      console.error(err)
+      // Handled
     } finally {
       setIsLoading(false)
     }

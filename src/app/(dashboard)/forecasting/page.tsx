@@ -4,12 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import dynamic from "next/dynamic";
-import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
-// @ts-ignore
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false });
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts"
 import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { fetchForecastData, applyAction, generateForecast } from "@/services/forecastService"
@@ -93,7 +88,6 @@ export default function ForecastingPage() {
       setNeedsGeneration(false)
       toast.success("Forecast generated successfully")
     } catch (err: any) {
-      console.error("Failed to generate forecast:", err)
       toast.error(err.message || "Failed to generate forecast")
     } finally {
       setIsGenerating(false)
@@ -186,6 +180,14 @@ export default function ForecastingPage() {
   }
 
   const chartData = Array.from(chartMap.values()).sort((a, b) => a.month.localeCompare(b.month));
+
+  if (chartData.length === 1) {
+    chartData.unshift({
+      month: "Prev",
+      actual: 0,
+      predicted: chartData[0].actual || chartData[0].predicted || 0
+    });
+  }
 
   // Risk Level computation
   let riskLevel = forecast?.riskLevel || "LOW"

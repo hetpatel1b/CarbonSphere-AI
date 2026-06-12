@@ -26,7 +26,7 @@ export function NotificationDropdown() {
       const data = await fetchNotifications();
       setNotifications(data || []);
     } catch (err) {
-      console.error("Failed to fetch notifications", err);
+      // Handled silently
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +47,7 @@ export function NotificationDropdown() {
       await markNotificationAsRead(id);
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
     } catch (err) {
-      console.error("Failed to mark as read", err);
+      // Handled silently
     }
   };
 
@@ -56,7 +56,7 @@ export function NotificationDropdown() {
       await markAllNotificationsAsRead();
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     } catch (err) {
-      console.error("Failed to mark all as read", err);
+      // Handled silently
     }
   };
 

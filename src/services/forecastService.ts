@@ -10,7 +10,6 @@ export const fetchForecastData = async (): Promise<ForecastData & { needsGenerat
     if (err.status === 404) {
       return { ...(err.data || {}), needsGeneration: true } as any;
     }
-    console.error('Error fetching forecast:', err.message);
     throw error;
   }
 };

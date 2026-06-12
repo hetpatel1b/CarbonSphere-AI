@@ -3,7 +3,7 @@ import { fetchWithCache } from '../utils/apiCache';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-export const getHeaders = (customHeaders?: HeadersInit) => {
+const getHeaders = (customHeaders?: HeadersInit) => {
   const token = getToken();
   return {
     'Content-Type': 'application/json',
@@ -29,7 +29,6 @@ const handleResponse = async (response: Response) => {
 };
 
 export const apiClient = {
-  getHeaders,
   
   async get<T>(path: string, options: RequestInit = {}, forceRefresh = false): Promise<T> {
     const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;

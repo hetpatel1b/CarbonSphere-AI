@@ -36,10 +36,18 @@ export default function CommunityPage() {
         fetchCommunityChallenges()
       ])
       setStats(statsRes.data.stats)
-      setChartData(statsRes.data.chartData)
-      setLeaderboard(leaderboardRes.data)
       setFeed(feedRes.data)
       setChallenges(challengesRes.data)
+      
+      let cData = statsRes.data.chartData;
+      if (cData && cData.length === 1) {
+        cData.unshift({
+          month: "Prev",
+          reduction: 0
+        });
+      }
+      setLeaderboard(leaderboardRes.data)
+      setChartData(cData || [])
     } catch (err: any) {
       setError(err.message || "Failed to load community data.")
       toast.error("Unable to load community data")

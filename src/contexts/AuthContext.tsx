@@ -38,7 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
       }
     } catch (error) {
-      console.error("Failed to load user profile", error);
       setUser(null);
     } finally {
       setIsLoading(false);

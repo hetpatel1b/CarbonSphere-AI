@@ -6,7 +6,7 @@ const seedDemoData = require('../../scripts/seedDemoData');
 // Resets the demo data for the demo user
 router.post('/reset', async (req, res) => {
   try {
-    console.log('Demo Reset requested');
+
     await seedDemoData();
     res.status(200).json({ success: true, message: 'Demo data reset successfully' });
   } catch (error) {

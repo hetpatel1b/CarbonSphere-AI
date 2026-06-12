@@ -148,6 +148,5 @@ const checkAndUpdateChallenges = async (userId) => {
 };
 
 module.exports = {
-  checkAndUpdateChallenges,
-  getConsecutiveDaysInRange
+  checkAndUpdateChallenges
 };

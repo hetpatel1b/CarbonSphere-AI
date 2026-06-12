@@ -4,21 +4,11 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import dynamic from "next/dynamic";
 import { 
   ResponsiveContainer, 
-  XAxis, YAxis, Tooltip, CartesianGrid, Cell, ReferenceLine
+  XAxis, YAxis, Tooltip, CartesianGrid, Cell, ReferenceLine,
+  AreaChart, Area, BarChart, Bar, LineChart, Line
 } from "recharts"
-
-const AreaChart = dynamic(() => import('recharts').then(mod => mod.AreaChart), { ssr: false });
-// @ts-ignore
-const Area = dynamic(() => import('recharts').then(mod => mod.Area), { ssr: false });
-const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false });
-// @ts-ignore
-const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false });
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
-// @ts-ignore
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false });
 import { 
   ArrowDownRight, ArrowUpRight, Cloud, Droplet, Zap, 
   Lightbulb, Compass, Award,
@@ -167,6 +157,17 @@ export default function AnalyticsPage() {
         milestone: idx === 0 ? "Account Onboarded" : null
       };
     });
+
+    if (mainChartData.length === 1) {
+      mainChartData.unshift({
+        name: "Prev",
+        emissions: 0,
+        target: 2000,
+        score: 700,
+        forecast: null,
+        milestone: "Start"
+      });
+    }
   }
 
   const totalCarbonSum = analytics?.categoryBreakdown.reduce((sum, cat) => sum + cat.totalCarbon, 0) || 0;
