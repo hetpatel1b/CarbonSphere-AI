@@ -104,3 +104,66 @@ export const DEMO_COACH = {
     { id: "rec-3", title: "Local Produce", description: "Buying local reduces transport emissions associated with food.", impact: "Medium", estimatedSavings: 50 }
   ]
 };
+
+export const DEMO_DASHBOARD_SUMMARY = {
+  totalActivities: 142,
+  totalCarbon: 12500,
+  sustainabilityScore: 85,
+  currentMonthCarbon: 420.5,
+  currentWeekCarbon: 110.2,
+  totalAchievementsUnlocked: 15,
+  activeChallengesCount: 3,
+  completedChallengesCount: 12,
+  aiInsight: {
+    score: 85,
+    topEmissionSources: ["Transport", "Grid Energy"],
+    strengths: ["Consistent logging", "Low diet emissions"],
+    weaknesses: ["High transport emissions"],
+    challengeSuggestion: "Join the Carpool Month Challenge to lower transport emissions!"
+  }
+};
+
+export const DEMO_DASHBOARD_ANALYTICS = {
+  carbonTrend: [
+    { month: "Jan", totalCarbon: 600, activitiesCount: 10 },
+    { month: "Feb", totalCarbon: 550, activitiesCount: 12 },
+    { month: "Mar", totalCarbon: 520, activitiesCount: 15 },
+    { month: "Apr", totalCarbon: 480, activitiesCount: 18 },
+    { month: "May", totalCarbon: 450, activitiesCount: 20 },
+    { month: "Jun", totalCarbon: 420.5, activitiesCount: 22 }
+  ],
+  monthlyTotals: [
+    { month: "Jan", totalCarbon: 600, activitiesCount: 10 },
+    { month: "Feb", totalCarbon: 550, activitiesCount: 12 },
+    { month: "Mar", totalCarbon: 520, activitiesCount: 15 },
+    { month: "Apr", totalCarbon: 480, activitiesCount: 18 },
+    { month: "May", totalCarbon: 450, activitiesCount: 20 },
+    { month: "Jun", totalCarbon: 420.5, activitiesCount: 22 }
+  ],
+  categoryBreakdown: [
+    { category: "Transport", totalCarbon: 5000 },
+    { category: "Energy", totalCarbon: 4000 },
+    { category: "Food", totalCarbon: 2000 },
+    { category: "Shopping", totalCarbon: 1500 }
+  ],
+  recentActivities: [
+    {
+      _id: "act-1",
+      activityType: "Flight",
+      title: "Roundtrip Flight to NYC",
+      description: "Business trip.",
+      carbonEmission: 500,
+      category: "Transport",
+      date: new Date().toISOString()
+    },
+    {
+      _id: "act-2",
+      activityType: "Grid Energy",
+      title: "Monthly Electricity",
+      description: "Home office electricity.",
+      carbonEmission: 150,
+      category: "Energy",
+      date: new Date(Date.now() - 86400000).toISOString()
+    }
+  ]
+};

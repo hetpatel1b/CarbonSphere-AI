@@ -12,6 +12,10 @@ export async function handleDemoRequest(method: string, path: string, body?: unk
   if (normalizedPath === '/auth/login') return { token: 'demo-token', user: demoData.DEMO_USER.user };
   if (normalizedPath === '/auth/register') return { token: 'demo-token', user: demoData.DEMO_USER.user };
 
+  // Dashboard
+  if (normalizedPath === '/dashboard/summary') return { success: true, data: demoData.DEMO_DASHBOARD_SUMMARY };
+  if (normalizedPath === '/dashboard/analytics') return { success: true, data: demoData.DEMO_DASHBOARD_ANALYTICS };
+
   // Activity
   if (normalizedPath === '/activity/stats') return { success: true, data: demoData.DEMO_ACTIVITY_STATS };
   if (normalizedPath === '/activity') {
