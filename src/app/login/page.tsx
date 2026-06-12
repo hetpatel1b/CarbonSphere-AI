@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { authService } from '@/services/authService';
 import { Leaf, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,14 +17,27 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
+    
+    const loginPromise = authService.login(email, password);
+
+    toast.promise(loginPromise, {
+      loading: "Authenticating...",
+      success: () => {
+        window.location.href = '/';
+        return "Successfully logged in";
+      },
+      error: (err: any) => {
+        setError(err.message || 'An error occurred during login');
+        return "Invalid credentials";
+      }
+    });
 
     try {
-      await authService.login(email, password);
-      window.location.href = '/';
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during login');
+      setIsLoading(true);
+      setError('');
+      await loginPromise;
+    } catch (err) {
+      // Handled in toast error
     } finally {
       setIsLoading(false);
     }

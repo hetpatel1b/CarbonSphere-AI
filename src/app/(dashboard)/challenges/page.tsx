@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { Leaf, Target, Zap, Droplet, CheckCircle2, Clock, CalendarClock, Trophy, TrendingUp, Loader2 } from "lucide-react"
 import { challengeService, ChallengeStatusResponse, ChallengeDocument } from "@/services/challengeService"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -28,7 +28,6 @@ export default function ChallengesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [joiningId, setJoiningId] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const loadData = async () => {
     try {
@@ -47,20 +46,24 @@ export default function ChallengesPage() {
   }, []);
 
   const handleJoin = async (id: string) => {
+    setJoiningId(id);
+    const joinPromise = challengeService.joinChallenge(id);
+
+    toast.promise(joinPromise, {
+      loading: "Processing...",
+      success: () => {
+        loadData();
+        return "Challenge joined successfully";
+      },
+      error: (err: any) => {
+        return "Unable to update challenge";
+      }
+    });
+
     try {
-      setJoiningId(id);
-      await challengeService.joinChallenge(id);
-      toast({
-        title: "Challenge Joined!",
-        description: "You've successfully joined the challenge.",
-      });
-      await loadData();
-    } catch (err: any) {
-      toast({
-        title: "Failed to join",
-        description: err.message,
-        variant: "destructive"
-      });
+      await joinPromise;
+    } catch (err) {
+      // Handled in toast error
     } finally {
       setJoiningId(null);
     }

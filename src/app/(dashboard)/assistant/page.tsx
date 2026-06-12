@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { MessageSquare, Sparkles, Send, Leaf, ShieldCheck, Zap, Droplets, Clock, BarChart3, TrendingUp, Target, User, CheckCircle2, AlertCircle } from "lucide-react"
 import { assistantService } from "@/services/assistantService"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
@@ -71,7 +71,6 @@ export default function AssistantPage() {
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const { toast } = useToast()
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -98,11 +97,7 @@ export default function AssistantPage() {
       }
       setMessages((prev) => [...prev, aiMsg])
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "AI Request Failed",
-        description: error.message || "Failed to communicate with AI Assistant. Please try again."
-      })
+      toast.error(error.message || "Failed to communicate with AI Assistant. Please try again.")
     } finally {
       setIsTyping(false)
     }

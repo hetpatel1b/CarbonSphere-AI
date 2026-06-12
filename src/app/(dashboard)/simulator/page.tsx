@@ -8,6 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Car, Train, Bike, Footprints, Zap, TrendingDown, Leaf, Shield, History, Sparkles, DollarSign, Trees, Loader2 } from "lucide-react"
 import { runSimulation, fetchSimulationHistory } from "@/services/simulatorService"
 import { EmptyState } from "@/components/ui/empty-state"
+import { toast } from "sonner"
 
 const SCENARIOS = [
   { id: "switch_to_ev", label: "Switch to EV", icon: Car, category: 'Transport' },
@@ -39,14 +40,27 @@ export default function SimulatorPage() {
   }, [])
 
   const handleSimulate = async () => {
+    const simPromise = runSimulation(selectedScenario)
+
+    toast.promise(simPromise, {
+      loading: "Running simulation...",
+      success: (res) => {
+        setResults(res.data.results)
+        loadHistory()
+        return "Simulation completed"
+      },
+      error: (err: any) => {
+        setError(err.message || 'Failed to run simulation')
+        return "Simulation failed"
+      }
+    })
+
     try {
       setIsRunning(true)
       setError(null)
-      const res = await runSimulation(selectedScenario)
-      setResults(res.data.results)
-      loadHistory()
-    } catch (err: any) {
-      setError(err.message || 'Failed to run simulation')
+      await simPromise
+    } catch (err) {
+      // Handled in toast error
     } finally {
       setIsRunning(false)
     }

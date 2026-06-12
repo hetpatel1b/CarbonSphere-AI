@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { authService } from '@/services/authService';
 import { Leaf, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,20 +19,32 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
-      setIsLoading(false);
       return;
     }
 
+    const registerPromise = authService.register(name, email, password);
+
+    toast.promise(registerPromise, {
+      loading: "Creating account...",
+      success: () => {
+        router.push('/login' as any);
+        return "Account created successfully";
+      },
+      error: (err: any) => {
+        setError(err.message || 'An error occurred during registration');
+        return "Registration failed";
+      }
+    });
+
     try {
-      await authService.register(name, email, password);
-      router.push('/login' as any);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during registration');
+      setIsLoading(true);
+      setError('');
+      await registerPromise;
+    } catch (err) {
+      // Handled in toast error
     } finally {
       setIsLoading(false);
     }

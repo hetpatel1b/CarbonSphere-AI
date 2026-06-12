@@ -12,6 +12,7 @@ import { fetchCommunityStats, fetchLeaderboard, fetchCommunityFeed, fetchCommuni
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
+import { toast } from "sonner"
 
 export default function CommunityPage() {
   const [loading, setLoading] = useState(true)
@@ -25,24 +26,35 @@ export default function CommunityPage() {
   const [challenges, setChallenges] = useState<any[]>([])
 
   const loadData = async () => {
+    setLoading(true)
+    setError(null)
+    const dataPromise = Promise.all([
+      fetchCommunityStats(),
+      fetchLeaderboard(),
+      fetchCommunityFeed(),
+      fetchCommunityChallenges()
+    ])
+    
+    toast.promise(dataPromise, {
+      loading: "Refreshing community data...",
+      success: (res) => {
+        setStats(res[0].data.stats)
+        setChartData(res[0].data.chartData)
+        setLeaderboard(res[1].data)
+        setFeed(res[2].data)
+        setChallenges(res[3].data)
+        return "Community data refreshed"
+      },
+      error: (err: any) => {
+        setError(err.message || "Failed to load community data.")
+        return "Unable to load community data"
+      }
+    })
+
     try {
-      setLoading(true)
-      setError(null)
-      
-      const [statsRes, leadRes, feedRes, chalRes] = await Promise.all([
-        fetchCommunityStats(),
-        fetchLeaderboard(),
-        fetchCommunityFeed(),
-        fetchCommunityChallenges()
-      ])
-      
-      setStats(statsRes.data.stats)
-      setChartData(statsRes.data.chartData)
-      setLeaderboard(leadRes.data)
-      setFeed(feedRes.data)
-      setChallenges(chalRes.data)
-    } catch (err: any) {
-      setError(err.message || "Failed to load community data.")
+      await dataPromise
+    } catch (err) {
+      // Handled in toast error
     } finally {
       setLoading(false)
     }
@@ -53,15 +65,26 @@ export default function CommunityPage() {
   }, [])
 
   const handleJoinChallenge = async (id: string) => {
+    setJoiningId(id)
+    const joinPromise = joinChallenge(id)
+    
+    toast.promise(joinPromise, {
+      loading: "Joining challenge...",
+      success: () => {
+        setChallenges(prev => prev.map(c => 
+          c.id === id ? { ...c, hasJoined: true, participants: c.participants + 1 } : c
+        ))
+        return "Challenge joined successfully"
+      },
+      error: (err: any) => {
+        return err.message || "Failed to join challenge"
+      }
+    })
+
     try {
-      setJoiningId(id)
-      await joinChallenge(id)
-      // Optimistically update
-      setChallenges(prev => prev.map(c => 
-        c.id === id ? { ...c, hasJoined: true, participants: c.participants + 1 } : c
-      ))
-    } catch (err: any) {
-      alert(err.message || "Failed to join challenge")
+      await joinPromise
+    } catch (err) {
+      // Handled in toast error
     } finally {
       setJoiningId(null)
     }

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
+import { toast } from "sonner"
 import { 
   fetchOffsetProjects, 
   fetchOffsetRecommendations, 
@@ -86,25 +87,37 @@ export default function OffsetMarketplacePage() {
   const handlePurchase = async () => {
     if (!selectedProject || creditsToBuy <= 0) return
     
+    const purchasePromise = purchaseOffset(selectedProject._id, creditsToBuy)
+
+    toast.promise(purchasePromise, {
+      loading: "Processing transaction...",
+      success: () => {
+        setPurchaseSuccess(true)
+        
+        // Reload stats and history in background
+        Promise.all([fetchOffsetStats(), fetchOffsetHistory(1, 5), fetchOffsetProjects()]).then(
+          ([sRes, hRes, pRes]) => {
+            setStats(sRes.data)
+            setHistory(hRes.data)
+            setProjects(pRes.data)
+            setPage(1)
+            setTotalPages(hRes.pagination.pages)
+          }
+        )
+        
+        setTimeout(() => setPurchaseModalOpen(false), 2000)
+        return "Offset purchased successfully"
+      },
+      error: (err: any) => {
+        return err.message || "Transaction failed"
+      }
+    })
+
     try {
       setPurchasing(true)
-      await purchaseOffset(selectedProject._id, creditsToBuy)
-      setPurchaseSuccess(true)
-      
-      // Reload stats and history in background
-      Promise.all([fetchOffsetStats(), fetchOffsetHistory(1, 5), fetchOffsetProjects()]).then(
-        ([sRes, hRes, pRes]) => {
-          setStats(sRes.data)
-          setHistory(hRes.data)
-          setProjects(pRes.data)
-          setPage(1)
-          setTotalPages(hRes.pagination.pages)
-        }
-      )
-      
-      setTimeout(() => setPurchaseModalOpen(false), 2000)
-    } catch (err: any) {
-      alert(err.message || "Purchase failed")
+      await purchasePromise
+    } catch (err) {
+      // Handled in toast error
     } finally {
       setPurchasing(false)
     }

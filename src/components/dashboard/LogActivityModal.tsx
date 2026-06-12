@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { activityService, CreateActivityDTO, ActivityDocument } from "@/services/activityService";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface LogActivityModalProps {
   isOpen: boolean;
@@ -30,7 +30,6 @@ const CATEGORIES = [
 export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: LogActivityModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const { toast } = useToast();
 
   const [formData, setFormData] = useState<CreateActivityDTO>({
     title: "",
@@ -86,24 +85,36 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
     setError("");
 
     try {
-      if (activityToEdit) {
-        await activityService.updateActivity(activityToEdit._id, formData);
-      } else {
-        const { newlyUnlocked, newlyCompletedChallenges } = await activityService.createActivity(formData);
-        if (newlyUnlocked && newlyUnlocked.length > 0) {
-          toast({
-            title: "🏆 Achievement Unlocked!",
-            description: `You just unlocked ${newlyUnlocked.length} new achievement(s)!`,
-          });
-        }
-        if (newlyCompletedChallenges && newlyCompletedChallenges.length > 0) {
-          toast({
-            title: "🏆 Challenge Completed!",
-            description: `You completed ${newlyCompletedChallenges.length} challenge(s)!`,
-            variant: "default",
-          });
-        }
-      }
+      const savePromise = activityToEdit
+        ? activityService.updateActivity(activityToEdit._id, formData)
+        : activityService.createActivity(formData);
+
+      toast.promise(savePromise, {
+        loading: activityToEdit ? "Updating activity..." : "Logging activity...",
+        success: (data: any) => {
+          if (!activityToEdit) {
+            const { newlyUnlocked, newlyCompletedChallenges } = data || {};
+            if (newlyUnlocked && newlyUnlocked.length > 0) {
+              setTimeout(() => {
+                toast.success("🏆 Achievement Unlocked!", {
+                  description: `You just unlocked ${newlyUnlocked.length} new achievement(s)!`,
+                });
+              }, 500);
+            }
+            if (newlyCompletedChallenges && newlyCompletedChallenges.length > 0) {
+              setTimeout(() => {
+                toast.success("🏆 Challenge Completed!", {
+                  description: `You completed ${newlyCompletedChallenges.length} challenge(s)!`,
+                });
+              }, 500);
+            }
+          }
+          return activityToEdit ? "Activity updated successfully" : "Activity logged successfully";
+        },
+        error: "Failed to log activity"
+      });
+
+      await savePromise;
       onSave(); // Trigger parent refresh
       onClose(); // Close modal
     } catch (err: any) {

@@ -11,6 +11,7 @@ import { aiCoachService, AICoachResponse } from "@/services/aiCoachService"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
+import { toast } from "sonner"
 
 export default function AICoachPage() {
   const [data, setData] = useState<AICoachResponse | null>(null)
@@ -33,13 +34,26 @@ export default function AICoachPage() {
   }
 
   const handleGenerate = async () => {
+    const genPromise = aiCoachService.generateNewAnalysis()
+    
+    toast.promise(genPromise, {
+      loading: "Analyzing data...",
+      success: (res) => {
+        setData(res)
+        return "AI analysis generated"
+      },
+      error: (err: any) => {
+        setError(err.message || "Failed to generate new analysis")
+        return "AI service temporarily unavailable"
+      }
+    })
+
     try {
       setIsGenerating(true)
       setError(null)
-      const res = await aiCoachService.generateNewAnalysis()
-      setData(res)
-    } catch (err: any) {
-      setError(err.message || "Failed to generate new analysis")
+      await genPromise
+    } catch (err) {
+      // Handled in toast error
     } finally {
       setIsGenerating(false)
     }

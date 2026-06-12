@@ -12,6 +12,7 @@ import { fetchReports, generateReport, deleteReport } from "@/services/reportSer
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
+import { toast } from "sonner"
 
 export default function ImpactReportsPage() {
   const [reports, setReports] = useState<any[]>([])
@@ -39,20 +40,40 @@ export default function ImpactReportsPage() {
   }, [])
 
   const handleGenerate = async (type: string) => {
+    const generatePromise = generateReport(type)
+    
+    toast.promise(generatePromise, {
+      loading: "Generating report...",
+      success: (res) => {
+        setActiveReport(res.data)
+        loadReports() // Refresh history
+        return "Report generated successfully"
+      },
+      error: (err: any) => {
+        return err.message || "Failed to generate report"
+      }
+    })
+
     try {
       setIsGenerating(true)
-      const res = await generateReport(type)
-      setActiveReport(res.data)
-      loadReports() // Refresh history
-    } catch (err: any) {
-      alert(err.message || 'Failed to generate report')
+      await generatePromise
+    } catch (err) {
+      // Handled in toast error
     } finally {
       setIsGenerating(false)
     }
   }
 
   const handlePrint = () => {
-    window.print()
+    const printPromise = new Promise(resolve => setTimeout(resolve, 500));
+    toast.promise(printPromise, {
+      loading: "Preparing download...",
+      success: () => {
+        setTimeout(() => window.print(), 100);
+        return "Report downloaded";
+      },
+      error: "Failed to download report"
+    });
   }
 
   const handleDelete = async (id: string) => {

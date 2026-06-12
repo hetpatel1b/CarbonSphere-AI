@@ -13,6 +13,7 @@ import { dashboardService, DashboardSummary, DashboardAnalytics } from "@/servic
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
+import { toast } from "sonner"
 
 // Helper to format relative time
 const formatRelativeTime = (dateString: string) => {
@@ -43,16 +44,28 @@ export default function DashboardPage() {
     loadingRef.current = true;
 
     const fetchDashboardData = async () => {
+      const dataPromise = Promise.all([
+        dashboardService.getSummary(),
+        dashboardService.getAnalytics()
+      ]);
+
+      toast.promise(dataPromise, {
+        loading: "Refreshing dashboard...",
+        success: (data) => {
+          setSummary(data[0]);
+          setAnalytics(data[1]);
+          return "Dashboard refreshed";
+        },
+        error: (err: any) => {
+          setError(err.message || 'Failed to load dashboard data');
+          return "Unable to load dashboard data";
+        }
+      });
+
       try {
-        const [summaryData, analyticsData] = await Promise.all([
-          dashboardService.getSummary(),
-          dashboardService.getAnalytics()
-        ]);
-        
-        setSummary(summaryData);
-        setAnalytics(analyticsData);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load dashboard data');
+        await dataPromise;
+      } catch (e) {
+        // Handled in toast.promise error callback
       } finally {
         setIsLoading(false);
       }

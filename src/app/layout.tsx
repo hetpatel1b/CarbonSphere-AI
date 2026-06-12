@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Geist } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
@@ -37,7 +37,7 @@ export default function RootLayout({
               {children}
             </AuthGuard>
           </AuthProvider>
-          <Toaster />
+          <Toaster position="top-right" richColors />
         </ThemeProvider>
       </body>
     </html>

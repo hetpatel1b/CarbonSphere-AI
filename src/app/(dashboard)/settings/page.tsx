@@ -26,6 +26,7 @@ import {
   updatePassword, exportData, deleteAccount 
 } from "@/services/settingsService"
 import { useAuth } from "@/contexts/AuthContext"
+import { toast } from "sonner"
 
 export default function SettingsPage() {
   const [isMounted, setIsMounted] = useState(false)
@@ -89,24 +90,50 @@ export default function SettingsPage() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSavingProfile(true)
+    
+    const savePromise = updateProfile(profile).then(() => refreshUser())
+
+    toast.promise(savePromise, {
+      loading: "Saving preferences...",
+      success: () => {
+        setProfileSaved(true)
+        setTimeout(() => setProfileSaved(false), 3000)
+        return "Settings saved successfully"
+      },
+      error: "Failed to save settings"
+    })
+
     try {
-      await updateProfile(profile)
-      await refreshUser()
-      setProfileSaved(true)
-      setTimeout(() => setProfileSaved(false), 3000)
-    } catch (err) { alert("Failed to save profile") }
-    setIsSavingProfile(false)
+      setIsSavingProfile(true)
+      await savePromise
+    } catch (err) {
+      // Handled in toast error
+    } finally {
+      setIsSavingProfile(false)
+    }
   }
 
   const handleSavePreferences = async () => {
-    setIsSavingPrefs(true)
+    const savePromise = updatePreferences(preferences)
+
+    toast.promise(savePromise, {
+      loading: "Saving preferences...",
+      success: () => {
+        setPrefsSaved(true)
+        setTimeout(() => setPrefsSaved(false), 3000)
+        return "Settings saved successfully"
+      },
+      error: "Failed to save settings"
+    })
+
     try {
-      await updatePreferences(preferences)
-      setPrefsSaved(true)
-      setTimeout(() => setPrefsSaved(false), 3000)
-    } catch (err) { alert("Failed to save preferences") }
-    setIsSavingPrefs(false)
+      setIsSavingPrefs(true)
+      await savePromise
+    } catch (err) {
+      // Handled
+    } finally {
+      setIsSavingPrefs(false)
+    }
   }
 
   const handleUpdatePassword = async () => {

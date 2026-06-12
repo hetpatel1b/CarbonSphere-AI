@@ -18,6 +18,7 @@ import { dashboardService, DashboardAnalytics } from "@/services/dashboardServic
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
+import { toast } from "sonner"
 
 // Base narratives and colors to keep the beautiful UI intact while data is dynamic
 const baseCategories: Record<string, any> = {
@@ -84,14 +85,27 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      try {
-        const data = await dashboardService.getAnalytics();
-        setAnalytics(data);
-        if (data.categoryBreakdown.length > 0) {
-          setSelectedCategory(data.categoryBreakdown[0].category);
+      const dataPromise = dashboardService.getAnalytics();
+      
+      toast.promise(dataPromise, {
+        loading: "Loading analytics...",
+        success: (data) => {
+          setAnalytics(data);
+          if (data.categoryBreakdown.length > 0) {
+            setSelectedCategory(data.categoryBreakdown[0].category);
+          }
+          return "Analytics updated";
+        },
+        error: (err: any) => {
+          setError(err.message || "Failed to load analytics");
+          return "Analytics could not be loaded";
         }
-      } catch (err: any) {
-        setError(err.message || "Failed to load analytics");
+      });
+
+      try {
+        await dataPromise;
+      } catch (err) {
+        // Handled in toast error
       } finally {
         setIsLoading(false);
       }

@@ -8,7 +8,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { fetchForecastData, applyAction } from "@/services/forecastService"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
@@ -20,40 +20,38 @@ export default function ForecastingPage() {
   
   const [forecast, setForecast] = useState<any>(null)
   
-  const { toast } = useToast()
   const [selectedAction, setSelectedAction] = useState<any>(null)
   const [isApplying, setIsApplying] = useState(false)
 
   const handleApplyAction = async () => {
     if (!selectedAction) return;
+
+    const reductionMatch = selectedAction.reduction?.match(/[\d.]+/);
+    const reductionValue = reductionMatch ? parseFloat(reductionMatch[0]) : 0;
+
+    const applyPromise = applyAction({
+      title: selectedAction.title,
+      reduction: reductionValue,
+      difficulty: selectedAction.difficulty,
+      impact: selectedAction.impact
+    });
+
+    toast.promise(applyPromise, {
+      loading: "Applying action...",
+      success: () => {
+        setSelectedAction(null);
+        return `Successfully added "${selectedAction.title}" to your plan.`;
+      },
+      error: (err: any) => {
+        return err.response?.data?.message || err.message || "Failed to apply action";
+      }
+    });
+
     try {
       setIsApplying(true);
-      // Parse reduction number from string e.g. "0.2 tCO2e/yr" -> 0.2
-      const reductionMatch = selectedAction.reduction?.match(/[\d.]+/);
-      const reductionValue = reductionMatch ? parseFloat(reductionMatch[0]) : 0;
-
-      await applyAction({
-        title: selectedAction.title,
-        reduction: reductionValue,
-        difficulty: selectedAction.difficulty,
-        impact: selectedAction.impact
-      });
-
-      toast({
-        title: "Action Applied",
-        description: `Successfully added "${selectedAction.title}" to your plan.`,
-        duration: 4000,
-      });
-
-      setSelectedAction(null);
-      // Optional: reload data to update forecast
-      // window.location.reload();
-    } catch (err: any) {
-      toast({
-        title: "Failed to apply action",
-        description: err.response?.data?.message || err.message,
-        variant: "destructive"
-      });
+      await applyPromise;
+    } catch (err) {
+      // Handled in toast error
     } finally {
       setIsApplying(false);
     }
@@ -61,13 +59,26 @@ export default function ForecastingPage() {
 
   useEffect(() => {
     const loadData = async () => {
+      setLoading(true)
+      setError(null)
+      const fetchPromise = fetchForecastData()
+      
+      toast.promise(fetchPromise, {
+        loading: "Projecting scenarios...",
+        success: (res) => {
+          setForecast(res.data)
+          return "Forecast updated"
+        },
+        error: (err: any) => {
+          setError(err.response?.data?.message || err.message || "Failed to load forecasting data.")
+          return "Unable to generate forecast"
+        }
+      })
+
       try {
-        setLoading(true)
-        setError(null)
-        const res = await fetchForecastData()
-        setForecast(res.data)
-      } catch (err: any) {
-        setError(err.response?.data?.message || err.message || "Failed to load forecasting data.")
+        await fetchPromise
+      } catch (err) {
+        // Handled in toast error
       } finally {
         setLoading(false)
       }

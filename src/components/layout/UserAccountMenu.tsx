@@ -14,13 +14,27 @@ import {
 import { User, Settings, FileText, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 export function UserAccountMenu() {
   const { user, isLoading } = useAuth();
 
   const handleLogout = () => {
-    logout();
-    window.location.href = "/login";
+    const logoutPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        logout();
+        resolve(true);
+      }, 500);
+    });
+
+    toast.promise(logoutPromise, {
+      loading: "Logging out...",
+      success: () => {
+        window.location.href = "/login";
+        return "Logged out successfully";
+      },
+      error: "Failed to logout"
+    });
   };
 
   if (isLoading) {
