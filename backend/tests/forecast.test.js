@@ -1,5 +1,54 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 const request = require('supertest');
+
+// Directly override groqService singleton methods to bypass Vitest loader mock issues
+const groqService = require('../src/services/groqService');
+groqService.generateAssistantResponse = async () => {
+  return {
+    insight: "Mocked AI sustainability insights. Target reduction in transport emissions.",
+    highestRiskArea: "Transport",
+    potentialReduction: "12.5%",
+    recommendations: [
+      {
+        title: "Use Public Transit",
+        description: "Replace driving with train/bus commute.",
+        reduction: 0.5,
+        difficulty: "Easy",
+        impact: "Medium"
+      },
+      {
+        title: "Unplug Standby Devices",
+        description: "Turn off power strips when not in use.",
+        reduction: 0.1,
+        difficulty: "Easy",
+        impact: "Low"
+      },
+      {
+        title: "Transition to Solar energy",
+        description: "Install solar panels or subscribe to green power.",
+        reduction: 1.2,
+        difficulty: "Hard",
+        impact: "High"
+      },
+      {
+        title: "Eat Plant-Based Meals",
+        description: "Reduce meat consumption to lower agricultural impact.",
+        reduction: 0.3,
+        difficulty: "Medium",
+        impact: "Medium"
+      }
+    ]
+  };
+};
+
+groqService.getHealthStats = () => {
+  return {
+    status: "healthy",
+    availableKeys: 1,
+    activeKey: 1
+  };
+};
+
 const app = require('../src/app');
 const User = require('../src/models/User');
 const Activity = require('../src/models/Activity');

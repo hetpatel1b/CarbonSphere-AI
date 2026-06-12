@@ -1,5 +1,31 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 const request = require('supertest');
+
+// Directly override groqService singleton methods to bypass Vitest loader mock issues
+const groqService = require('../src/services/groqService');
+groqService.generateAssistantResponse = async () => {
+  return {
+    environmentalSummary: "Mocked: installing solar panels reduces dependency on fossil-fuel power grids.",
+    longTermBenefits: [
+      "Substantial long-term reduction in grid emissions",
+      "Offsets electricity costs over time"
+    ],
+    recommendedActions: [
+      "Review local grid emission factors",
+      "Verify system capacity sizing options"
+    ],
+    riskReduction: "Protects against future brownouts and spikes in grid emissions intensity."
+  };
+};
+
+groqService.getHealthStats = () => {
+  return {
+    status: "healthy",
+    availableKeys: 1,
+    activeKey: 1
+  };
+};
+
 const app = require('../src/app');
 const User = require('../src/models/User');
 const jwt = require('jsonwebtoken');
