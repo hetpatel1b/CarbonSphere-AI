@@ -12,7 +12,25 @@ const getHeaders = () => {
 
 export const fetchForecastData = async () => {
   const response = await fetch(`${API_URL}/forecast/data`, { headers: getHeaders() });
+  
+  if (response.status === 404) {
+    const data = await response.json();
+    return { ...data, needsGeneration: true };
+  }
+
   if (!response.ok) throw new Error('Failed to fetch forecast data');
+  return response.json();
+};
+
+export const generateForecast = async () => {
+  const response = await fetch(`${API_URL}/forecast/generate`, {
+    method: 'POST',
+    headers: getHeaders()
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || 'Failed to generate forecast');
+  }
   return response.json();
 };
 

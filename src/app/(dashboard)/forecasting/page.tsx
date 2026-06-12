@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { fetchForecastData, applyAction } from "@/services/forecastService"
+import { fetchForecastData, applyAction, generateForecast } from "@/services/forecastService"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -22,6 +22,8 @@ export default function ForecastingPage() {
   
   const [selectedAction, setSelectedAction] = useState<any>(null)
   const [isApplying, setIsApplying] = useState(false)
+  const [needsGeneration, setNeedsGeneration] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   const handleApplyAction = async () => {
     if (!selectedAction) return;
@@ -64,10 +66,14 @@ export default function ForecastingPage() {
       const fetchPromise = fetchForecastData()
       
       toast.promise(fetchPromise, {
-        loading: "Projecting scenarios...",
+        loading: "Loading forecast...",
         success: (res) => {
+          if (res.needsGeneration) {
+            setNeedsGeneration(true)
+            return "No forecast available"
+          }
           setForecast(res.data)
-          return "Forecast updated"
+          return "Forecast loaded"
         },
         error: (err: any) => {
           setError(err.response?.data?.message || err.message || "Failed to load forecasting data.")
@@ -86,6 +92,32 @@ export default function ForecastingPage() {
     
     loadData()
   }, [])
+
+  const handleGenerateForecast = async () => {
+    setIsGenerating(true)
+    const generatePromise = generateForecast()
+
+    toast.promise(generatePromise, {
+      loading: "Analyzing your activity history...",
+      success: (res) => {
+        setForecast(res.data)
+        setNeedsGeneration(false)
+        return "Forecast generated successfully"
+      },
+      error: (err: any) => {
+        console.error("Failed to generate forecast:", err)
+        return err.message || "Failed to generate forecast"
+      }
+    })
+
+    try {
+      await generatePromise
+    } catch (err) {
+      // Handled in toast error
+    } finally {
+      setIsGenerating(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -115,6 +147,27 @@ export default function ForecastingPage() {
           title="Failed to load forecast"
           message={error}
           onRetry={() => window.location.reload()}
+        />
+      </div>
+    )
+  }
+
+  if (needsGeneration) {
+    return (
+      <div className="flex flex-col gap-8 pb-8">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Carbon Forecasting</h1>
+          <p className="text-sm text-muted-foreground">
+            Predict future emissions and discover opportunities for improvement.
+          </p>
+        </div>
+        <EmptyState
+          icon={TrendingUp}
+          title="No forecast available yet"
+          description="Generate your first AI-driven forecast from your activity history."
+          actionLabel={isGenerating ? "Generating..." : "Generate Forecast"}
+          onAction={handleGenerateForecast}
+          className="my-8"
         />
       </div>
     )
@@ -188,10 +241,10 @@ export default function ForecastingPage() {
       {!hasSufficientData ? (
         <EmptyState
           icon={TrendingUp}
-          title="No Forecast Available"
-          description="Add at least 3 activities to generate an AI forecast."
-          actionLabel="Log Activity"
-          actionHref="/log"
+          title="No forecast available yet"
+          description="Generate your first AI-driven forecast from your activity history."
+          actionLabel={isGenerating ? "Generating..." : "Generate Forecast"}
+          onAction={handleGenerateForecast}
           className="my-8"
         />
       ) : (
