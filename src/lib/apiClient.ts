@@ -51,7 +51,7 @@ export const apiClient = {
     }, forceRefresh);
   },
 
-  async post<T>(path: string, body?: unknown, options: RequestInit = {}): Promise<T> {
+  async post<T, B extends object | string | FormData = object | string | FormData>(path: string, body?: B, options: RequestInit = {}): Promise<T> {
     const isDemo = typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
     if (isDemo) return handleDemoRequest('POST', path, body) as Promise<T>;
 
@@ -66,7 +66,7 @@ export const apiClient = {
     return handleResponse(response);
   },
 
-  async put<T>(path: string, body?: unknown, options: RequestInit = {}): Promise<T> {
+  async put<T, B extends object | string | FormData = object | string | FormData>(path: string, body?: B, options: RequestInit = {}): Promise<T> {
     const isDemo = typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
     if (isDemo) return handleDemoRequest('PUT', path, body) as Promise<T>;
 
@@ -81,7 +81,7 @@ export const apiClient = {
     return handleResponse(response);
   },
 
-  async patch<T>(path: string, body?: unknown, options: RequestInit = {}): Promise<T> {
+  async patch<T, B extends object | string | FormData = object | string | FormData>(path: string, body?: B, options: RequestInit = {}): Promise<T> {
     const isDemo = typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
     if (isDemo) return handleDemoRequest('PATCH', path, body) as Promise<T>;
 

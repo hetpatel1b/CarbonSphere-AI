@@ -6,14 +6,19 @@ export interface AssistantResponse {
   actionability?: number;
 }
 
+interface InnerJson {
+  content?: string;
+  message?: { content?: string };
+}
+
 interface ApiResponsePayload {
   data?: {
-    content?: string | Record<string, unknown>;
+    content?: string | InnerJson;
     impact?: 'High' | 'Medium' | 'Low';
     actionability?: number;
-    [key: string]: unknown;
+    [key: string]: string | number | boolean | null | undefined | InnerJson | object;
   };
-  content?: string | Record<string, unknown>;
+  content?: string | InnerJson;
   message?: {
     content?: string;
   };
@@ -21,7 +26,7 @@ interface ApiResponsePayload {
 
 export const assistantService = {
   chat: async (message: string): Promise<AssistantResponse> => {
-    const response = await apiClient.post<unknown>('/assistant/chat', { message });
+    const response = await apiClient.post<ApiResponsePayload>('/assistant/chat', { message });
     
     // Defensive parsing
     const safeData = response as ApiResponsePayload;
@@ -30,8 +35,8 @@ export const assistantService = {
     // If the backend somehow returned a stringified JSON string for content
     if (typeof parsedContent === 'string' && parsedContent.trim().startsWith('{')) {
       try {
-        const innerJson = JSON.parse(parsedContent) as Record<string, unknown>;
-        parsedContent = (innerJson.content || (innerJson.message as Record<string, unknown>)?.content || parsedContent) as string;
+        const innerJson = JSON.parse(parsedContent) as InnerJson;
+        parsedContent = (innerJson.content || innerJson.message?.content || parsedContent) as string | InnerJson;
       } catch (e) {
         // Ignore JSON parse errors, just use the string
       }
@@ -39,7 +44,8 @@ export const assistantService = {
     
     // If it's still an object for some reason, stringify it or extract safely
     if (typeof parsedContent === 'object' && parsedContent !== null) {
-      parsedContent = (parsedContent as Record<string, unknown>).content as string || JSON.stringify(parsedContent);
+      const parsedObj = parsedContent as InnerJson;
+      parsedContent = parsedObj.content || JSON.stringify(parsedContent);
     }
     
     return {

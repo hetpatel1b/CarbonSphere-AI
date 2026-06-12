@@ -1,4 +1,5 @@
 import { apiClient } from '../lib/apiClient';
+import { AchievementDocument, Challenge } from '../types';
 
 export interface ActivityDocument {
   _id: string;
@@ -27,8 +28,8 @@ export interface CreateActivityDTO {
 interface CreateActivityResponse {
   success: boolean;
   data: ActivityDocument;
-  newlyUnlocked?: unknown[];
-  newlyCompletedChallenges?: unknown[];
+  newlyUnlocked?: AchievementDocument[];
+  newlyCompletedChallenges?: Challenge[];
 }
 
 export const activityService = {
@@ -47,7 +48,7 @@ export const activityService = {
     return res.data;
   },
 
-  async createActivity(data: CreateActivityDTO): Promise<{ activity: ActivityDocument, newlyUnlocked: unknown[], newlyCompletedChallenges: unknown[] }> {
+  async createActivity(data: CreateActivityDTO): Promise<{ activity: ActivityDocument, newlyUnlocked: AchievementDocument[], newlyCompletedChallenges: Challenge[] }> {
     const res = await apiClient.post<CreateActivityResponse>('/activities', data);
     return {
       activity: res.data,

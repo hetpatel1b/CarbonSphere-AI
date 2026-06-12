@@ -1,4 +1,6 @@
-export const setUser = (user: unknown) => {
+import { UserProfile } from '../types';
+
+export const setUser = (user: UserProfile) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('user', JSON.stringify(user));
   }

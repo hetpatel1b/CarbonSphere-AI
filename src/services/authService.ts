@@ -1,12 +1,13 @@
 import { setUser, logout as localLogout } from '../utils/auth';
 import { apiClient } from '../lib/apiClient';
+import { UserProfile } from '../types';
 
 interface AuthResponse {
   success: boolean;
   message?: string;
   token?: string;
-  user?: unknown;
-  data?: unknown;
+  user?: UserProfile;
+  data?: UserProfile;
 }
 
 export const authService = {
@@ -14,7 +15,8 @@ export const authService = {
     const data = await apiClient.post<AuthResponse>('/auth/login', { email, password });
 
     if (data.success && (data.user || data.data || data.token)) {
-      setUser(data.user || data.data);
+      const u = data.user || data.data;
+      if (u) setUser(u);
     }
 
     return data;

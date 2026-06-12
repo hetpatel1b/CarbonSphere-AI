@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import dynamic from "next/dynamic"
 import { Users, Globe, Target, Trophy, Flame, TrendingUp, Sparkles, AlertTriangle, UserCircle2, CheckCircle2, History, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { fetchCommunityStats, fetchLeaderboard, fetchCommunityFeed, fetchCommunityChallenges, joinChallenge } from "@/services/communityService"
+import { fetchCommunityStats, fetchLeaderboard, fetchCommunityFeed, fetchCommunityChallenges, joinChallenge, CommunityStats, LeaderboardEntry, FeedItem, CommunityChallenge } from "@/services/communityService"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -23,11 +23,11 @@ export default function CommunityPage() {
   const [joiningId, setJoiningId] = useState<string | null>(null)
   const reducedMotion = useReducedMotion()
   
-  const [stats, setStats] = useState<{ totalUsers: number; totalCarbonSaved: number; activeChallengesCount: number; totalBadges: number } | null>(null)
+  const [stats, setStats] = useState<CommunityStats | null>(null)
   const [chartData, setChartData] = useState<{ month: string; reduction: number }[]>([])
-  const [leaderboard, setLeaderboard] = useState<{ id: string; name: string; rank: number; score: number; isCurrentUser?: boolean }[]>([])
-  const [feed, setFeed] = useState<{ id: string; user: string; title: string; description: string; type: string }[]>([])
-  const [challenges, setChallenges] = useState<{ id: string; title: string; progress: number; participants: number; hasJoined: boolean }[]>([])
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [feed, setFeed] = useState<FeedItem[]>([])
+  const [challenges, setChallenges] = useState<CommunityChallenge[]>([])
 
   const loadData = async () => {
     setLoading(true)
@@ -39,9 +39,9 @@ export default function CommunityPage() {
         fetchCommunityFeed(),
         fetchCommunityChallenges()
       ])
-      setStats(statsRes.data.stats as { totalUsers: number; totalCarbonSaved: number; activeChallengesCount: number; totalBadges: number })
-      setFeed(feedRes.data as { id: string; user: string; title: string; description: string; type: string }[])
-      setChallenges(challengesRes.data as unknown as { id: string; title: string; progress: number; participants: number; hasJoined: boolean }[])
+      setStats(statsRes.data.stats)
+      setFeed(feedRes.data)
+      setChallenges(challengesRes.data)
       
       let cData = statsRes.data.chartData;
       if (cData && cData.length === 1) {
@@ -50,7 +50,7 @@ export default function CommunityPage() {
           reduction: 0
         });
       }
-      setLeaderboard(leaderboardRes.data as { id: string; name: string; rank: number; score: number; isCurrentUser?: boolean }[])
+      setLeaderboard(leaderboardRes.data)
       setChartData((cData || []) as { month: string; reduction: number }[])
     } catch (err: unknown) {
       setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load community data.")

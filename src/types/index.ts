@@ -11,8 +11,8 @@ export interface ApiResponse<T> {
     total: number;
     pages: number;
   };
-  newlyUnlocked?: unknown[];
-  newlyCompletedChallenges?: unknown[];
+  newlyUnlocked?: AchievementDocument[];
+  newlyCompletedChallenges?: Challenge[];
 }
 
 // User profile & preferences
@@ -96,10 +96,12 @@ export interface ForecastInsights {
   insight: string;
   highestRiskArea?: string;
   potentialIncrease?: string;
+  potentialReduction?: string;
 }
 
 export interface ForecastAction {
   title: string;
+  description: string;
   reduction: string | number;
   difficulty: string;
   impact: string;
@@ -115,7 +117,7 @@ export interface ForecastData {
   forecastNextMonth: number;
   trendDirection: 'Decreasing' | 'Stable' | 'Increasing';
   aiInsights: ForecastInsights;
-  actionPlan: ForecastAction[];
+  recommendations: ForecastAction[];
   needsGeneration?: boolean;
 }
 
@@ -154,7 +156,7 @@ export interface SimulatorScenario {
   name: string;
   description: string;
   category: string;
-  parameters: Record<string, unknown>;
+  parameters: Record<string, string | number | boolean>;
   icon?: string;
 }
 
@@ -227,7 +229,7 @@ export interface AchievementDocument {
   badgeIcon: string;
   points: number;
   category: string;
-  criteria: Record<string, unknown>;
+  criteria: Record<string, string | number | boolean>;
   isActive: boolean;
   unlocked: boolean;
   progress: number;
@@ -261,15 +263,15 @@ export interface Notification {
 
 export interface Report {
   _id: string;
-  userId: string;
   reportType: string;
-  carbonScore: number;
-  periodStart: string;
-  periodEnd: string;
-  summary: string;
-  sections: Record<string, unknown>;
-  pdfUrl?: string;
-  createdAt: string;
+  generatedAt: string;
+  reportData: {
+    summary: { sustainabilityScore: number; totalEmissions: number; netCarbonImpact: number };
+    aiInsights: { executiveSummary: string; keyFindings: string[]; improvementOpportunities: string[] };
+    offsetContributions: { totalCredits: number; treesEquivalent: number };
+    emissionsAnalysis: { categoryBreakdown: { category: string; amount: number; percentage: number; activitiesCount?: number }[] };
+    community: { challengesJoined: number; challengesCompleted: number; achievementsEarned: number };
+  };
 }
 
 

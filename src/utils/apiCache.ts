@@ -1,7 +1,7 @@
 import { logout } from './auth';
 
-const cache = new Map<string, { data: unknown; timestamp: number }>();
-const inFlightRequests = new Map<string, Promise<unknown>>();
+const cache = new Map<string, { data: Record<string, string | number | boolean | null | undefined | object>; timestamp: number }>();
+const inFlightRequests = new Map<string, Promise<Record<string, string | number | boolean | null | undefined | object>>>();
 
 const CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 
@@ -21,7 +21,7 @@ export const fetchWithCache = async (url: string, options: RequestInit = {}, for
     }
     const contentType = res.headers.get("content-type");
     if (!res.ok) {
-        const error = new Error('API request failed') as Error & { status?: number; data?: unknown };
+        const error = new Error('API request failed') as Error & { status?: number; data?: Record<string, string | number | boolean | null | object | undefined> };
         error.status = res.status;
         if (contentType && contentType.indexOf("application/json") !== -1) {
             const errJson = await res.json();
@@ -54,7 +54,7 @@ export const fetchWithCache = async (url: string, options: RequestInit = {}, for
     }
     const contentType = res.headers.get("content-type");
     if (!res.ok) {
-        const error = new Error('API request failed') as Error & { status?: number; data?: unknown };
+        const error = new Error('API request failed') as Error & { status?: number; data?: Record<string, string | number | boolean | null | object | undefined> };
         error.status = res.status;
         if (contentType && contentType.indexOf("application/json") !== -1) {
             const errJson = await res.json();

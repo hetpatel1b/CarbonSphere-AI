@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { TreeDeciduous, Wind, Droplets, Droplet, Sprout, Globe } from "lucide-react"
+import { OffsetProject } from "@/types"
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
@@ -22,9 +23,9 @@ export default function MarketplaceCard({
   isRecommended, 
   onPurchase 
 }: { 
-  project: any; 
+  project: OffsetProject; 
   isRecommended: boolean;
-  onPurchase: (project: any) => void;
+  onPurchase: (project: OffsetProject) => void;
 }) {
   return (
     <Card className={cn("flex flex-col transition-shadow hover:shadow-xl border-border/40 bg-white/50 dark:bg-zinc-950/30 backdrop-blur-xl relative", isRecommended && "border-emerald-500/50 shadow-emerald-500/10")}>

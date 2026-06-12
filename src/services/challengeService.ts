@@ -39,8 +39,8 @@ export const challengeService = {
     return res.data;
   },
 
-  async joinChallenge(id: string): Promise<unknown> {
-    const res = await apiClient.post<{ success: boolean; data: unknown }>(`/challenges/join/${id}`);
+  async joinChallenge(id: string): Promise<{ hasJoined: boolean; challengeId?: string }> {
+    const res = await apiClient.post<{ success: boolean; data: { hasJoined: boolean; challengeId?: string } }>(`/challenges/join/${id}`);
     return res.data;
   }
 };

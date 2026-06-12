@@ -8,6 +8,7 @@ import dynamic from "next/dynamic"
 import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { fetchForecastData, applyAction, generateForecast } from "@/services/forecastService"
+import { ForecastData, ForecastAction } from "@/types"
 import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -17,30 +18,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion"
 
 const ForecastingChart = dynamic(() => import('@/components/charts/ForecastingChart'), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> })
 
-interface RecommendationAction {
-  title: string;
-  description: string;
-  reduction: string;
-  difficulty: string;
-  impact: string;
-}
 
-interface ForecastData {
-  historicalSeries: { month: string; actual: number }[];
-  predictionSeries: { month: string; predicted: number }[];
-  riskLevel: string;
-  previousMonth: number;
-  currentMonth: number;
-  forecastNextMonth: number;
-  trendDirection: string;
-  aiInsights: {
-    insight: string;
-    highestRiskArea: string;
-    potentialIncrease?: string;
-    potentialReduction?: string;
-  };
-  recommendations: RecommendationAction[];
-}
 
 export default function ForecastingPage() {
   const [loading, setLoading] = useState(true)
@@ -48,7 +26,7 @@ export default function ForecastingPage() {
   
   const [forecast, setForecast] = useState<ForecastData | null>(null)
   
-  const [selectedAction, setSelectedAction] = useState<RecommendationAction | null>(null)
+  const [selectedAction, setSelectedAction] = useState<ForecastAction | null>(null)
   const [isApplying, setIsApplying] = useState(false)
   const [needsGeneration, setNeedsGeneration] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -57,7 +35,7 @@ export default function ForecastingPage() {
   const handleApplyAction = async () => {
     if (!selectedAction) return;
 
-    const reductionMatch = selectedAction.reduction?.match(/[\d.]+/);
+    const reductionMatch = String(selectedAction.reduction).match(/[\d.]+/);
     const reductionValue = reductionMatch ? parseFloat(reductionMatch[0]) : 0;
 
     const applyPromise = applyAction({
@@ -97,7 +75,7 @@ export default function ForecastingPage() {
         if (res.needsGeneration) {
           setNeedsGeneration(true)
         } else {
-          setForecast(res as unknown as ForecastData)
+          setForecast(res as ForecastData)
         }
       } catch (err: unknown) {
         setError((err as { response?: { data?: { message?: string } } })?.response?.data?.message || (err as Error).message || "Failed to load forecasting data.")
@@ -113,7 +91,7 @@ export default function ForecastingPage() {
     setIsGenerating(true)
     try {
       const res = await generateForecast()
-      setForecast(res.data as unknown as ForecastData)
+      setForecast(res.data as ForecastData)
       setNeedsGeneration(false)
       toast.success("Forecast generated successfully")
     } catch (err: unknown) {
