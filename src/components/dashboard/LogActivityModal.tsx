@@ -296,10 +296,21 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
                         <div><span className="font-semibold text-foreground">Formula:</span> {breakdown.formula}</div>
                         <div><span className="font-semibold text-foreground">Factor:</span> {breakdown.emissionFactor} {breakdown.factorUnit}</div>
                      </div>
-                     <div className="flex items-start gap-1">
+                     <div className="flex items-start gap-1 pt-1 border-t border-primary/5">
                        <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                       <div>
-                         <div><span className="font-semibold text-foreground">Source:</span> {breakdown.source}</div>
+                       <div className="space-y-1">
+                         <div>
+                           <span className="font-semibold text-foreground">Source:</span>{" "}
+                           {breakdown.sourceUrl ? (
+                             <a href={breakdown.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                               {breakdown.source}
+                             </a>
+                           ) : (
+                             breakdown.source
+                           )}
+                           {breakdown.region && <span className="opacity-70"> ({breakdown.region})</span>}
+                           {breakdown.updatedAt && <span className="opacity-70"> • Updated: {breakdown.updatedAt}</span>}
+                         </div>
                          <div><span className="font-semibold text-foreground">Assumptions:</span> {breakdown.assumptions}</div>
                        </div>
                      </div>

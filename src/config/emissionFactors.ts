@@ -1,36 +1,44 @@
+export interface EmissionFactorNode {
+  factor: number;
+  source: string;
+  sourceUrl: string;
+  updatedAt: string;
+  region: string;
+}
+
 export interface EmissionFactors {
-  transport: Record<string, number>;
-  energy: { electricity: number };
-  water: { usage: number };
-  food: Record<string, number>;
-  shopping: Record<string, number>;
+  transport: Record<string, EmissionFactorNode>;
+  energy: { electricity: EmissionFactorNode };
+  water: { usage: EmissionFactorNode };
+  food: Record<string, EmissionFactorNode>;
+  shopping: Record<string, EmissionFactorNode>;
 }
 
 export const defaultEmissionFactors: EmissionFactors = {
   transport: {
-    'Petrol Car': 0.192,
-    'Diesel Car': 0.171,
-    'Electric Vehicle': 0.050,
-    'Bus': 0.089,
-    'Train': 0.041,
-    'Flight': 0.255
+    'Petrol Car': { factor: 0.192, source: 'DEFRA (UK Govt)', sourceUrl: 'https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2023', updatedAt: '2023-06-01', region: 'Global Average' },
+    'Diesel Car': { factor: 0.171, source: 'DEFRA (UK Govt)', sourceUrl: 'https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2023', updatedAt: '2023-06-01', region: 'Global Average' },
+    'Electric Vehicle': { factor: 0.050, source: 'EPA eGRID', sourceUrl: 'https://www.epa.gov/egrid', updatedAt: '2023-01-30', region: 'US Average' },
+    'Bus': { factor: 0.089, source: 'DEFRA (UK Govt)', sourceUrl: 'https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2023', updatedAt: '2023-06-01', region: 'Global Average' },
+    'Train': { factor: 0.041, source: 'DEFRA (UK Govt)', sourceUrl: 'https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2023', updatedAt: '2023-06-01', region: 'Global Average' },
+    'Flight': { factor: 0.255, source: 'GHG Protocol', sourceUrl: 'https://ghgprotocol.org/', updatedAt: '2022-04-15', region: 'Global Average' }
   },
   energy: {
-    electricity: 0.475
+    electricity: { factor: 0.475, source: 'EPA eGRID', sourceUrl: 'https://www.epa.gov/egrid', updatedAt: '2023-01-30', region: 'US Average' }
   },
   water: {
-    usage: 0.0003
+    usage: { factor: 0.0003, source: 'DEFRA (UK Govt)', sourceUrl: 'https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2023', updatedAt: '2023-06-01', region: 'Global Average' }
   },
   food: {
-    'Beef': 27,
-    'Chicken': 6.9,
-    'Vegetarian': 2,
-    'Vegan': 1.5
+    'Beef': { factor: 27, source: 'IPCC', sourceUrl: 'https://www.ipcc.ch/srccl/', updatedAt: '2019-08-08', region: 'Global Average' },
+    'Chicken': { factor: 6.9, source: 'IPCC', sourceUrl: 'https://www.ipcc.ch/srccl/', updatedAt: '2019-08-08', region: 'Global Average' },
+    'Vegetarian': { factor: 2, source: 'IPCC', sourceUrl: 'https://www.ipcc.ch/srccl/', updatedAt: '2019-08-08', region: 'Global Average' },
+    'Vegan': { factor: 1.5, source: 'IPCC', sourceUrl: 'https://www.ipcc.ch/srccl/', updatedAt: '2019-08-08', region: 'Global Average' }
   },
   shopping: {
-    'Low Impact': 5,
-    'Medium Impact': 15,
-    'High Impact': 40
+    'Low Impact': { factor: 5, source: 'GHG Protocol', sourceUrl: 'https://ghgprotocol.org/', updatedAt: '2022-04-15', region: 'Global Average' },
+    'Medium Impact': { factor: 15, source: 'GHG Protocol', sourceUrl: 'https://ghgprotocol.org/', updatedAt: '2022-04-15', region: 'Global Average' },
+    'High Impact': { factor: 40, source: 'GHG Protocol', sourceUrl: 'https://ghgprotocol.org/', updatedAt: '2022-04-15', region: 'Global Average' }
   }
 };
 
