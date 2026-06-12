@@ -52,6 +52,18 @@ export default function LoginPage() {
     }
   };
 
+  const handleDemoLogin = () => {
+    localStorage.setItem('demoMode', 'true');
+    localStorage.setItem('token', 'demo-token');
+    localStorage.setItem('user', JSON.stringify({
+      _id: 'demo-user-id',
+      name: 'Demo Explorer',
+      email: 'demo@carbonsphere.ai'
+    }));
+    toast.success("Demo Mode Activated", { description: "Welcome, Demo Explorer!" });
+    window.location.href = '/';
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4">
       <div className="w-full max-w-md space-y-8 bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800">
@@ -126,6 +138,25 @@ export default function LoginPage() {
             Sign up
           </Link>
         </p>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-zinc-300 dark:border-zinc-700" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white dark:bg-zinc-900 px-2 text-zinc-500">Or continue without account</span>
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full h-11 text-base font-semibold border-primary/50 hover:bg-primary/5 text-primary"
+          onClick={handleDemoLogin}
+          disabled={isLoading}
+        >
+          Enter One-Click Demo
+        </Button>
       </div>
     </div>
   );

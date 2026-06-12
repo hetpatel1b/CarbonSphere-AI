@@ -18,6 +18,8 @@ import { toast } from "sonner";
 
 export function UserAccountMenu() {
   const { user, isLoading } = useAuth();
+  
+  const isDemoMode = typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
 
   const handleLogout = () => {
     const logoutPromise = new Promise((resolve) => {
@@ -113,7 +115,7 @@ export function UserAccountMenu() {
         
         <DropdownMenuSeparator className="bg-border/30" />
         
-        {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
+        {isDemoMode && (
           <>
             <DropdownMenuItem 
               onClick={handleResetDemoData} 
@@ -131,7 +133,7 @@ export function UserAccountMenu() {
           className="cursor-pointer p-2 rounded-lg m-0.5 text-red-600 dark:text-red-400 focus:bg-red-50 focus:text-red-700 dark:focus:bg-red-500/10 dark:focus:text-red-300"
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{isDemoMode ? "Exit Demo Mode" : "Log out"}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

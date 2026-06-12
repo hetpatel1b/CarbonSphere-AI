@@ -28,9 +28,14 @@ const handleResponse = async (response: Response) => {
   return data;
 };
 
+import { handleDemoRequest } from './demoInterceptor';
+
 export const apiClient = {
   
   async get<T>(path: string, options: RequestInit = {}, forceRefresh = false): Promise<T> {
+    const isDemo = typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
+    if (isDemo) return handleDemoRequest('GET', path) as Promise<T>;
+
     const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;
     return fetchWithCache(fullUrl, {
       ...options,
@@ -40,6 +45,9 @@ export const apiClient = {
   },
 
   async post<T>(path: string, body?: unknown, options: RequestInit = {}): Promise<T> {
+    const isDemo = typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
+    if (isDemo) return handleDemoRequest('POST', path, body) as Promise<T>;
+
     const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;
     const response = await fetch(fullUrl, {
       ...options,
@@ -52,6 +60,9 @@ export const apiClient = {
   },
 
   async put<T>(path: string, body?: unknown, options: RequestInit = {}): Promise<T> {
+    const isDemo = typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
+    if (isDemo) return handleDemoRequest('PUT', path, body) as Promise<T>;
+
     const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;
     const response = await fetch(fullUrl, {
       ...options,
@@ -64,6 +75,9 @@ export const apiClient = {
   },
 
   async patch<T>(path: string, body?: unknown, options: RequestInit = {}): Promise<T> {
+    const isDemo = typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
+    if (isDemo) return handleDemoRequest('PATCH', path, body) as Promise<T>;
+
     const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;
     const response = await fetch(fullUrl, {
       ...options,
@@ -76,6 +90,9 @@ export const apiClient = {
   },
 
   async delete<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const isDemo = typeof window !== 'undefined' && localStorage.getItem('demoMode') === 'true';
+    if (isDemo) return handleDemoRequest('DELETE', path) as Promise<T>;
+
     const fullUrl = path.startsWith('http') ? path : `${API_URL}${path}`;
     const response = await fetch(fullUrl, {
       ...options,
