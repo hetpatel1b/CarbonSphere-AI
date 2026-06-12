@@ -10,7 +10,7 @@ test.describe('Activity Logging', () => {
     // or we'll click the button to log activity.
     // In a real e2e, we would use a seeded db or mock auth state.
     
-    const pageTitle = page.locator('h1', { hasText: 'Log Sustainability Activity' }).or(page.locator('h1', { hasText: 'Welcome' }));
+    const pageTitle = page.locator('h1', { hasText: 'Activity Log' }).or(page.locator('h2', { hasText: 'Welcome back' }));
     await expect(pageTitle).toBeVisible({ timeout: 10000 });
 
     // Try opening the modal if it exists

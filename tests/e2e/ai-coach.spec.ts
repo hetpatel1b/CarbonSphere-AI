@@ -6,7 +6,7 @@ test.describe('AI Coach Workspace', () => {
     await page.goto('/ai-coach');
     
     // Check if page loaded correctly
-    const title = page.locator('h1', { hasText: 'AI Coach' }).or(page.locator('h1', { hasText: 'Welcome' }));
+    const title = page.locator('h1', { hasText: 'AI Coach' }).or(page.locator('h2', { hasText: 'Welcome back' }));
     await expect(title).toBeVisible({ timeout: 10000 });
 
     // Try finding the generate button
