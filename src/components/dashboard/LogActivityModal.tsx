@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calculator, Info } from "lucide-react";
 import { activityService, CreateActivityDTO, ActivityDocument } from "@/services/activityService";
-import { calculateCarbonImpact, CarbonCalculationParams } from "@/utils/carbonCalculator";
+import { calculateCarbonImpact, getCarbonCalculationBreakdown, CarbonCalculationParams } from "@/utils/carbonCalculator";
 import { toast } from "sonner";
 
 interface LogActivityModalProps {
@@ -46,6 +46,11 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
   const [manualEmission, setManualEmission] = useState<string>("");
 
   const estimatedCarbon = calculateCarbonImpact({
+    ...calcParams,
+    category: formData.category
+  });
+
+  const breakdown = getCarbonCalculationBreakdown({
     ...calcParams,
     category: formData.category
   });
@@ -276,9 +281,30 @@ export function LogActivityModal({ isOpen, onClose, onSave, activityToEdit }: Lo
             )}
             
             {formData.category && estimatedCarbon > 0 && (
-              <div className="bg-primary/10 border border-primary/20 p-3 rounded-md flex items-center justify-between">
-                <span className="text-sm font-medium">Estimated Carbon Impact:</span>
-                <span className="text-sm font-bold text-primary">{estimatedCarbon} kg CO2e</span>
+              <div className="bg-primary/5 border border-primary/20 rounded-md p-4 mt-2 space-y-3">
+                <div className="flex justify-between items-center border-b border-primary/10 pb-2">
+                   <span className="text-sm font-semibold flex items-center gap-2">
+                     <Calculator className="w-4 h-4 text-primary"/> 
+                     Estimated Carbon Impact
+                   </span>
+                   <span className="text-lg font-bold text-primary">{estimatedCarbon} kg CO₂e</span>
+                </div>
+                
+                {breakdown && (
+                  <div className="text-xs text-muted-foreground space-y-2 pt-1 animate-in slide-in-from-top-1">
+                     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                        <div><span className="font-semibold text-foreground">Formula:</span> {breakdown.formula}</div>
+                        <div><span className="font-semibold text-foreground">Factor:</span> {breakdown.emissionFactor} {breakdown.factorUnit}</div>
+                     </div>
+                     <div className="flex items-start gap-1">
+                       <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                       <div>
+                         <div><span className="font-semibold text-foreground">Source:</span> {breakdown.source}</div>
+                         <div><span className="font-semibold text-foreground">Assumptions:</span> {breakdown.assumptions}</div>
+                       </div>
+                     </div>
+                  </div>
+                )}
               </div>
             )}
 
