@@ -1,7 +1,4 @@
-import { getToken, logout } from '../utils/auth';
-import { fetchWithCache } from '../utils/apiCache';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { apiClient } from '../lib/apiClient';
 
 export interface ChallengeDocument {
   _id: string;
@@ -36,48 +33,14 @@ export interface ChallengeStatusResponse {
   stats: ChallengeStats;
 }
 
-const getHeaders = () => {
-  const token = getToken();
-  if (!token) throw new Error('No authentication token found');
-  
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  };
-};
-
-const handleResponse = async (response: Response) => {
-  if (response.status === 401) {
-    logout();
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login';
-    }
-    throw new Error('Authentication expired. Please log in again.');
-  }
-
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'API request failed');
-  }
-
-  return data.data; 
-};
-
 export const challengeService = {
   async getChallengeStatus(): Promise<ChallengeStatusResponse> {
-    const data = await fetchWithCache(`${API_URL}/challenges/status`, {
-      method: 'GET',
-      headers: getHeaders(),
-    });
-    return data.data;
+    const res = await apiClient.get<{ success: boolean; data: ChallengeStatusResponse }>('/challenges/status');
+    return res.data;
   },
 
   async joinChallenge(id: string): Promise<any> {
-    const response = await fetch(`${API_URL}/challenges/join/${id}`, {
-      method: 'POST',
-      headers: getHeaders(),
-      credentials: 'include',
-    });
-    return handleResponse(response);
+    const res = await apiClient.post<{ success: boolean; data: any }>(`/challenges/join/${id}`);
+    return res.data;
   }
 };

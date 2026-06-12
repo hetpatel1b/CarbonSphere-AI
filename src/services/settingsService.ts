@@ -1,31 +1,5 @@
-import { getToken } from '../utils/auth';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
-const getHeaders = () => {
-  const token = getToken() || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  };
-};
-
-const fetchWithCreds = (url: string, options: RequestInit = {}) => {
-  return fetch(url, {
-    ...options,
-    headers: {
-      ...getHeaders(),
-      ...options.headers,
-    },
-    credentials: 'include'
-  });
-};
-
-export const fetchProfile = async () => {
-  const response = await fetchWithCreds(`${API_URL}/settings/profile`);
-  if (!response.ok) throw new Error('Failed to fetch profile');
-  return response.json();
-};
+import { apiClient } from '../lib/apiClient';
+import { ApiResponse, UserProfile } from '../types';
 
 export interface ProfileData {
   name?: string;
@@ -62,53 +36,30 @@ export interface PasswordData {
   newPassword?: string;
 }
 
-export const updateProfile = async (data: ProfileData) => {
-  const response = await fetchWithCreds(`${API_URL}/settings/profile`, {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  });
-  if (!response.ok) throw new Error('Failed to update profile');
-  return response.json();
+export const fetchProfile = async (): Promise<ApiResponse<UserProfile>> => {
+  return apiClient.get<ApiResponse<UserProfile>>('/settings/profile');
 };
 
-export const updatePreferences = async (data: PreferencesData) => {
-  const response = await fetchWithCreds(`${API_URL}/settings/preferences`, {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  });
-  if (!response.ok) throw new Error('Failed to update preferences');
-  return response.json();
+export const updateProfile = async (data: ProfileData): Promise<ApiResponse<UserProfile>> => {
+  return apiClient.put<ApiResponse<UserProfile>>('/settings/profile', data);
 };
 
-export const updateNotifications = async (data: NotificationsData) => {
-  const response = await fetchWithCreds(`${API_URL}/settings/notifications`, {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  });
-  if (!response.ok) throw new Error('Failed to update notifications');
-  return response.json();
+export const updatePreferences = async (data: PreferencesData): Promise<ApiResponse<UserProfile>> => {
+  return apiClient.put<ApiResponse<UserProfile>>('/settings/preferences', data);
 };
 
-export const updatePassword = async (data: PasswordData) => {
-  const response = await fetchWithCreds(`${API_URL}/settings/password`, {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  });
-  const resData = await response.json();
-  if (!response.ok) throw new Error(resData.message || 'Failed to update password');
-  return resData;
+export const updateNotifications = async (data: NotificationsData): Promise<ApiResponse<UserProfile>> => {
+  return apiClient.put<ApiResponse<UserProfile>>('/settings/notifications', data);
 };
 
-export const exportData = async () => {
-  const response = await fetchWithCreds(`${API_URL}/settings/export`);
-  if (!response.ok) throw new Error('Failed to export data');
-  return response.json();
+export const updatePassword = async (data: PasswordData): Promise<ApiResponse<void>> => {
+  return apiClient.put<ApiResponse<void>>('/settings/password', data);
 };
 
-export const deleteAccount = async () => {
-  const response = await fetchWithCreds(`${API_URL}/settings/account`, {
-    method: 'DELETE'
-  });
-  if (!response.ok) throw new Error('Failed to delete account');
-  return response.json();
+export const exportData = async (): Promise<ApiResponse<any>> => {
+  return apiClient.get<ApiResponse<any>>('/settings/export');
+};
+
+export const deleteAccount = async (): Promise<ApiResponse<void>> => {
+  return apiClient.delete<ApiResponse<void>>('/settings/account');
 };

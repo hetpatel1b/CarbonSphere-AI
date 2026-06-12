@@ -8,7 +8,7 @@ import {
   FileText, Download, Target, Award, Globe, 
   ShieldCheck, Sparkles, CheckCircle2, AlertTriangle, Leaf, Plus, Loader2
 } from "lucide-react"
-import { fetchReports, generateReport, deleteReport } from "@/services/reportService"
+import { fetchReports, generateReport, deleteReport, fetchReportById } from "@/services/reportService"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -40,25 +40,14 @@ export default function ImpactReportsPage() {
   }, [])
 
   const handleGenerate = async (type: string) => {
-    const generatePromise = generateReport(type)
-    
-    toast.promise(generatePromise, {
-      loading: "Generating report...",
-      success: (res) => {
-        setActiveReport(res.data)
-        loadReports() // Refresh history
-        return "Report generated successfully"
-      },
-      error: (err: any) => {
-        return err.message || "Failed to generate report"
-      }
-    })
-
+    setIsGenerating(true)
     try {
-      setIsGenerating(true)
-      await generatePromise
-    } catch (err) {
-      // Handled in toast error
+      const res = await generateReport(type)
+      setActiveReport(res.data)
+      loadReports() // Refresh history
+      toast.success("Report generated successfully")
+    } catch (err: any) {
+      toast.error(err.message || "Failed to generate report")
     } finally {
       setIsGenerating(false)
     }
@@ -298,18 +287,16 @@ export default function ImpactReportsPage() {
                       <Button variant="ghost" size="sm" onClick={() => handleDelete(report._id)} className="text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30">
                         Delete
                       </Button>
-                      <Button onClick={() => {
-                        // Fetch full report data before setting active
+                      <Button onClick={async () => {
                         setIsGenerating(true);
-                        import('@/services/reportService').then(({ fetchReportById }) => {
-                          fetchReportById(report._id).then(res => {
-                            setActiveReport(res.data);
-                            setIsGenerating(false);
-                          }).catch(err => {
-                            alert(err.message);
-                            setIsGenerating(false);
-                          });
-                        });
+                        try {
+                          const res = await fetchReportById(report._id);
+                          setActiveReport(res.data);
+                        } catch (err: any) {
+                          alert(err.message || "Failed to load report");
+                        } finally {
+                          setIsGenerating(false);
+                        }
                       }} size="sm" variant="outline" className="group-hover:border-emerald-500/50">
                         View Report
                       </Button>

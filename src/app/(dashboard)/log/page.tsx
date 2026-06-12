@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -35,23 +35,28 @@ export default function LogActivityPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [activityToEdit, setActivityToEdit] = useState<ActivityDocument | null>(null)
 
-  const loadActivities = async () => {
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+
+  const loadActivities = useCallback(async (currentPage = page) => {
     setIsLoading(true)
     setError("")
     try {
-      const data = await activityService.getActivities()
-      setActivities(data)
+      const res = await activityService.getActivities(currentPage, 10)
+      setActivities(res.data)
+      if (res.pagination) {
+        setTotalPages(res.pagination.pages || 1)
+      }
     } catch (err: any) {
       setError(err.message || "Failed to load activities")
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [page])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadActivities()
-  }, [])
+    Promise.resolve().then(() => loadActivities(page))
+  }, [page, loadActivities])
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this activity?")) return;
@@ -108,7 +113,7 @@ export default function LogActivityPage() {
               <CardDescription>A complete history of your logged events.</CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto items-center">
-              <Button variant="outline" size="icon" onClick={loadActivities} disabled={isLoading}>
+              <Button variant="outline" size="icon" onClick={() => loadActivities(page)} disabled={isLoading}>
                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
               <div className="relative w-full sm:w-64">
@@ -222,8 +227,25 @@ export default function LogActivityPage() {
             </Table>
           </div>
           <div className="flex items-center justify-end space-x-2 py-4">
-            <Button variant="outline" size="sm" disabled>Previous</Button>
-            <Button variant="outline" size="sm" disabled={filteredActivities.length < 10}>Next</Button>
+            <span className="text-xs text-muted-foreground mr-2">
+              Page {page} of {totalPages}
+            </span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setPage(p => Math.max(1, p - 1))} 
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
           </div>
         </CardContent>
       </Card>

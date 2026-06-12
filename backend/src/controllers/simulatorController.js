@@ -129,12 +129,28 @@ const runSimulation = async (req, res) => {
 // @access  Private
 const getSimulationHistory = async (req, res) => {
   try {
-    const simulations = await Simulation.find({ userId: req.user.id })
-      .sort({ createdAt: -1 });
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = parseInt(req.query.skip, 10) || (page - 1) * limit;
+
+    const query = { userId: req.user.id };
+    const total = await Simulation.countDocuments(query);
+
+    const simulations = await Simulation.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     return res.status(200).json({
       success: true,
       count: simulations.length,
+      pagination: {
+        page,
+        limit,
+        skip,
+        total,
+        pages: Math.ceil(total / limit)
+      },
       data: simulations
     });
   } catch (error) {

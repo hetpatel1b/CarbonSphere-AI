@@ -1,25 +1,16 @@
-import { getToken } from '../utils/auth';
-import { fetchWithCache } from '../utils/apiCache';
+import { apiClient } from '../lib/apiClient';
+import { ApiResponse, SimulationRecord } from '../types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
-const getHeaders = () => {
-  const token = getToken() || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  };
+export const runSimulation = async (scenarioId: string): Promise<ApiResponse<SimulationRecord>> => {
+  return apiClient.post<ApiResponse<SimulationRecord>>('/simulator/run', { scenarioId });
 };
 
-export const runSimulation = async (scenarioId: string) => {
-  const response = await fetchWithCache(`${API_URL}/simulator/run`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify({ scenarioId })
-  });
-  return response;
-};
+export const fetchSimulationHistory = async (page?: number, limit?: number): Promise<ApiResponse<SimulationRecord[]>> => {
+  let path = '/simulator/history';
+  const params = [];
+  if (page !== undefined) params.push(`page=${page}`);
+  if (limit !== undefined) params.push(`limit=${limit}`);
+  if (params.length > 0) path += `?${params.join('&')}`;
 
-export const fetchSimulationHistory = async () => {
-  return fetchWithCache(`${API_URL}/simulator/history`, { headers: getHeaders() });
+  return apiClient.get<ApiResponse<SimulationRecord[]>>(path);
 };

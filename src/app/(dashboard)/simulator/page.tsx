@@ -40,27 +40,16 @@ export default function SimulatorPage() {
   }, [])
 
   const handleSimulate = async () => {
-    const simPromise = runSimulation(selectedScenario)
-
-    toast.promise(simPromise, {
-      loading: "Running simulation...",
-      success: (res) => {
-        setResults(res.data.results)
-        loadHistory()
-        return "Simulation completed"
-      },
-      error: (err: any) => {
-        setError(err.message || 'Failed to run simulation')
-        return "Simulation failed"
-      }
-    })
-
+    setIsRunning(true)
+    setError(null)
     try {
-      setIsRunning(true)
-      setError(null)
-      await simPromise
-    } catch (err) {
-      // Handled in toast error
+      const res = await runSimulation(selectedScenario)
+      setResults(res.data.results)
+      loadHistory()
+      toast.success("Simulation completed")
+    } catch (err: any) {
+      setError(err.message || 'Failed to run simulation')
+      toast.error("Simulation failed")
     } finally {
       setIsRunning(false)
     }

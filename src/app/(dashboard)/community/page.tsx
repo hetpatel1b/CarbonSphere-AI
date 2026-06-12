@@ -28,33 +28,21 @@ export default function CommunityPage() {
   const loadData = async () => {
     setLoading(true)
     setError(null)
-    const dataPromise = Promise.all([
-      fetchCommunityStats(),
-      fetchLeaderboard(),
-      fetchCommunityFeed(),
-      fetchCommunityChallenges()
-    ])
-    
-    toast.promise(dataPromise, {
-      loading: "Refreshing community data...",
-      success: (res) => {
-        setStats(res[0].data.stats)
-        setChartData(res[0].data.chartData)
-        setLeaderboard(res[1].data)
-        setFeed(res[2].data)
-        setChallenges(res[3].data)
-        return "Community data refreshed"
-      },
-      error: (err: any) => {
-        setError(err.message || "Failed to load community data.")
-        return "Unable to load community data"
-      }
-    })
-
     try {
-      await dataPromise
-    } catch (err) {
-      // Handled in toast error
+      const [statsRes, leaderboardRes, feedRes, challengesRes] = await Promise.all([
+        fetchCommunityStats(),
+        fetchLeaderboard(),
+        fetchCommunityFeed(),
+        fetchCommunityChallenges()
+      ])
+      setStats(statsRes.data.stats)
+      setChartData(statsRes.data.chartData)
+      setLeaderboard(leaderboardRes.data)
+      setFeed(feedRes.data)
+      setChallenges(challengesRes.data)
+    } catch (err: any) {
+      setError(err.message || "Failed to load community data.")
+      toast.error("Unable to load community data")
     } finally {
       setLoading(false)
     }

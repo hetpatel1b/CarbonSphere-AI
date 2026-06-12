@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
   let token;
 
   if (req.cookies && req.cookies.token) {
@@ -15,10 +16,30 @@ const protect = (req, res, next) => {
   if (token) {
     try {
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
 
-      // Store decoded payload inside req.user
-      req.user = decoded;
+      // Verify user exists and is active in database
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "User account no longer exists"
+        });
+      }
+
+      if (user.status !== 'active') {
+        return res.status(403).json({
+          success: false,
+          message: `Your account is currently ${user.status}`
+        });
+      }
+
+      // Store decoded user info in req.user
+      req.user = {
+        id: user._id.toString(),
+        role: user.role,
+        email: user.email
+      };
 
       next();
     } catch (error) {

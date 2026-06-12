@@ -1,35 +1,22 @@
-import { getToken } from '../utils/auth';
-import { fetchWithCache } from '../utils/apiCache';
+import { apiClient } from '../lib/apiClient';
+import { ApiResponse, Challenge } from '../types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
-const getHeaders = () => {
-  const token = getToken() || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  };
+export const fetchCommunityStats = async (): Promise<ApiResponse<{ stats: any; chartData: any[] }>> => {
+  return apiClient.get<ApiResponse<{ stats: any; chartData: any[] }>>('/community/stats');
 };
 
-export const fetchCommunityStats = async () => {
-  return fetchWithCache(`${API_URL}/community/stats`, { headers: getHeaders() });
+export const fetchLeaderboard = async (): Promise<ApiResponse<any[]>> => {
+  return apiClient.get<ApiResponse<any[]>>('/community/leaderboard');
 };
 
-export const fetchLeaderboard = async () => {
-  return fetchWithCache(`${API_URL}/community/leaderboard`, { headers: getHeaders() });
+export const fetchCommunityFeed = async (): Promise<ApiResponse<any[]>> => {
+  return apiClient.get<ApiResponse<any[]>>('/community/feed');
 };
 
-export const fetchCommunityFeed = async () => {
-  return fetchWithCache(`${API_URL}/community/feed`, { headers: getHeaders() });
+export const fetchCommunityChallenges = async (): Promise<ApiResponse<Challenge[]>> => {
+  return apiClient.get<ApiResponse<Challenge[]>>('/community/challenges');
 };
 
-export const fetchCommunityChallenges = async () => {
-  return fetchWithCache(`${API_URL}/community/challenges`, { headers: getHeaders() });
-};
-
-export const joinChallenge = async (id: string) => {
-  return fetchWithCache(`${API_URL}/community/challenges/${id}/join`, { 
-    method: 'POST',
-    headers: getHeaders() 
-  });
+export const joinChallenge = async (id: string): Promise<ApiResponse<any>> => {
+  return apiClient.post<ApiResponse<any>>(`/community/challenges/${id}/join`);
 };

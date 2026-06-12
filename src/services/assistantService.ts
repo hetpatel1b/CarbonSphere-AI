@@ -1,6 +1,4 @@
-import { getToken } from '../utils/auth';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { apiClient } from '../lib/apiClient';
 
 export interface AssistantResponse {
   content: string;
@@ -10,25 +8,7 @@ export interface AssistantResponse {
 
 export const assistantService = {
   chat: async (message: string): Promise<AssistantResponse> => {
-    const token = getToken();
-    if (!token) throw new Error('Authentication required');
-
-    const response = await fetch(`${API_URL}/assistant/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      credentials: 'include',
-      body: JSON.stringify({ message })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to communicate with AI Assistant');
-    }
-
-    const data = await response.json();
+    const data = await apiClient.post<any>('/assistant/chat', { message });
     
     // Defensive parsing
     let parsedContent = data?.data?.content || data?.content || data?.message?.content || data?.data;

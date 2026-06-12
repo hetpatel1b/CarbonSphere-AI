@@ -1,8 +1,6 @@
-import { getToken } from '../utils/auth';
-import { fetchWithCache, clearApiCache } from '../utils/apiCache';
+import { apiClient } from '../lib/apiClient';
+import { clearApiCache } from '../utils/apiCache';
 import { AIInsight } from './aiCoachService';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export interface DashboardSummary {
   totalActivities: number;
@@ -33,31 +31,23 @@ export interface DashboardAnalytics {
   recentActivities: ActivityDocument[];
 }
 
-const getHeaders = () => {
-  const token = getToken();
-  if (!token) throw new Error('No authentication token found');
-  
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  };
-};
-
 export const dashboardService = {
   async getSummary(forceRefresh = false): Promise<DashboardSummary> {
-    const data = await fetchWithCache(`${API_URL}/dashboard/summary`, {
-      method: 'GET',
-      headers: getHeaders(),
-    }, forceRefresh);
-    return data.data;
+    const res = await apiClient.get<{ success: boolean; data: DashboardSummary }>(
+      '/dashboard/summary',
+      {},
+      forceRefresh
+    );
+    return res.data;
   },
 
   async getAnalytics(forceRefresh = false): Promise<DashboardAnalytics> {
-    const data = await fetchWithCache(`${API_URL}/dashboard/analytics`, {
-      method: 'GET',
-      headers: getHeaders(),
-    }, forceRefresh);
-    return data.data;
+    const res = await apiClient.get<{ success: boolean; data: DashboardAnalytics }>(
+      '/dashboard/analytics',
+      {},
+      forceRefresh
+    );
+    return res.data;
   },
 
   clearCache() {

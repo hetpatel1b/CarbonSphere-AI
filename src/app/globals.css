@@ -56,9 +56,9 @@
     --popover: 0 0% 100%;
     --popover-foreground: 225 59% 11%;
     
-    /* primary (Eco Emerald): #00E599 -> 160 100% 45% */
-    --primary: 160 100% 45%;
-    --primary-foreground: 225 59% 11%;
+    /* primary (Eco Emerald): #0a7c52 -> 160 84% 33% */
+    --primary: 160 84% 33%;
+    --primary-foreground: 0 0% 100%;
     
     /* secondary (Bioluminescent Blue): #00B8FF -> 197 100% 50% */
     --secondary: 197 100% 50%;
@@ -101,8 +101,8 @@
     --color-ring: #00B8FF;
     --color-background: #FAFAFA;
     --color-foreground: #0B132B;
-    --color-primary: #00E599;
-    --color-primary-foreground: #0B132B;
+    --color-primary: #0a7c52;
+    --color-primary-foreground: #FFFFFF;
     --color-secondary: #00B8FF;
     --color-secondary-foreground: #FFFFFF;
     --color-destructive: #EF4444;

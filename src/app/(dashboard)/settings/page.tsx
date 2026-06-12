@@ -27,6 +27,7 @@ import {
 } from "@/services/settingsService"
 import { useAuth } from "@/contexts/AuthContext"
 import { toast } from "sonner"
+import { UserProfile } from "@/types"
 
 export default function SettingsPage() {
   const [isMounted, setIsMounted] = useState(false)
@@ -63,10 +64,28 @@ export default function SettingsPage() {
         dashboardService.getSummary().catch(() => ({ totalAchievementsUnlocked: 0, totalCarbon: 0, sustainabilityScore: 0 }))
       ])
       
-      const u = profileRes.data || {};
+      const u: Partial<UserProfile> = profileRes.data || {};
       setProfile({ name: u.name || "", email: u.email || "", location: u.location || "", timezone: u.timezone || "utc", avatar: u.avatar || "" })
-      if (u.preferences) setPreferences(u.preferences)
-      if (u.notifications) setNotifications(u.notifications)
+      if (u.preferences) {
+        setPreferences({
+          goal: u.preferences.goal || "neutrality",
+          transport: u.preferences.transport || "public",
+          energy: u.preferences.energy || "renewable",
+          dietary: u.preferences.dietary || "balanced",
+          compactView: !!u.preferences.compactView,
+          darkMode: u.preferences.darkMode !== false,
+          reduceAnimations: !!u.preferences.reduceAnimations,
+        })
+      }
+      if (u.notifications) {
+        setNotifications({
+          weeklyReports: u.notifications.weeklyReports !== false && u.notifications.weeklyReport !== false,
+          aiInsights: u.notifications.aiInsights !== false,
+          challengeUpdates: u.notifications.challengeUpdates !== false,
+          achievementAlerts: u.notifications.achievementAlerts !== false,
+          marketplaceUpdates: !!u.notifications.marketplaceUpdates,
+        })
+      }
       
       const stats = analyticsRes as any || {};
       setAnalytics({

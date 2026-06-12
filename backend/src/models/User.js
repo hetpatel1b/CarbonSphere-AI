@@ -71,6 +71,11 @@ const UserSchema = new mongoose.Schema(
     aiInsight: {
       type: mongoose.Schema.Types.Mixed,
       default: null
+    },
+    status: {
+      type: String,
+      enum: ["active", "suspended", "deactivated"],
+      default: "active"
     }
   },
   {

@@ -83,6 +83,20 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
+// Dedicated, stricter auth limiter (5 attempts per 15 minutes)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: {
+    success: false,
+    message: 'Too many attempts. Please try again after 15 minutes'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+
 // 3. Response Compression
 app.use(compression());
 
@@ -115,10 +129,46 @@ app.use('/api/actions', actionRoutes);
 app.use('/api/demo', demoRoutes);
 
 // Health check route
-app.get('/api/health/ai', (req, res) => {
+const getHealthInfo = (req, res) => {
+  const mongoose = require('mongoose');
   const groqService = require('./services/groqService');
-  res.status(200).json(groqService.getHealthStats());
-});
+  
+  const dbState = mongoose.connection.readyState;
+  const isDbConnected = dbState === 1;
+  const aiStats = groqService.getHealthStats();
+  const isAiHealthy = aiStats.status === 'healthy';
+
+  let status = 'healthy';
+  let statusCode = 200;
+
+  if (!isDbConnected) {
+    status = 'unhealthy';
+    statusCode = 503;
+  } else if (!isAiHealthy) {
+    status = 'degraded';
+    statusCode = 200; // Server is up, database is up, but AI features won't work
+  }
+
+  res.status(statusCode).json({
+    status,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    components: {
+      database: {
+        status: isDbConnected ? 'connected' : 'disconnected',
+        readyState: dbState
+      },
+      ai: {
+        status: aiStats.status,
+        availableKeys: aiStats.availableKeys,
+        activeKey: aiStats.activeKey
+      }
+    }
+  });
+};
+
+app.get('/api/health', getHealthInfo);
+app.get('/api/health/ai', getHealthInfo);
 
 app.get('/', (req, res) => {
   res.status(200).json({

@@ -1,23 +1,17 @@
-import { setToken, setUser, logout } from '../utils/auth';
+import { setToken, setUser, logout as localLogout } from '../utils/auth';
+import { apiClient } from '../lib/apiClient';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+interface AuthResponse {
+  success: boolean;
+  message?: string;
+  token?: string;
+  user?: any;
+  data?: any;
+}
 
 export const authService = {
-  async login(email: string, password: string) {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Login failed');
-    }
+  async login(email: string, password: string): Promise<AuthResponse> {
+    const data = await apiClient.post<AuthResponse>('/auth/login', { email, password });
 
     if (data.success && data.token) {
       setToken(data.token);
@@ -27,34 +21,16 @@ export const authService = {
     return data;
   },
 
-  async register(name: string, email: string, password: string) {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Registration failed');
-    }
-
-    return data;
+  async register(name: string, email: string, password: string): Promise<AuthResponse> {
+    return apiClient.post<AuthResponse>('/auth/register', { name, email, password });
   },
 
-  async logout() {
+  async logout(): Promise<void> {
     try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      });
+      await apiClient.post('/auth/logout');
     } catch (err) {
       console.error('Backend logout failed', err);
     }
-    logout();
+    localLogout();
   }
 };

@@ -1,43 +1,24 @@
-import { getToken } from '../utils/auth';
-import { fetchWithCache } from '../utils/apiCache';
+import { apiClient } from '../lib/apiClient';
+import { ApiResponse, ForecastData } from '../types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
-const getHeaders = () => {
-  const token = getToken() || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  };
-};
-
-export const fetchForecastData = async () => {
+export const fetchForecastData = async (): Promise<ForecastData & { needsGeneration?: boolean }> => {
   try {
-    const response = await fetchWithCache(`${API_URL}/forecast/data`, { headers: getHeaders() });
-    return response.data; // backend wraps in data for success
+    const response = await apiClient.get<ApiResponse<ForecastData>>('/forecast/data');
+    return response.data;
   } catch (error: unknown) {
-    const err = error as { status?: number, data?: any, message?: string };
+    const err = error as { status?: number; data?: any; message?: string };
     if (err.status === 404) {
-      return { ...(err.data || {}), needsGeneration: true };
+      return { ...(err.data || {}), needsGeneration: true } as any;
     }
     console.error('Error fetching forecast:', err.message);
     throw error;
   }
 };
 
-export const generateForecast = async () => {
-  const response = await fetchWithCache(`${API_URL}/forecast/generate`, {
-    method: 'POST',
-    headers: getHeaders()
-  });
-  return response;
+export const generateForecast = async (): Promise<ApiResponse<ForecastData>> => {
+  return apiClient.post<ApiResponse<ForecastData>>('/forecast/generate');
 };
 
-export const applyAction = async (data: { title: string, reduction: number, difficulty: string, impact: string }) => {
-  const response = await fetchWithCache(`${API_URL}/actions/apply`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(data)
-  });
-  return response;
+export const applyAction = async (data: { title: string; reduction: number; difficulty: string; impact: string }): Promise<ApiResponse<any>> => {
+  return apiClient.post<ApiResponse<any>>('/actions/apply', data);
 };

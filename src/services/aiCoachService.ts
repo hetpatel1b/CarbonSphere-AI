@@ -1,7 +1,4 @@
-import { getToken, logout } from '../utils/auth';
-import { fetchWithCache } from '../utils/apiCache';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { apiClient } from '../lib/apiClient';
 
 export interface AIRecommendation {
   _id?: string;
@@ -31,43 +28,14 @@ export interface AICoachResponse {
   recommendations: AIRecommendation[];
 }
 
-const getHeaders = () => {
-  const token = getToken();
-  if (!token) throw new Error('No authentication token found');
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  };
-};
-
-const handleResponse = async (response: Response) => {
-  if (response.status === 401) {
-    logout();
-    if (typeof window !== 'undefined') window.location.href = '/login';
-    throw new Error('Authentication expired. Please log in again.');
-  }
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'API request failed');
-  }
-  return data.data;
-};
-
 export const aiCoachService = {
   async getLatestInsight(): Promise<AICoachResponse> {
-    const data = await fetchWithCache(`${API_URL}/ai-coach/latest`, {
-      method: 'GET',
-      headers: getHeaders(),
-    });
-    return data.data; // Because fetchWithCache returns raw json, and data is inside .data
+    const res = await apiClient.get<{ success: boolean; data: AICoachResponse }>('/ai-coach/latest');
+    return res.data;
   },
 
   async generateNewAnalysis(): Promise<AICoachResponse> {
-    // POST request, fetchWithCache will bypass cache and return raw json
-    const data = await fetchWithCache(`${API_URL}/ai-coach/analyze`, {
-      method: 'POST',
-      headers: getHeaders(),
-    });
-    return data.data;
+    const res = await apiClient.post<{ success: boolean; data: AICoachResponse }>('/ai-coach/analyze');
+    return res.data;
   }
 };

@@ -63,7 +63,7 @@ export default function OffsetMarketplacePage() {
       setStats(statsRes.data)
       setProjects(projectsRes.data)
       setHistory(historyRes.data)
-      setTotalPages(historyRes.pagination.pages)
+      setTotalPages(historyRes.pagination?.pages || 1)
       setRecommendations(recRes.data)
     } catch (err: any) {
       setError(err.message || "Failed to load marketplace data.")
@@ -101,7 +101,7 @@ export default function OffsetMarketplacePage() {
             setHistory(hRes.data)
             setProjects(pRes.data)
             setPage(1)
-            setTotalPages(hRes.pagination.pages)
+            setTotalPages(hRes.pagination?.pages || 1)
           }
         )
         

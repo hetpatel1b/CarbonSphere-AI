@@ -162,13 +162,29 @@ const generateReport = async (req, res) => {
 // @access  Private
 const getMyReports = async (req, res) => {
   try {
-    const reports = await Report.find({ userId: req.user.id })
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = parseInt(req.query.skip, 10) || (page - 1) * limit;
+
+    const query = { userId: req.user.id };
+    const total = await Report.countDocuments(query);
+
+    const reports = await Report.find(query)
       .sort({ generatedAt: -1 })
-      .select('-reportData'); // Omit heavy payload for list view
+      .select('-reportData') // Omit heavy payload for list view
+      .skip(skip)
+      .limit(limit);
 
     return res.status(200).json({
       success: true,
       count: reports.length,
+      pagination: {
+        page,
+        limit,
+        skip,
+        total,
+        pages: Math.ceil(total / limit)
+      },
       data: reports
     });
   } catch (error) {

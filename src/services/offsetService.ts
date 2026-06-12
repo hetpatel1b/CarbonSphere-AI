@@ -1,37 +1,22 @@
-import { getToken } from '../utils/auth';
-import { fetchWithCache } from '../utils/apiCache';
+import { apiClient } from '../lib/apiClient';
+import { ApiResponse, OffsetProject, OffsetPurchase, OffsetStats, AIRecommendation } from '../types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
-const getHeaders = () => {
-  const token = getToken() || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  };
+export const fetchOffsetProjects = async (): Promise<ApiResponse<OffsetProject[]>> => {
+  return apiClient.get<ApiResponse<OffsetProject[]>>('/offsets/projects');
 };
 
-export const fetchOffsetProjects = async () => {
-  return fetchWithCache(`${API_URL}/offsets/projects`, { headers: getHeaders() });
+export const fetchOffsetRecommendations = async (): Promise<ApiResponse<AIRecommendation[]>> => {
+  return apiClient.get<ApiResponse<AIRecommendation[]>>('/offsets/recommendations');
 };
 
-export const fetchOffsetRecommendations = async () => {
-  return fetchWithCache(`${API_URL}/offsets/recommendations`, { headers: getHeaders() });
+export const purchaseOffset = async (projectId: string, credits: number): Promise<ApiResponse<OffsetPurchase>> => {
+  return apiClient.post<ApiResponse<OffsetPurchase>>('/offsets/purchase', { projectId, credits });
 };
 
-export const purchaseOffset = async (projectId: string, credits: number) => {
-  const response = await fetchWithCache(`${API_URL}/offsets/purchase`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify({ projectId, credits })
-  });
-  return response;
+export const fetchOffsetHistory = async (page: number = 1, limit: number = 10): Promise<ApiResponse<OffsetPurchase[]>> => {
+  return apiClient.get<ApiResponse<OffsetPurchase[]>>(`/offsets/history?page=${page}&limit=${limit}`);
 };
 
-export const fetchOffsetHistory = async (page: number = 1, limit: number = 10) => {
-  return fetchWithCache(`${API_URL}/offsets/history?page=${page}&limit=${limit}`, { headers: getHeaders() });
-};
-
-export const fetchOffsetStats = async () => {
-  return fetchWithCache(`${API_URL}/offsets/stats`, { headers: getHeaders() });
+export const fetchOffsetStats = async (): Promise<ApiResponse<OffsetStats>> => {
+  return apiClient.get<ApiResponse<OffsetStats>>('/offsets/stats');
 };

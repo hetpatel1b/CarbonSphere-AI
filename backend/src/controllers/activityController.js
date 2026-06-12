@@ -52,10 +52,28 @@ const createActivity = async (req, res) => {
 // @access  Private
 const getActivities = async (req, res) => {
   try {
-    const activities = await Activity.find({ userId: req.user.id }).sort({ date: -1 });
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = parseInt(req.query.skip, 10) || (page - 1) * limit;
+
+    const query = { userId: req.user.id };
+    const total = await Activity.countDocuments(query);
+
+    const activities = await Activity.find(query)
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit);
+
     res.status(200).json({
       success: true,
       count: activities.length,
+      pagination: {
+        page,
+        limit,
+        skip,
+        total,
+        pages: Math.ceil(total / limit)
+      },
       data: activities
     });
   } catch (error) {

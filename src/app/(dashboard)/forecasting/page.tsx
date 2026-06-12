@@ -68,28 +68,15 @@ export default function ForecastingPage() {
     const loadData = async () => {
       setLoading(true)
       setError(null)
-      const fetchPromise = fetchForecastData()
-      
-      toast.promise(fetchPromise, {
-        loading: "Loading forecast...",
-        success: (res) => {
-          if (res.needsGeneration) {
-            setNeedsGeneration(true)
-            return "No forecast available"
-          }
-          setForecast(res.data)
-          return "Forecast loaded"
-        },
-        error: (err: any) => {
-          setError(err.response?.data?.message || err.message || "Failed to load forecasting data.")
-          return "Unable to generate forecast"
-        }
-      })
-
       try {
-        await fetchPromise
-      } catch (err) {
-        // Handled in toast error
+        const res = await fetchForecastData()
+        if (res.needsGeneration) {
+          setNeedsGeneration(true)
+        } else {
+          setForecast(res)
+        }
+      } catch (err: any) {
+        setError(err.response?.data?.message || err.message || "Failed to load forecasting data.")
       } finally {
         setLoading(false)
       }
@@ -100,25 +87,14 @@ export default function ForecastingPage() {
 
   const handleGenerateForecast = async () => {
     setIsGenerating(true)
-    const generatePromise = generateForecast()
-
-    toast.promise(generatePromise, {
-      loading: "Analyzing your activity history...",
-      success: (res) => {
-        setForecast(res.data)
-        setNeedsGeneration(false)
-        return "Forecast generated successfully"
-      },
-      error: (err: any) => {
-        console.error("Failed to generate forecast:", err)
-        return err.message || "Failed to generate forecast"
-      }
-    })
-
     try {
-      await generatePromise
-    } catch (err) {
-      // Handled in toast error
+      const res = await generateForecast()
+      setForecast(res.data)
+      setNeedsGeneration(false)
+      toast.success("Forecast generated successfully")
+    } catch (err: any) {
+      console.error("Failed to generate forecast:", err)
+      toast.error(err.message || "Failed to generate forecast")
     } finally {
       setIsGenerating(false)
     }

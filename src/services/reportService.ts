@@ -1,37 +1,24 @@
-import { getToken } from '../utils/auth';
-import { fetchWithCache } from '../utils/apiCache';
+import { apiClient } from '../lib/apiClient';
+import { ApiResponse, Report } from '../types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export const fetchReports = async (page?: number, limit?: number): Promise<ApiResponse<Report[]>> => {
+  let path = '/reports';
+  const params = [];
+  if (page !== undefined) params.push(`page=${page}`);
+  if (limit !== undefined) params.push(`limit=${limit}`);
+  if (params.length > 0) path += `?${params.join('&')}`;
 
-const getHeaders = () => {
-  const token = getToken() || (typeof window !== 'undefined' ? localStorage.getItem('token') : null);
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {})
-  };
+  return apiClient.get<ApiResponse<Report[]>>(path);
 };
 
-export const fetchReports = async () => {
-  return fetchWithCache(`${API_URL}/reports`, { headers: getHeaders() });
+export const fetchReportById = async (id: string): Promise<ApiResponse<Report>> => {
+  return apiClient.get<ApiResponse<Report>>(`/reports/${id}`);
 };
 
-export const fetchReportById = async (id: string) => {
-  return fetchWithCache(`${API_URL}/reports/${id}`, { headers: getHeaders() });
+export const generateReport = async (reportType: string): Promise<ApiResponse<Report>> => {
+  return apiClient.post<ApiResponse<Report>>('/reports/generate', { reportType });
 };
 
-export const generateReport = async (reportType: string) => {
-  const response = await fetchWithCache(`${API_URL}/reports/generate`, {
-    method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify({ reportType })
-  });
-  return response;
-};
-
-export const deleteReport = async (id: string) => {
-  const response = await fetchWithCache(`${API_URL}/reports/${id}`, {
-    method: 'DELETE',
-    headers: getHeaders()
-  });
-  return response;
+export const deleteReport = async (id: string): Promise<ApiResponse<void>> => {
+  return apiClient.delete<ApiResponse<void>>(`/reports/${id}`);
 };
