@@ -6,19 +6,32 @@ export interface AssistantResponse {
   actionability?: number;
 }
 
+interface ApiResponsePayload {
+  data?: {
+    content?: string | Record<string, unknown>;
+    impact?: 'High' | 'Medium' | 'Low';
+    actionability?: number;
+    [key: string]: unknown;
+  };
+  content?: string | Record<string, unknown>;
+  message?: {
+    content?: string;
+  };
+}
+
 export const assistantService = {
   chat: async (message: string): Promise<AssistantResponse> => {
     const response = await apiClient.post<unknown>('/assistant/chat', { message });
     
     // Defensive parsing
-    const safeData = response as Record<string, any>;
+    const safeData = response as ApiResponsePayload;
     let parsedContent = safeData?.data?.content || safeData?.content || safeData?.message?.content || safeData?.data;
     
     // If the backend somehow returned a stringified JSON string for content
     if (typeof parsedContent === 'string' && parsedContent.trim().startsWith('{')) {
       try {
-        const innerJson = JSON.parse(parsedContent);
-        parsedContent = innerJson.content || innerJson.message?.content || parsedContent;
+        const innerJson = JSON.parse(parsedContent) as Record<string, unknown>;
+        parsedContent = (innerJson.content || (innerJson.message as Record<string, unknown>)?.content || parsedContent) as string;
       } catch (e) {
         // Ignore JSON parse errors, just use the string
       }
@@ -26,7 +39,7 @@ export const assistantService = {
     
     // If it's still an object for some reason, stringify it or extract safely
     if (typeof parsedContent === 'object' && parsedContent !== null) {
-      parsedContent = parsedContent.content || JSON.stringify(parsedContent);
+      parsedContent = (parsedContent as Record<string, unknown>).content as string || JSON.stringify(parsedContent);
     }
     
     return {

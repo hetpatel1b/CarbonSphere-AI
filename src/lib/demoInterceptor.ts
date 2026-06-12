@@ -2,13 +2,13 @@ import * as demoData from './demoData';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function handleDemoRequest(method: string, path: string, body?: unknown): Promise<any> {
+export async function handleDemoRequest(method: string, path: string, body?: unknown): Promise<{ success?: boolean; data?: unknown; token?: string; message?: string; user?: unknown; pagination?: unknown }> {
   await delay(300); // Simulate network latency
 
   const normalizedPath = path.replace(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api', '').split('?')[0];
 
   // Auth
-  if (normalizedPath === '/auth/me') return demoData.DEMO_USER;
+  if (normalizedPath === '/auth/me') return { success: true, data: demoData.DEMO_USER.user };
   if (normalizedPath === '/auth/login') return { token: 'demo-token', user: demoData.DEMO_USER.user };
   if (normalizedPath === '/auth/register') return { token: 'demo-token', user: demoData.DEMO_USER.user };
 
@@ -20,11 +20,11 @@ export async function handleDemoRequest(method: string, path: string, body?: unk
   if (normalizedPath === '/activity/stats') return { success: true, data: demoData.DEMO_ACTIVITY_STATS };
   if (normalizedPath === '/activities') {
     if (method === 'GET') return { success: true, data: demoData.DEMO_ACTIVITIES.activities, pagination: { total: 3, page: 1, pages: 1 } };
-    if (method === 'POST') return { success: true, data: { _id: Date.now().toString(), ...((body as any) || {}) } };
+    if (method === 'POST') return { success: true, data: { _id: Date.now().toString(), ...((body as Record<string, unknown>) || {}) } };
   }
   if (normalizedPath.startsWith('/activities/')) {
     if (method === 'DELETE') return { success: true, message: 'Deleted successfully' };
-    if (method === 'PUT') return { success: true, data: { _id: normalizedPath.split('/').pop(), ...((body as any) || {}) } };
+    if (method === 'PUT') return { success: true, data: { _id: normalizedPath.split('/').pop(), ...((body as Record<string, unknown>) || {}) } };
     if (method === 'GET') return { success: true, data: demoData.DEMO_ACTIVITIES.activities[0] };
   }
 
@@ -57,7 +57,7 @@ export async function handleDemoRequest(method: string, path: string, body?: unk
   // Settings
   if (normalizedPath === '/settings/profile') {
     if (method === 'GET') return { success: true, data: demoData.DEMO_USER.user };
-    if (method === 'PUT') return { success: true, data: { ...demoData.DEMO_USER.user, ...((body as any) || {}) } };
+    if (method === 'PUT') return { success: true, data: { ...demoData.DEMO_USER.user, ...((body as Record<string, unknown>) || {}) } };
   }
 
   // Default fallback

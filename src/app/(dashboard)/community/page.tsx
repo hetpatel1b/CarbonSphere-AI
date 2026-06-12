@@ -19,11 +19,11 @@ export default function CommunityPage() {
   const [error, setError] = useState<string | null>(null)
   const [joiningId, setJoiningId] = useState<string | null>(null)
   
-  const [stats, setStats] = useState<any>(null)
-  const [chartData, setChartData] = useState<any[]>([])
-  const [leaderboard, setLeaderboard] = useState<any[]>([])
-  const [feed, setFeed] = useState<any[]>([])
-  const [challenges, setChallenges] = useState<any[]>([])
+  const [stats, setStats] = useState<{ totalUsers: number; totalCarbonSaved: number; activeChallengesCount: number; totalBadges: number } | null>(null)
+  const [chartData, setChartData] = useState<{ month: string; reduction: number }[]>([])
+  const [leaderboard, setLeaderboard] = useState<{ id: string; name: string; rank: number; score: number; isCurrentUser?: boolean }[]>([])
+  const [feed, setFeed] = useState<{ id: string; user: string; title: string; description: string; type: string }[]>([])
+  const [challenges, setChallenges] = useState<{ id: string; title: string; progress: number; participants: number; hasJoined: boolean }[]>([])
 
   const loadData = async () => {
     setLoading(true)
@@ -35,9 +35,9 @@ export default function CommunityPage() {
         fetchCommunityFeed(),
         fetchCommunityChallenges()
       ])
-      setStats(statsRes.data.stats)
-      setFeed(feedRes.data)
-      setChallenges(challengesRes.data)
+      setStats(statsRes.data.stats as { totalUsers: number; totalCarbonSaved: number; activeChallengesCount: number; totalBadges: number })
+      setFeed(feedRes.data as { id: string; user: string; title: string; description: string; type: string }[])
+      setChallenges(challengesRes.data as unknown as { id: string; title: string; progress: number; participants: number; hasJoined: boolean }[])
       
       let cData = statsRes.data.chartData;
       if (cData && cData.length === 1) {
@@ -46,8 +46,8 @@ export default function CommunityPage() {
           reduction: 0
         });
       }
-      setLeaderboard(leaderboardRes.data)
-      setChartData(cData || [])
+      setLeaderboard(leaderboardRes.data as { id: string; name: string; rank: number; score: number; isCurrentUser?: boolean }[])
+      setChartData((cData || []) as { month: string; reduction: number }[])
     } catch (err: unknown) {
       setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load community data.")
       toast.error("Unable to load community data")

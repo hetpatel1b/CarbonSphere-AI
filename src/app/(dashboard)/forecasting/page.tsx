@@ -14,13 +14,38 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 
+interface RecommendationAction {
+  title: string;
+  description: string;
+  reduction: string;
+  difficulty: string;
+  impact: string;
+}
+
+interface ForecastData {
+  historicalSeries: { month: string; actual: number }[];
+  predictionSeries: { month: string; predicted: number }[];
+  riskLevel: string;
+  previousMonth: number;
+  currentMonth: number;
+  forecastNextMonth: number;
+  trendDirection: string;
+  aiInsights: {
+    insight: string;
+    highestRiskArea: string;
+    potentialIncrease?: string;
+    potentialReduction?: string;
+  };
+  recommendations: RecommendationAction[];
+}
+
 export default function ForecastingPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  const [forecast, setForecast] = useState<any>(null)
+  const [forecast, setForecast] = useState<ForecastData | null>(null)
   
-  const [selectedAction, setSelectedAction] = useState<any>(null)
+  const [selectedAction, setSelectedAction] = useState<RecommendationAction | null>(null)
   const [isApplying, setIsApplying] = useState(false)
   const [needsGeneration, setNeedsGeneration] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
@@ -68,7 +93,7 @@ export default function ForecastingPage() {
         if (res.needsGeneration) {
           setNeedsGeneration(true)
         } else {
-          setForecast(res)
+          setForecast(res as unknown as ForecastData)
         }
       } catch (err: unknown) {
         setError((err as { response?: { data?: { message?: string } } })?.response?.data?.message || (err as Error).message || "Failed to load forecasting data.")
@@ -84,7 +109,7 @@ export default function ForecastingPage() {
     setIsGenerating(true)
     try {
       const res = await generateForecast()
-      setForecast(res.data)
+      setForecast(res.data as unknown as ForecastData)
       setNeedsGeneration(false)
       toast.success("Forecast generated successfully")
     } catch (err: unknown) {
@@ -149,16 +174,16 @@ export default function ForecastingPage() {
   }
 
   // Fallbacks if data is missing
-  const hasSufficientData = forecast?.historicalSeries?.length > 0
+  const hasSufficientData = (forecast?.historicalSeries?.length || 0) > 0
   
   // Prepare chart data
   const chartMap = new Map<string, { month: string; actual?: number; predicted?: number }>();
   let lastActual: { month: string; val: number } | null = null;
 
   if (forecast?.historicalSeries) {
-    forecast.historicalSeries.forEach((item: Record<string, unknown>) => {
-      chartMap.set((item as { month: string; [key: string]: unknown }).month, { month: (item as { month: string; [key: string]: unknown }).month, actual: parseFloat((item as any).actual.toFixed(2)) });
-      lastActual = { month: (item as { month: string; [key: string]: unknown }).month, val: parseFloat((item as any).actual.toFixed(2)) };
+    forecast.historicalSeries.forEach((item) => {
+      chartMap.set(item.month, { month: item.month, actual: parseFloat(item.actual.toFixed(2)) });
+      lastActual = { month: item.month, val: parseFloat(item.actual.toFixed(2)) };
     });
   }
 
@@ -172,12 +197,12 @@ export default function ForecastingPage() {
       }
     }
 
-    forecast.predictionSeries.forEach((item: Record<string, unknown>) => {
-      if (chartMap.has((item as { month: string; [key: string]: unknown }).month)) {
-        const ci = chartMap.get((item as { month: string; [key: string]: unknown }).month);
-        if (ci) ci.predicted = parseFloat((item as any).predicted.toFixed(2));
+    forecast.predictionSeries.forEach((item) => {
+      if (chartMap.has(item.month)) {
+        const ci = chartMap.get(item.month);
+        if (ci) ci.predicted = parseFloat(item.predicted.toFixed(2));
       } else {
-        chartMap.set((item as { month: string; [key: string]: unknown }).month, { month: (item as { month: string; [key: string]: unknown }).month, predicted: parseFloat((item as any).predicted.toFixed(2)) });
+        chartMap.set(item.month, { month: item.month, predicted: parseFloat(item.predicted.toFixed(2)) });
       }
     });
   }
@@ -210,8 +235,8 @@ export default function ForecastingPage() {
 
   // Monthly trend calculation
   let monthlyTrend = 0;
-  if (forecast?.previousMonth > 0) {
-    monthlyTrend = ((forecast.currentMonth - forecast.previousMonth) / forecast.previousMonth) * 100;
+  if ((forecast?.previousMonth || 0) > 0) {
+    monthlyTrend = (((forecast?.currentMonth || 0) - (forecast?.previousMonth || 0)) / (forecast?.previousMonth || 1)) * 100;
   }
 
   return (
@@ -283,7 +308,7 @@ export default function ForecastingPage() {
           <CardContent className="p-5 flex flex-col gap-1">
             <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Trend Direction</p>
             {hasSufficientData ? (
-               <h4 className={`text-xl font-bold mt-2 leading-tight ${forecast.trendDirection === 'Decreasing' ? 'text-emerald-500' : (forecast.trendDirection === 'Stable' ? 'text-amber-500' : 'text-rose-500')}`}>{forecast?.trendDirection}</h4>
+               <h4 className={`text-xl font-bold mt-2 leading-tight ${forecast?.trendDirection === 'Decreasing' ? 'text-emerald-500' : (forecast?.trendDirection === 'Stable' ? 'text-amber-500' : 'text-rose-500')}`}>{forecast?.trendDirection}</h4>
             ) : (
                <h4 className="text-sm font-medium mt-2 text-muted-foreground">Keep logging activities</h4>
             )}
@@ -401,29 +426,29 @@ export default function ForecastingPage() {
       {/* Section 4: Recommended Actions */}
       <div>
         <h2 className="text-base font-semibold mb-4">Recommended Actions</h2>
-        {forecast?.recommendations?.length > 0 ? (
+        {(forecast?.recommendations?.length || 0) > 0 ? (
           <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            {forecast.recommendations.map((action: Record<string, unknown>, i: number) => (
+            {forecast?.recommendations?.map((action, i: number) => (
               <Card key={i} className="flex flex-col group hover:border-emerald-500/30 transition-colors">
                 <CardHeader className="pb-3 flex-1">
-                  <CardTitle className="text-sm font-semibold leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{(action as any).title}</CardTitle>
+                  <CardTitle className="text-sm font-semibold leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{action.title}</CardTitle>
                   <CardDescription className="text-xs leading-relaxed mt-1">
-                    {(action as any).description}
+                    {action.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pb-4">
                   <div className="flex flex-col gap-2 p-3 rounded-lg bg-muted/30 border border-border/40">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-muted-foreground">Reduction</span>
-                      <span className="font-medium text-emerald-600 dark:text-emerald-400">{(action as { reduction: string; [key: string]: unknown }).reduction}</span>
+                      <span className="font-medium text-emerald-600 dark:text-emerald-400">{action.reduction}</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-muted-foreground">Difficulty</span>
-                      <span className="font-medium">{(action as { difficulty: string; [key: string]: unknown }).difficulty}</span>
+                      <span className="font-medium">{action.difficulty}</span>
                     </div>
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-muted-foreground">Impact</span>
-                      <span className="font-medium">{(action as { impact: string; [key: string]: unknown }).impact}</span>
+                      <span className="font-medium">{action.impact}</span>
                     </div>
                   </div>
                 </CardContent>

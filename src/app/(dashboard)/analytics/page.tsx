@@ -21,8 +21,14 @@ import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import { toast } from "sonner"
 
+interface BaseCategory {
+  color: string;
+  narrative: string;
+  actions: string[];
+}
+
 // Base narratives and colors to keep the beautiful UI intact while data is dynamic
-const baseCategories: Record<string, any> = {
+const baseCategories: Record<string, BaseCategory> = {
   Transport: { color: "#3b82f6", narrative: "Commuting by single-occupancy vehicles remains your highest operational emission source.", actions: ["Subsidize employee E-Bike purchases", "Optimize logistics delivery routes using AI scheduler"] },
   Energy: { color: "#f59e0b", narrative: "Transitioning cloud hosting to Carbon-Free regions lowered footprint by 12% in Q2.", actions: ["Install smart HVAC thermostats with occupancy sensors", "Configure off-hour sleep schedules for workspace laptops"] },
   Food: { color: "#10b981", narrative: "Food footprint is stable.", actions: ["Implement Meatless Mondays defaults for catered events", "Source pantry catering from regional suppliers"] },
@@ -49,17 +55,18 @@ const defaultChartData: ChartDataItem[] = [
 
 const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: unknown[]; label?: string }) => {
   if (active && payload && payload.length) {
-    const data = (payload[0] as any).payload
+    const data = (payload[0] as { payload: ChartDataItem }).payload
     return (
       <div className="bg-zinc-950/95 backdrop-blur-md border border-zinc-800 p-4 rounded-xl shadow-xl space-y-2 text-xs">
         <p className="font-extrabold text-white text-sm">{label} 2026</p>
         <div className="space-y-1">
-          {payload.map((p: any, idx: number) => {
-            const displayVal = p.value !== null ? p.value : "N/A"
+          {payload.map((p: { value: number | null; color?: string; stroke?: string; name: string } | unknown, idx: number) => {
+            const typedP = p as { value: number | null; color?: string; stroke?: string; name: string };
+            const displayVal = typedP.value !== null ? typedP.value : "N/A"
             return (
-              <p key={idx} className="font-semibold flex items-center gap-1.5" style={{ color: p.color || p.stroke }}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: p.color || p.stroke }} />
-                {p.name}: {displayVal} {p.name.includes("Score") ? "pts" : "kg"}
+              <p key={idx} className="font-semibold flex items-center gap-1.5" style={{ color: typedP.color || typedP.stroke }}>
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: typedP.color || typedP.stroke }} />
+                {typedP.name}: {displayVal} {typedP.name.includes("Score") ? "pts" : "kg"}
               </p>
             )
           })}
@@ -172,7 +179,17 @@ export default function AnalyticsPage() {
 
   const totalCarbonSum = analytics?.categoryBreakdown.reduce((sum, cat) => sum + cat.totalCarbon, 0) || 0;
   
-  const mappedCategories: Record<string, any> = {};
+  interface MappedCategory {
+    value: number;
+    unit: string;
+    trend: string;
+    benchmark: string;
+    color: string;
+    breakdown: { label: string; percent: number; val: string }[];
+    narrative: string;
+    actions: string[];
+  }
+  const mappedCategories: Record<string, MappedCategory> = {};
   if (analytics && analytics.categoryBreakdown.length > 0) {
     analytics.categoryBreakdown.forEach(cat => {
       const base = baseCategories[cat.category] || baseCategories.Other;
@@ -465,7 +482,7 @@ export default function AnalyticsPage() {
                 <div className="space-y-3">
                   <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">Detailed Breakdown</span>
                   <div className="space-y-2.5">
-                    {activeCategoryData?.breakdown.map((item: any, index: number) => (
+                    {activeCategoryData?.breakdown.map((item: { label: string; percent: number; val: string }, index: number) => (
                       <div key={index} className="space-y-1">
                         <div className="flex justify-between text-xs font-semibold">
                           <span className="text-zinc-500">{item.label}</span>
