@@ -272,8 +272,8 @@ export default function OffsetMarketplacePage() {
                       <TableCell className="text-xs">{new Date(h.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell className="text-xs font-medium">{(h.projectId as OffsetProject)?.title || h.projectName || "Unknown Project"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">{(h.projectId as OffsetProject)?.category || "-"}</TableCell>
-                      <TableCell className="text-right text-xs font-bold text-emerald-600 dark:text-emerald-400">{h.credits}</TableCell>
-                      <TableCell className="text-right text-xs">${h.totalCost.toFixed(2)}</TableCell>
+                      <TableCell className="text-right text-xs font-bold text-emerald-600 dark:text-emerald-400">{h.credits || 0}</TableCell>
+                      <TableCell className="text-right text-xs">${(h.totalCost || 0).toFixed(2)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
