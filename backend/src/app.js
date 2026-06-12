@@ -94,24 +94,9 @@ app.use(cors({
 app.use(cookieParser());
 
 // CSRF Protection Middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin || req.headers.referer;
-  
-  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
-    if (origin) {
-      if (!origin.startsWith('http://') && !origin.startsWith('https://')) {
-        return res.status(403).json({ success: false, message: 'CSRF validation failed: missing protocol' });
-      }
-      
-      if (isOriginAllowed(origin)) {
-        return next();
-      } else {
-        return res.status(403).json({ success: false, message: 'CSRF validation failed: origin mismatch' });
-      }
-    }
-  }
-  next();
-});
+const { generateCsrfToken, verifyCsrfToken } = require('./middleware/csrfMiddleware');
+app.use(generateCsrfToken);
+app.use(verifyCsrfToken);
 
 // 2. Rate Limiting (100 req per 15 min)
 const apiLimiter = rateLimit({

@@ -54,7 +54,6 @@ export default function LoginPage() {
 
   const handleDemoLogin = () => {
     localStorage.setItem('demoMode', 'true');
-    localStorage.setItem('token', 'demo-token');
     localStorage.setItem('user', JSON.stringify({
       _id: 'demo-user-id',
       name: 'Demo Explorer',

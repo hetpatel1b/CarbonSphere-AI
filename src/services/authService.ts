@@ -1,4 +1,4 @@
-import { setToken, setUser, logout as localLogout } from '../utils/auth';
+import { setUser, logout as localLogout } from '../utils/auth';
 import { apiClient } from '../lib/apiClient';
 
 interface AuthResponse {
@@ -13,8 +13,7 @@ export const authService = {
   async login(email: string, password: string): Promise<AuthResponse> {
     const data = await apiClient.post<AuthResponse>('/auth/login', { email, password });
 
-    if (data.success && data.token) {
-      setToken(data.token);
+    if (data.success && (data.user || data.data || data.token)) {
       setUser(data.user || data.data);
     }
 

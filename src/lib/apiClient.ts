@@ -1,13 +1,20 @@
-import { getToken, logout } from '../utils/auth';
+import { logout } from '../utils/auth';
 import { fetchWithCache } from '../utils/apiCache';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+const getCsrfToken = () => {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie.match(new RegExp('(^| )csrfToken=([^;]+)'));
+  if (match) return match[2];
+  return '';
+};
+
 const getHeaders = (customHeaders?: HeadersInit) => {
-  const token = getToken();
+  const csrfToken = getCsrfToken();
   return {
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
     ...customHeaders,
   };
 };
