@@ -75,7 +75,7 @@ export default function LandingPage() {
             variants={stagger}
             className="max-w-3xl mx-auto"
           >
-            <motion.h2 variants={fadeIn} className="text-3xl md:text-4xl font-bold mb-6">Carbon tracking shouldn't require a PhD.</motion.h2>
+            <motion.h2 variants={fadeIn} className="text-3xl md:text-4xl font-bold mb-6">Carbon tracking shouldn&apos;t require a PhD.</motion.h2>
             <motion.p variants={fadeIn} className="text-lg text-muted-foreground leading-relaxed">
               For too long, understanding your environmental impact has meant wrestling with complex spreadsheets, outdated scientific factors, and vague advice. We built CarbonSphere AI to seamlessly translate daily activities into actionable, mathematically precise insights.
             </motion.p>
