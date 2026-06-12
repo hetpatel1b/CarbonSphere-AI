@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 require('dotenv').config({ path: '.env' });
 
+// Ensure required environment variables exist for tests in CI
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+process.env.GROQ_API_KEY = process.env.GROQ_API_KEY || 'gsk_dummy_key';
+
 let mongoServer;
 
 beforeAll(async () => {
