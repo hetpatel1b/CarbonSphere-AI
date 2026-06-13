@@ -117,7 +117,67 @@ $$\text{Projected}_t = (\text{Intercept} + \text{Slope} \times t) - \text{Active
 
 ## 🏗️ System Architecture
 
-The following diagram illustrates the flow of data across the three primary layers of CarbonSphere AI:
+### 1. Architecture Overview
+CarbonSphere AI operates on a highly decoupled, modern, and scalable architecture separating the UI presentation layer from the robust data-processing backend. The ecosystem leverages Next.js for high-performance React rendering, Express.js for RESTful API services, MongoDB Atlas for serverless data persistence, and Groq's Llama 3.3 for high-throughput AI intelligence.
+
+### 2. High-Level Architecture Diagram
+```mermaid
+graph TD
+    subgraph "Frontend Layer (Vercel)"
+        UI[Next.js App Router]
+        Tailwind[TailwindCSS + Shadcn UI]
+        State[React Hooks + Context]
+        UI --> Tailwind
+        UI --> State
+    end
+
+    subgraph "Backend Layer (Railway)"
+        API[Express.js API]
+        Auth[JWT + CSRF Auth Layer]
+        Router[API Routers & Controllers]
+        Services[Business Logic Services]
+        API --> Auth
+        Auth --> Router
+        Router --> Services
+    end
+
+    subgraph "Data & AI Layer"
+        Mongo[(MongoDB Atlas)]
+        Groq{Groq Llama Models}
+    end
+
+    Client([Client Browser]) -->|HTTPS / REST| UI
+    UI -->|HTTPS / API Calls| API
+    Services <-->|Mongoose ODM| Mongo
+    Services <-->|Groq SDK| Groq
+```
+
+### 3. Request Flow
+1. **Client Interaction:** The user interacts with the Next.js frontend (e.g., logging an activity or requesting AI insights).
+2. **API Request Initiation:** The frontend `apiClient` securely attaches the JWT and dynamically fetched Cross-Origin CSRF token to the request headers.
+3. **Backend Middleware Processing:** The Express.js backend intercepts the request, validates the CORS origin, verifies rate limits via `express-rate-limit`, decodes the JWT, and validates the CSRF token.
+4. **Controller Execution:** The validated request reaches the corresponding controller (e.g., `aiCoachController`), which requests required data from MongoDB.
+5. **Response Delivery:** Data is processed, formatted, and returned to the frontend, updating the React state and reflecting on the UI.
+
+### 4. Security Layer Explanation
+CarbonSphere AI employs an enterprise-grade security posture:
+- **Authentication:** Stateless JSON Web Tokens (JWT) stored securely.
+- **Cross-Origin CSRF Protection:** A robust Double Submit Cookie implementation natively engineered to protect against cross-site request forgery across the decoupled Vercel/Railway boundaries.
+- **Network Security:** Strict CORS policies, `Helmet.js` HTTP headers, and API rate limiting prevent abuse and brute-force attacks.
+
+### 5. AI Processing Flow
+The intelligence layer acts as a specialized data-processor rather than a generic chatbot:
+1. **Data Aggregation:** User metrics (activities, forecasts, limits) are aggregated via optimized MongoDB queries.
+2. **Contextual Prompt Building:** The backend constructs highly structured prompts injecting the user's specific environmental data.
+3. **Groq Inference:** The prompt is dispatched to Groq's Llama 3.3 model enforcing a strict JSON-mode schema.
+4. **Validation & Delivery:** The output is parsed and validated before being served to the frontend, guaranteeing predictable UI rendering.
+
+### 6. Deployment Architecture
+- **Frontend (Vercel):** The Next.js application is deployed to Vercel's Edge Network, utilizing static pre-rendering and efficient edge caching for near-instant Time to Interactive (TTI).
+- **Backend (Railway):** The Node.js/Express.js API runs on Railway, providing a scalable containerized environment optimized for heavy database transactions and AI API orchestration.
+- **Database (MongoDB Atlas):** Hosted on a serverless Atlas cluster to ensure high availability and resilient disaster recovery.
+
+The following sequence diagram illustrates a specific AI data request across these layers:
 
 ```mermaid
 sequenceDiagram
@@ -128,13 +188,13 @@ sequenceDiagram
     participant AI as Groq (Llama 3.3)
 
     User->>API: HTTP Request (With Secure Cookie & JWT)
-    Note over API: CORS Verification & JWT Token Decoding
+    Note over API: CORS Verification & CSRF Validation
     API->>DB: Query Aggregated Activity Data
     DB-->>API: Return User Footprint & Preferences
     API->>AI: Send Rich Prompt Context (JSON Mode)
     AI-->>API: Stream Back Structured Insights
     API->>DB: Save Generated Recommendations
-    API-->>User: Return HTTP 200 (Payload + Cached ETag)
+    API-->>User: Return HTTP 200 (Payload)
 ```
 
 ---
