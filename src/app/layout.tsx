@@ -16,6 +16,19 @@ export const metadata: Metadata = {
   title: "CarbonSphere AI | Intelligent Sustainability",
   description: "Track, simulate, and forecast your environmental impact with enterprise-grade precision and Groq-powered AI coaching.",
   keywords: ["Sustainability", "Carbon Footprint", "AI Coach", "Net Zero", "Climate Tech", "Forecasting"],
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: [
+      { url: "/favicon.ico" },
+    ],
+  },
   openGraph: {
     title: "CarbonSphere AI | Intelligent Sustainability",
     description: "Track, simulate, and forecast your environmental impact with enterprise-grade precision and Groq-powered AI coaching.",
