@@ -112,13 +112,13 @@ export default function LandingPage() {
               <div className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tighter">
                 <AnimatedCounter end={1.2} suffix="M+" />
               </div>
-              <p className="text-sm text-zinc-500 font-medium uppercase tracking-wider">Kg Carbon Tracked</p>
+              <p className="text-sm text-zinc-500 font-medium uppercase tracking-wider">Simulated Carbon Tracked</p>
             </div>
             <div className="text-center px-4">
               <div className="text-4xl md:text-5xl font-bold text-emerald-400 mb-2 tracking-tighter">
                 <AnimatedCounter end={450} suffix="k" />
               </div>
-              <p className="text-sm text-zinc-500 font-medium uppercase tracking-wider">Predicted Reduction</p>
+              <p className="text-sm text-zinc-500 font-medium uppercase tracking-wider">Projected Reduction Potential</p>
             </div>
             <div className="text-center px-4">
               <div className="text-4xl md:text-5xl font-bold text-cyan-400 mb-2 tracking-tighter">
@@ -130,8 +130,13 @@ export default function LandingPage() {
               <div className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tighter">
                 <AnimatedCounter end={15} suffix="k+" />
               </div>
-              <p className="text-sm text-zinc-500 font-medium uppercase tracking-wider">Activities Logged</p>
+              <p className="text-sm text-zinc-500 font-medium uppercase tracking-wider">Sample Activities Analyzed</p>
             </div>
+          </div>
+          <div className="mt-8 text-center">
+            <p className="text-xs text-zinc-600 font-medium">
+              Demonstration metrics shown for platform preview purposes.
+            </p>
           </div>
         </div>
       </section>
