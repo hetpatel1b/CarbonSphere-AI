@@ -98,6 +98,11 @@ const { generateCsrfToken, verifyCsrfToken } = require('./middleware/csrfMiddlew
 app.use(generateCsrfToken);
 app.use(verifyCsrfToken);
 
+// Expose CSRF token explicitly for decoupled frontend fetches
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ success: true, csrfToken: req.csrfToken });
+});
+
 // 2. Rate Limiting (100 req per 15 min)
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

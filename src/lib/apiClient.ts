@@ -3,15 +3,35 @@ import { fetchWithCache } from '../utils/apiCache';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-const getCsrfToken = () => {
-  if (typeof document === 'undefined') return '';
-  const match = document.cookie.match(new RegExp('(^| )csrfToken=([^;]+)'));
-  if (match) return match[2];
+let csrfTokenCache: string | null = null;
+
+const ensureCsrfToken = async (): Promise<string> => {
+  if (typeof window === 'undefined') return '';
+  if (csrfTokenCache) return csrfTokenCache;
+
+  const isDemo = localStorage.getItem('demoMode') === 'true';
+  if (isDemo) return 'demo-csrf-token';
+
+  try {
+    const res = await fetch(`${API_URL}/csrf-token`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.csrfToken) {
+        csrfTokenCache = data.csrfToken;
+        return data.csrfToken;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to fetch CSRF token:', e);
+  }
   return '';
 };
 
-const getHeaders = (customHeaders?: HeadersInit) => {
-  const csrfToken = getCsrfToken();
+const getHeaders = async (customHeaders?: HeadersInit) => {
+  const csrfToken = await ensureCsrfToken();
   return {
     'Content-Type': 'application/json',
     ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {}),
@@ -47,7 +67,7 @@ export const apiClient = {
     return fetchWithCache(fullUrl, {
       ...options,
       method: 'GET',
-      headers: getHeaders(options.headers),
+      headers: await getHeaders(options.headers),
     }, forceRefresh);
   },
 
@@ -59,7 +79,7 @@ export const apiClient = {
     const response = await fetch(fullUrl, {
       ...options,
       method: 'POST',
-      headers: getHeaders(options.headers),
+      headers: await getHeaders(options.headers),
       credentials: 'include',
       body: body ? JSON.stringify(body) : undefined,
     });
@@ -74,7 +94,7 @@ export const apiClient = {
     const response = await fetch(fullUrl, {
       ...options,
       method: 'PUT',
-      headers: getHeaders(options.headers),
+      headers: await getHeaders(options.headers),
       credentials: 'include',
       body: body ? JSON.stringify(body) : undefined,
     });
@@ -89,7 +109,7 @@ export const apiClient = {
     const response = await fetch(fullUrl, {
       ...options,
       method: 'PATCH',
-      headers: getHeaders(options.headers),
+      headers: await getHeaders(options.headers),
       credentials: 'include',
       body: body ? JSON.stringify(body) : undefined,
     });
@@ -104,7 +124,7 @@ export const apiClient = {
     const response = await fetch(fullUrl, {
       ...options,
       method: 'DELETE',
-      headers: getHeaders(options.headers),
+      headers: await getHeaders(options.headers),
       credentials: 'include',
     });
     return handleResponse(response);
