@@ -18,9 +18,11 @@ import { toast } from "sonner"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-const EmissionsAreaChart = dynamic(() => import('@/components/charts/AnalyticsCharts').then(mod => mod.EmissionsAreaChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
-const SourcesBarChart = dynamic(() => import('@/components/charts/AnalyticsCharts').then(mod => mod.SourcesBarChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
-const ScoreAreaChart = dynamic(() => import('@/components/charts/AnalyticsCharts').then(mod => mod.ScoreAreaChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
+import { ActivityBreakdownChart } from "@/components/charts/ActivityBreakdownChart"
+
+const EmissionsAreaChart = dynamic(() => import('@/components/charts/EmissionsTrendChart').then(mod => mod.EmissionsTrendChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
+const SourcesBarChart = dynamic(() => import('@/components/charts/CarbonSourcesChart').then(mod => mod.CarbonSourcesChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
+const ScoreAreaChart = dynamic(() => import('@/components/charts/EmissionsTrendChart').then(mod => mod.ScoreTrendChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
 
 interface BaseCategory {
   color: string;
@@ -415,25 +417,7 @@ export default function AnalyticsPage() {
                   {activeCategoryData?.narrative}
                 </p>
 
-                <div className="space-y-3">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">Detailed Breakdown</span>
-                  <div className="space-y-2.5">
-                    {activeCategoryData?.breakdown.map((item: { label: string; percent: number; val: string }, index: number) => (
-                      <div key={index} className="space-y-1">
-                        <div className="flex justify-between text-xs font-semibold">
-                          <span className="text-zinc-500">{item.label}</span>
-                          <span className="text-foreground">{item.val} ({item.percent}%)</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-900 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full rounded-full transition-all duration-500" 
-                            style={{ width: `${item.percent}%`, backgroundColor: activeCategoryData.color }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <ActivityBreakdownChart items={activeCategoryData?.breakdown || []} color={activeCategoryData?.color || "#10b981"} />
 
                 <div className="space-y-2.5 pt-2 border-t border-zinc-200/40 dark:border-zinc-800/40">
                   <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">Recommended Actions</span>

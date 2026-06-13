@@ -2,7 +2,7 @@
 
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts"
 
-export default function ForecastingChart({ chartData, isAnimationActive }: { 
+export default function ForecastChart({ chartData, isAnimationActive }: { 
   chartData: { month: string; actual?: number; predicted?: number }[];
   isAnimationActive: boolean;
 }) {

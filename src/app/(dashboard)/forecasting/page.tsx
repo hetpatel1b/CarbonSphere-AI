@@ -16,7 +16,7 @@ import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 
-const ForecastingChart = dynamic(() => import('@/components/charts/ForecastingChart'), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> })
+const ForecastChart = dynamic(() => import('@/components/charts/ForecastChart'), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> })
 
 
 
@@ -318,7 +318,7 @@ export default function ForecastingPage() {
                     Forecast for next month: {forecast?.forecastNextMonth?.toFixed(2) || "0.00"} tCO2e.
                     Trend direction: {forecast?.trendDirection}.
                   </span>
-                  <ForecastingChart chartData={chartData} isAnimationActive={!reducedMotion} />
+                  <ForecastChart chartData={chartData} isAnimationActive={!reducedMotion} />
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full">
