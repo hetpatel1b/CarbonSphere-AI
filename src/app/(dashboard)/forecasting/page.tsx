@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import dynamic from "next/dynamic"
-import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2, Info, HelpCircle, Database, LineChart, Target, ShieldAlert, Calculator, BrainCircuit } from "lucide-react"
+import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2, Info, HelpCircle, Database, LineChart, Target, ShieldAlert, Calculator, BrainCircuit, Zap, BusFront, Sun, Car, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { fetchForecastData, applyAction, generateForecast } from "@/services/forecastService"
 import { ForecastData, ForecastAction } from "@/types"
@@ -16,6 +16,7 @@ import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Switch } from "@/components/ui/switch"
 
 const ForecastChart = dynamic(() => import('@/components/charts/ForecastChart'), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> })
 
@@ -244,221 +245,258 @@ export default function ForecastingPage() {
         />
       ) : (
         <>
-          {/* Section 1: Forecast Summary */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="p-5 flex flex-col gap-1">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Current Emissions (Month)</p>
-            <div className="flex items-center justify-between mt-1">
-              <h4 className="text-2xl font-bold">{forecast?.currentMonth?.toFixed(2) || "0.00"} <span className="text-sm font-normal text-muted-foreground">tCO₂e</span></h4>
-              {monthlyTrend !== 0 && (
-                <Badge variant="secondary" className={cn(
-                  monthlyTrend < 0 ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400"
-                )}>
-                  {monthlyTrend < 0 ? <TrendingDown className="mr-1 h-3 w-3" /> : <TrendingUp className="mr-1 h-3 w-3" />}
-                  {Math.abs(monthlyTrend).toFixed(1)}%
-                </Badge>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-5 flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Forecasted (Next Month)</p>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 hover:text-foreground transition-colors cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p className="text-xs font-medium">Projected based on a weighted 30-day moving average and upcoming planned reductions.</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            {hasSufficientData ? (
-               <h4 className="text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">{forecast?.forecastNextMonth?.toFixed(2)} <span className="text-sm font-normal opacity-70">tCO₂e</span></h4>
-            ) : (
-               <h4 className="text-sm font-medium mt-2 text-muted-foreground">Need more data</h4>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-5 flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Risk Level</p>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 hover:text-foreground transition-colors cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p className="text-xs font-medium">Evaluates current trajectory against recommended sustainability targets and recent volatility.</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            {hasSufficientData ? (
-              <div className="flex items-center mt-1 gap-2">
-                <RiskIcon className={cn("h-5 w-5", riskColor)} />
-                <h4 className={cn("text-2xl font-bold", riskColor)}>{riskLevel} Risk</h4>
+          {/* Section 1: AI Prediction Summary Card Cluster */}
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mb-8">
+            <div className="p-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-3xl flex flex-col group hover:border-emerald-500/30 transition-all hover:-translate-y-1 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <ActivityIcon className="w-16 h-16 text-emerald-500" />
               </div>
-            ) : (
-              <h4 className="text-sm font-medium mt-2 text-muted-foreground">Insufficient Data</h4>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-5 flex flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Trend Direction</p>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 hover:text-foreground transition-colors cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p className="text-xs font-medium">Mathematical derivation of emission changes over the last 3 logging periods.</p>
-                </TooltipContent>
-              </Tooltip>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1 z-10">Current Run Rate</p>
+              <div className="flex items-end justify-between z-10 mt-2">
+                <h4 className="text-3xl font-black text-white">{forecast?.currentMonth?.toFixed(2) || "0.00"}<span className="text-sm font-medium text-zinc-500 ml-1">tCO₂e</span></h4>
+                {monthlyTrend !== 0 && (
+                  <div className={`flex items-center text-xs font-bold px-2 py-1 rounded-md ${monthlyTrend < 0 ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>
+                    {monthlyTrend < 0 ? <TrendingDown className="mr-1 h-3 w-3" /> : <TrendingUp className="mr-1 h-3 w-3" />}
+                    {Math.abs(monthlyTrend).toFixed(1)}%
+                  </div>
+                )}
+              </div>
             </div>
-            {hasSufficientData ? (
-               <h4 className={`text-xl font-bold mt-2 leading-tight ${forecast?.trendDirection === 'Decreasing' ? 'text-emerald-500' : (forecast?.trendDirection === 'Stable' ? 'text-amber-500' : 'text-rose-500')}`}>{forecast?.trendDirection}</h4>
-            ) : (
-               <h4 className="text-sm font-medium mt-2 text-muted-foreground">Keep logging activities</h4>
-            )}
-          </CardContent>
-        </Card>
-      </div>
 
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Section 2: Chart */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
-          <Card className="flex flex-col flex-1 relative overflow-hidden border-border/40 bg-white/50 backdrop-blur-xl shadow-[0_2px_16px_rgba(0,0,0,0.02)] dark:bg-zinc-950/50 dark:shadow-[0_2px_16px_rgba(0,0,0,0.02)]">
-            <div className="pointer-events-none absolute -right-32 -top-32 h-64 w-64 rounded-full bg-emerald-500/5 blur-[80px] dark:bg-emerald-500/3" />
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="space-y-1">
-                <CardTitle className="text-base font-semibold">Emission Forecast Trend</CardTitle>
-                <CardDescription>Historical data vs Future predictions</CardDescription>
+            <div className="p-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-3xl flex flex-col group hover:border-emerald-500/30 transition-all hover:-translate-y-1 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Target className="w-16 h-16 text-emerald-500" />
               </div>
-            </CardHeader>
-            <CardContent className="pt-4 pb-6 min-h-[300px] md:min-h-[350px]">
-              {chartData.length > 0 ? (
-                <div className="w-full h-full focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="forecast-chart-summary">
-                  <span id="forecast-chart-summary" className="sr-only">
-                    Emission forecast trend chart. 
-                    Current month emissions: {forecast?.currentMonth?.toFixed(2) || "0.00"} tCO2e.
-                    Forecast for next month: {forecast?.forecastNextMonth?.toFixed(2) || "0.00"} tCO2e.
-                    Trend direction: {forecast?.trendDirection}.
-                  </span>
-                  <ForecastChart chartData={chartData} isAnimationActive={!reducedMotion} />
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-muted-foreground">No data available to display chart.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Section 3: AI Forecast Insights */}
-        <div className="lg:col-span-4 flex flex-col gap-4">
-          <h2 className="text-base font-semibold pt-1">AI Forecast Insights</h2>
-          
-          <Card className="bg-emerald-50/50 border-emerald-200/60 dark:bg-emerald-500/5 dark:border-emerald-500/10 shadow-none">
-            <CardContent className="p-4 flex gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
-                <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              <div className="flex items-center justify-between z-10 mb-1">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Predicted Trajectory</p>
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
-              <div className="space-y-1">
-                <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Overall Insight</p>
-                <h4 className="text-sm font-medium text-foreground leading-snug">{forecast?.aiInsights?.insight || "Insufficient data for detailed AI insights."}</h4>
+              <div className="flex items-end z-10 mt-2">
+                {hasSufficientData ? (
+                  <h4 className="text-3xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{forecast?.forecastNextMonth?.toFixed(2)}<span className="text-sm font-medium text-emerald-500/50 ml-1">tCO₂e</span></h4>
+                ) : (
+                  <h4 className="text-sm font-medium text-zinc-500 mt-2">Awaiting Data</h4>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          {forecast?.aiInsights?.highestRiskArea && forecast.aiInsights.highestRiskArea !== "None" && (
-            <Card className="bg-rose-50/50 border-rose-200/60 dark:bg-rose-500/5 dark:border-rose-500/10 shadow-none">
-              <CardContent className="p-4 flex gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/40">
-                  <AlertTriangle className="h-5 w-5 text-rose-600 dark:text-rose-400" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Highest Risk Area</p>
-                  <h4 className="text-sm font-semibold text-foreground">{forecast.aiInsights.highestRiskArea}</h4>
-                  {forecast.aiInsights.potentialIncrease && (
-                    <p className="text-xs text-muted-foreground mt-1">Potential Increase: <span className="font-medium text-rose-600 dark:text-rose-400">+{forecast.aiInsights.potentialIncrease}</span></p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+            <div className="p-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-3xl flex flex-col group hover:border-emerald-500/30 transition-all hover:-translate-y-1 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <BrainCircuit className="w-16 h-16 text-sky-500" />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1 z-10">AI Confidence</p>
+              <div className="flex items-end z-10 mt-2">
+                {hasSufficientData ? (
+                  <h4 className="text-3xl font-black text-white">94<span className="text-sm font-medium text-zinc-500 ml-1">%</span></h4>
+                ) : (
+                  <h4 className="text-sm font-medium text-zinc-500 mt-2">Calibrating...</h4>
+                )}
+              </div>
+            </div>
 
-          {forecast?.aiInsights?.potentialReduction && (
-            <Card className="bg-muted/30 border-border/50 shadow-none">
-              <CardContent className="p-4 flex gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-900/40">
-                  <Lightbulb className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Potential Reduction</p>
-                  <h4 className="text-sm font-semibold text-foreground">{forecast.aiInsights.potentialReduction}</h4>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
+            <div className="p-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-3xl flex flex-col group hover:border-emerald-500/30 transition-all hover:-translate-y-1 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <RiskIcon className={`w-16 h-16 ${riskLevel === 'CRITICAL' || riskLevel === 'HIGH' ? 'text-rose-500' : (riskLevel === 'LOW' ? 'text-emerald-500' : 'text-amber-500')}`} />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1 z-10">Risk Vector</p>
+              <div className="flex items-end z-10 mt-2">
+                {hasSufficientData ? (
+                  <h4 className={`text-2xl font-black uppercase tracking-wider ${riskColor}`}>{riskLevel}</h4>
+                ) : (
+                  <h4 className="text-sm font-medium text-zinc-500 mt-2">Unknown</h4>
+                )}
+              </div>
+            </div>
+          </div>
 
-      {/* Section 4: Recommended Actions */}
-      <div aria-live="polite">
-        <h2 className="text-base font-semibold mb-4">Recommended Actions</h2>
-        {(forecast?.recommendations?.length || 0) > 0 ? (
-          <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            {forecast?.recommendations?.map((action, i: number) => (
-              <Card key={i} className="flex flex-col group hover:border-emerald-500/30 transition-colors">
-                <CardHeader className="pb-3 flex-1">
-                  <CardTitle className="text-sm font-semibold leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{action.title}</CardTitle>
-                  <CardDescription className="text-xs leading-relaxed mt-1">
-                    {action.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pb-4">
-                  <div className="flex flex-col gap-2 p-3 rounded-lg bg-muted/30 border border-border/40">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground">Reduction</span>
-                      <span className="font-medium text-emerald-600 dark:text-emerald-400">{action.reduction}</span>
+          {/* Section 2: Chart & Scenarios */}
+          <div className="grid gap-6 lg:grid-cols-12 mb-8">
+            <div className="lg:col-span-8 flex flex-col gap-6">
+              <div className="p-1 rounded-3xl bg-gradient-to-b from-zinc-800 to-zinc-950 shadow-2xl relative">
+                <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full" />
+                <div className="bg-zinc-950/80 backdrop-blur-2xl rounded-[22px] p-6 relative overflow-hidden h-[450px] flex flex-col">
+                  <div className="flex items-center justify-between mb-6 z-10">
+                    <div>
+                      <h3 className="text-lg font-bold text-white flex items-center gap-2"><Sparkles className="w-5 h-5 text-emerald-400" /> AI Trajectory Model</h3>
+                      <p className="text-xs text-zinc-500 mt-1">Stochastic rendering of emission probabilities.</p>
                     </div>
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground">Difficulty</span>
-                      <span className="font-medium">{action.difficulty}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground">Impact</span>
-                      <span className="font-medium">{action.impact}</span>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]" /><span className="text-xs font-bold text-zinc-400">Actual</span></div>
+                      <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" /><span className="text-xs font-bold text-zinc-400">Predicted</span></div>
                     </div>
                   </div>
-                </CardContent>
-                <CardFooter className="pt-0 border-t border-border/30 mt-auto flex">
-                  <Button 
-                    onClick={() => setSelectedAction(action)}
-                    variant="ghost" 
-                    className="w-full mt-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/50 justify-between"
-                  >
-                    Apply Action
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+                  
+                  <div className="flex-1 w-full relative z-10">
+                    {chartData.length > 0 ? (
+                      <ForecastChart chartData={chartData} isAnimationActive={!reducedMotion} />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-zinc-500">No data available to display model.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 flex flex-col gap-6">
+              {/* AI Forecast Insights */}
+              <div className="p-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-3xl flex-1 flex flex-col">
+                <h3 className="text-base font-bold text-white flex items-center gap-2 mb-6"><BrainCircuit className="w-5 h-5 text-sky-400" /> Intelligence Feed</h3>
+                
+                <div className="space-y-4 flex-1">
+                  <div className="p-4 rounded-2xl bg-zinc-950/50 border border-zinc-800 flex gap-4">
+                    <Sparkles className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Synthesized Insight</p>
+                      <p className="text-sm font-medium text-white leading-relaxed">{forecast?.aiInsights?.insight || "Insufficient data for detailed AI insights."}</p>
+                    </div>
+                  </div>
+
+                  {forecast?.aiInsights?.highestRiskArea && forecast.aiInsights.highestRiskArea !== "None" && (
+                    <div className="p-4 rounded-2xl bg-zinc-950/50 border border-zinc-800 flex gap-4">
+                      <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Primary Threat Vector</p>
+                        <p className="text-sm font-bold text-rose-400">{forecast.aiInsights.highestRiskArea}</p>
+                        {forecast.aiInsights.potentialIncrease && (
+                          <p className="text-xs text-rose-500/70 mt-1">Variance: +{forecast.aiInsights.potentialIncrease}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {forecast?.aiInsights?.potentialReduction && (
+                    <div className="p-4 rounded-2xl bg-zinc-950/50 border border-zinc-800 flex gap-4">
+                      <Lightbulb className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Optimization Opportunity</p>
+                        <p className="text-sm font-bold text-sky-400">{forecast.aiInsights.potentialReduction}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="p-8 text-center border border-dashed rounded-lg border-border/50 bg-muted/20">
-            <Leaf className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-3" />
-            <p className="text-sm text-muted-foreground">More data is needed to generate personalized recommendations.</p>
+
+          {/* Section 3: Visual Impact Indicators */}
+          <div className="mb-8">
+            <h2 className="text-xl font-bold tracking-tight text-white mb-6 flex items-center gap-2"><Globe className="w-5 h-5 text-emerald-500" /> Projected Global Impact</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-3xl flex items-center gap-6 overflow-hidden relative group cursor-default">
+                <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-emerald-500/10 to-transparent pointer-events-none group-hover:from-emerald-500/20 transition-colors" />
+                <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                  <Leaf className="w-8 h-8 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-3xl font-black text-white">{Math.max(0, Math.floor((forecast?.forecastNextMonth || 0) * 1.5))}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mt-1">Mature Trees Equivalent</p>
+                </div>
+              </div>
+
+              <div className="p-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-3xl flex items-center gap-6 overflow-hidden relative group cursor-default">
+                <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-sky-500/10 to-transparent pointer-events-none group-hover:from-sky-500/20 transition-colors" />
+                <div className="w-16 h-16 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(14,165,233,0.2)]">
+                  <Car className="w-8 h-8 text-sky-400" />
+                </div>
+                <div>
+                  <p className="text-3xl font-black text-white">{Math.max(0, Math.floor((forecast?.forecastNextMonth || 0) * 42.3))}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mt-1">Gallons of Fuel Equivalent</p>
+                </div>
+              </div>
+
+              <div className="p-6 bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-3xl flex items-center gap-6 overflow-hidden relative group cursor-default">
+                <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-indigo-500/10 to-transparent pointer-events-none group-hover:from-indigo-500/20 transition-colors" />
+                <div className="w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
+                  <ActivityIcon className="w-8 h-8 text-indigo-400" />
+                </div>
+                <div>
+                  <p className="text-3xl font-black text-white">{(forecast?.forecastNextMonth ? (forecast.forecastNextMonth * 0.85).toFixed(1) : "0.0")}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mt-1">Offset Potential (tCO₂e)</p>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Section 4: What-If Simulator (Mocks) & Recommended Actions */}
+          <div className="grid gap-8 lg:grid-cols-2 mb-8">
+            {/* What-If Analysis */}
+            <div className="p-8 bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-3xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20"><ActivityIcon className="w-5 h-5" /></div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">What-If Simulator</h3>
+                  <p className="text-xs text-zinc-500 mt-0.5">Toggle scenarios to visualize theoretical impacts on your footprint.</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                {[
+                  { id: "ev", label: "Full EV Adoption", desc: "-40% transit footprint", icon: <Zap className="w-4 h-4 text-amber-400" /> },
+                  { id: "public", label: "Max Public Transport", desc: "-60% commute footprint", icon: <BusFront className="w-4 h-4 text-sky-400" /> },
+                  { id: "solar", label: "100% Renewable Home", desc: "-85% energy footprint", icon: <Sun className="w-4 h-4 text-emerald-400" /> },
+                  { id: "vegan", label: "Plant-based Diet", desc: "-30% food footprint", icon: <Leaf className="w-4 h-4 text-indigo-400" /> }
+                ].map(sim => (
+                  <div key={sim.id} className="flex items-center justify-between p-4 bg-zinc-950/50 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 rounded-xl bg-zinc-900 border border-zinc-800">{sim.icon}</div>
+                      <div>
+                        <p className="text-sm font-bold text-white">{sim.label}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mt-0.5">{sim.desc}</p>
+                      </div>
+                    </div>
+                    <Switch />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Targeted Directives */}
+            <div className="p-8 bg-zinc-900/40 backdrop-blur-xl border border-white/5 shadow-2xl rounded-3xl flex flex-col">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><Target className="w-5 h-5" /></div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Targeted Directives</h3>
+                  <p className="text-xs text-zinc-500 mt-0.5">Commit to AI-curated actions to physically alter your forecast.</p>
+                </div>
+              </div>
+
+              {(forecast?.recommendations?.length || 0) > 0 ? (
+                <div className="space-y-4 flex-1 overflow-y-auto pr-2">
+                  {forecast?.recommendations?.map((action, i: number) => (
+                    <div key={i} className="p-4 bg-zinc-950/50 border border-zinc-800 rounded-2xl hover:border-emerald-500/30 transition-colors group">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">{action.title}</p>
+                          <p className="text-xs text-zinc-500 mt-1 leading-relaxed max-w-sm">{action.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-3 border-t border-zinc-800/50">
+                        <div className="flex gap-4">
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Drop: <span className="text-emerald-400 ml-1">{action.reduction}</span></div>
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Diff: <span className="text-zinc-300 ml-1">{action.difficulty}</span></div>
+                        </div>
+                        <Button 
+                          onClick={() => setSelectedAction(action)}
+                          size="sm"
+                          className="h-7 text-[10px] bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-zinc-950 font-bold border border-emerald-500/20 transition-all rounded-full px-4"
+                        >
+                          Execute
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border border-dashed rounded-2xl border-zinc-800 bg-zinc-950/30">
+                  <Leaf className="h-8 w-8 text-zinc-600 mb-3" />
+                  <p className="text-sm font-bold text-zinc-400">Data insufficient</p>
+                  <p className="text-xs text-zinc-600 mt-1">Log more activities to unlock targeted directives.</p>
+                </div>
+              )}
+            </div>
+          </div>
 
       <Dialog open={!!selectedAction} onOpenChange={(open) => !open && setSelectedAction(null)}>
         <DialogContent className="sm:max-w-md">

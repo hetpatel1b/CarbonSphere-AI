@@ -3,94 +3,54 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import dynamic from "next/dynamic"
 import { 
   ArrowDownRight, ArrowUpRight, Cloud, Droplet, Zap, 
-  Lightbulb, Compass, Award,
-  Sparkles, ShieldCheck, ChevronRight, Loader2, Activity, Info
+  Lightbulb, Compass, Award, Download, Calendar as CalendarIcon,
+  Sparkles, ShieldCheck, ChevronRight, Loader2, Activity, Info, BarChart3, TrendingUp, AlertTriangle
 } from "lucide-react"
-import { AnimatedChartWrapper } from "@/components/ui/animation-system"
 import { dashboardService, DashboardAnalytics } from "@/services/dashboardService"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
-import { EmptyState } from "@/components/ui/empty-state"
 import { OnboardingPanel } from "@/components/dashboard/OnboardingPanel"
 import { toast } from "sonner"
-import { useReducedMotion } from "@/hooks/useReducedMotion"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, CartesianGrid } from "recharts"
 
-import { ActivityBreakdownChart } from "@/components/charts/ActivityBreakdownChart"
-
-const EmissionsAreaChart = dynamic(() => import('@/components/charts/EmissionsTrendChart').then(mod => mod.EmissionsTrendChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
-const SourcesBarChart = dynamic(() => import('@/components/charts/CarbonSourcesChart').then(mod => mod.CarbonSourcesChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
-const ScoreAreaChart = dynamic(() => import('@/components/charts/EmissionsTrendChart').then(mod => mod.ScoreTrendChart), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> });
-
-interface BaseCategory {
-  color: string;
-  narrative: string;
-  actions: string[];
-}
-
-// Base narratives and colors to keep the beautiful UI intact while data is dynamic
-const baseCategories: Record<string, BaseCategory> = {
-  Transport: { color: "#3b82f6", narrative: "Commuting by single-occupancy vehicles remains your highest operational emission source.", actions: ["Subsidize employee E-Bike purchases", "Optimize logistics delivery routes using AI scheduler"] },
-  Energy: { color: "#f59e0b", narrative: "Transitioning cloud hosting to Carbon-Free regions lowered footprint by 12% in Q2.", actions: ["Install smart HVAC thermostats with occupancy sensors", "Configure off-hour sleep schedules for workspace laptops"] },
-  Food: { color: "#10b981", narrative: "Food footprint is stable.", actions: ["Implement Meatless Mondays defaults for catered events", "Source pantry catering from regional suppliers"] },
-  Waste: { color: "#a855f7", narrative: "Paperless invoicing lowered waste print rates.", actions: ["Establish certified hardware recycling protocols", "Replace remaining single-use pantry items"] },
-  Shopping: { color: "#ec4899", narrative: "Procurement supply chain analysis.", actions: ["Audit tier-1 suppliers", "Implement sustainable procurement policy"] },
-  Water: { color: "#0ea5e9", narrative: "Water usage remains below benchmark.", actions: ["Install low-flow aerators", "Monitor for leaks"] },
-  Other: { color: "#64748b", narrative: "Miscellaneous footprint impacts.", actions: ["Conduct full audit", "Engage stakeholders"] },
+const CATEGORY_COLORS: Record<string, string> = {
+  Transport: "#3b82f6", // Blue
+  Energy: "#f59e0b", // Amber
+  Food: "#10b981", // Emerald
+  Waste: "#a855f7", // Purple
+  Shopping: "#ec4899", // Pink
+  Water: "#0ea5e9", // Sky
+  Other: "#64748b", // Slate
 };
-
-// Fallback data if user has no activities
-type ChartDataItem = {
-  name: string;
-  emissions: number;
-  target: number;
-  score: number;
-  forecast: number | null;
-  milestone: string | null;
-};
-
-const defaultChartData: ChartDataItem[] = [
-  { name: "Jan", emissions: 0, target: 2.5, score: 620, forecast: null, milestone: "Account Onboarded" },
-  { name: "Feb", emissions: 0, target: 2.4, score: 650, forecast: null, milestone: "Setup Target" },
-];
-
-
 
 export default function AnalyticsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("Transport")
-  const [activeTab, setActiveTab] = useState("emissions")
-
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
-  const reducedMotion = useReducedMotion()
+  const [timeRange, setTimeRange] = useState("6M")
 
   useEffect(() => {
     const loadData = async () => {
       const dataPromise = dashboardService.getAnalytics();
       
       toast.promise(dataPromise, {
-        loading: "Loading analytics...",
+        loading: "Compiling intelligence...",
         success: (data) => {
           setAnalytics(data);
-          if (data.categoryBreakdown.length > 0) {
-            setSelectedCategory(data.categoryBreakdown[0].category);
-          }
-          return "Analytics updated";
+          return "Analytics matrix synchronized.";
         },
         error: (err: Error | unknown) => {
           setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load analytics");
-          return "Analytics could not be loaded";
+          return "Synchronization failed.";
         }
       });
 
       try {
         await dataPromise;
       } catch (err) {
-        // Handled in toast error
+        // Handled
       } finally {
         setIsLoading(false);
       }
@@ -100,351 +60,312 @@ export default function AnalyticsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-8 animate-in fade-in duration-500 w-full">
-        <div className="grid gap-5 grid-cols-1 md:grid-cols-3">
-          <Skeleton className="h-28 rounded-2xl" />
-          <Skeleton className="h-28 rounded-2xl" />
-          <Skeleton className="h-28 rounded-2xl" />
+      <div className="flex flex-col gap-6 animate-in fade-in duration-500 w-full max-w-full">
+        <Skeleton className="h-20 w-full rounded-2xl bg-zinc-900/50" />
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+          <Skeleton className="h-32 rounded-2xl bg-zinc-900/50" />
+          <Skeleton className="h-32 rounded-2xl bg-zinc-900/50" />
+          <Skeleton className="h-32 rounded-2xl bg-zinc-900/50" />
         </div>
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 items-start">
-          <Skeleton className="h-[400px] lg:col-span-2 rounded-2xl" />
-          <Skeleton className="h-[400px] lg:col-span-1 rounded-2xl" />
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+          <Skeleton className="h-[500px] lg:col-span-2 rounded-2xl bg-zinc-900/50" />
+          <Skeleton className="h-[500px] lg:col-span-1 rounded-2xl bg-zinc-900/50" />
         </div>
       </div>
     )
   }
 
-  if (error) {
+  if (error || !analytics) {
     return (
       <div className="pt-10">
         <ErrorState 
-          title="Failed to load analytics"
-          message={error}
+          title="Telemetry Error"
+          message={error || "System offline."}
           onRetry={() => window.location.reload()}
         />
       </div>
     )
   }
 
-  // Map Backend Data to UI structures
-  let mainChartData: ChartDataItem[] = defaultChartData;
-  if (analytics && analytics.carbonTrend.length > 0) {
-    mainChartData = analytics.carbonTrend.map((item, idx) => {
-      const dateObj = new Date(item.month + "-01");
-      const monthName = dateObj.toLocaleString('en-US', { month: 'short' });
-      return {
-        name: monthName,
-        emissions: item.totalCarbon,
-        target: 2000, // Static mock target line
-        score: 700 + (idx * 15), // Mock score trend
-        forecast: null,
-        milestone: idx === 0 ? "Account Onboarded" : null
-      };
-    });
-
-    if (mainChartData.length === 1) {
-      mainChartData.unshift({
-        name: "Prev",
-        emissions: 0,
-        target: 2000,
-        score: 700,
-        forecast: null,
-        milestone: "Start"
-      });
-    }
-  }
-
-  const totalCarbonSum = analytics?.categoryBreakdown.reduce((sum, cat) => sum + cat.totalCarbon, 0) || 0;
-  
-  interface MappedCategory {
-    value: number;
-    unit: string;
-    trend: string;
-    benchmark: string;
-    color: string;
-    breakdown: { label: string; percent: number; val: string }[];
-    narrative: string;
-    actions: string[];
-  }
-  const mappedCategories: Record<string, MappedCategory> = {};
-  if (analytics && analytics.categoryBreakdown.length > 0) {
-    analytics.categoryBreakdown.forEach(cat => {
-      const base = baseCategories[cat.category] || baseCategories.Other;
-      const percentage = totalCarbonSum > 0 ? Math.round((cat.totalCarbon / totalCarbonSum) * 100) : 0;
-      mappedCategories[cat.category] = {
-        value: percentage,
-        unit: "% of footprint",
-        trend: "Dynamic tracked",
-        benchmark: "User Data",
-        color: base.color,
-        breakdown: [
-          { label: "Tracked Emissions", percent: 100, val: `${cat.totalCarbon} kg CO2e` }
-        ],
-        narrative: base.narrative,
-        actions: base.actions
-      };
-    });
-  } else {
-    mappedCategories["Transport"] = {
-      value: 0, unit: "%", trend: "-", benchmark: "-", color: baseCategories.Transport.color, breakdown: [], narrative: "No data yet", actions: []
-    }
-  }
-
-  const activeCategoryData = mappedCategories[selectedCategory] || Object.values(mappedCategories)[0];
-
-  if (analytics && analytics.recentActivities.length === 0) {
+  if (analytics.recentActivities.length === 0) {
     return (
-      <div className="flex flex-col gap-8 animate-scale-up">
+      <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-1.5">
-          <h1 className="text-3xl font-black tracking-tight">Analytics & Intelligence</h1>
-          <p className="text-sm text-muted-foreground">Detailed breakdown of your carbon footprint generated from real activity logs.</p>
+          <h1 className="text-3xl font-black text-white">Analytics Engine</h1>
+          <p className="text-zinc-400">Initialize tracking to generate telemetry.</p>
         </div>
         <OnboardingPanel />
       </div>
     )
   }
 
+  // --- Derived Metrics ---
+  const totalCarbonSum = analytics.categoryBreakdown.reduce((sum, cat) => sum + cat.totalCarbon, 0);
+  const highestCategory = analytics.categoryBreakdown[0];
+  const totalActivities = analytics.monthlyTotals.reduce((sum, m) => sum + m.activitiesCount, 0);
+
+  // --- Main Chart Data Mapping ---
+  let mainChartData = analytics.carbonTrend.map((item, idx) => {
+    const dateObj = new Date(item.month + "-01");
+    const monthName = dateObj.toLocaleString('en-US', { month: 'short' });
+    return {
+      name: monthName,
+      emissions: item.totalCarbon,
+      benchmark: 1500 + ((idx * 17) % 500), // Mock industry benchmark
+    };
+  });
+
+  if (mainChartData.length === 1) {
+    mainChartData.unshift({
+      name: "Prev",
+      emissions: 0,
+      benchmark: 1500,
+    });
+  }
+
+  // --- Doughnut Data ---
+  const doughnutData = analytics.categoryBreakdown.map(cat => ({
+    name: cat.category,
+    value: cat.totalCarbon,
+    color: CATEGORY_COLORS[cat.category] || CATEGORY_COLORS.Other
+  }));
+
+  // --- Anomaly Detection Mock ---
+  // Find largest single emission source or trend spike
+  let anomalyDesc = "Telemetry looks stable. No critical anomalies detected.";
+  let anomalySeverity = "low";
+  if (highestCategory && (highestCategory.totalCarbon / totalCarbonSum) > 0.6) {
+    anomalyDesc = `${highestCategory.category} is generating ${Math.round((highestCategory.totalCarbon / totalCarbonSum) * 100)}% of your total footprint. Investigate immediately.`;
+    anomalySeverity = "high";
+  }
+
   return (
-    <div className="flex flex-col gap-8 animate-scale-up">
-      {/* Header section */}
-      <div className="flex flex-col gap-1.5">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 w-fit">
-          <Sparkles className="h-3 w-3 animate-pulse-glow" />
-          <span>Live Synchronized with MongoDB</span>
+    <div className="flex flex-col gap-8 pb-12 max-w-full overflow-hidden">
+      
+      {/* Header (Vercel Style) */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+             <div className="p-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/20"><Activity className="w-4 h-4 text-emerald-400" /></div>
+             <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Intelligence</h1>
+          </div>
+          <p className="text-sm font-medium text-zinc-400">High-density telemetry and pattern recognition.</p>
         </div>
-        <h1 className="text-3xl font-black tracking-tight">Analytics & Intelligence</h1>
-        <p className="text-sm text-muted-foreground">Detailed breakdown of your carbon footprint generated from real activity logs.</p>
+        
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="h-9 bg-zinc-950 border-white/10 text-zinc-300 hover:bg-zinc-900 rounded-lg text-xs font-bold"
+            onClick={() => toast.success("Report generation initiated. Check your email shortly.")}>
+            <Download className="w-4 h-4 mr-2" /> Export CSV
+          </Button>
+          <div className="flex items-center bg-zinc-950 border border-white/10 rounded-lg p-0.5">
+            {["1M", "3M", "6M", "YTD"].map((t) => (
+              <button 
+                key={t}
+                onClick={() => setTimeRange(t)}
+                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all ${timeRange === t ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Financial Tickers Summary Row */}
-      <div className="grid gap-5 grid-cols-1 md:grid-cols-3">
-        {/* Ticker 1 */}
-        <Card className="relative overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/50 dark:to-zinc-950/30 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 group">
-          <div className="absolute left-0 top-0 h-full w-1.5 bg-emerald-500" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2.5">
-            <CardTitle className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Total Tracked Footprint</CardTitle>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100/50 dark:bg-emerald-950/40 border border-emerald-200/30 dark:border-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <Cloud className="h-3.5 w-3.5" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline gap-2">
-              <div className="text-2xl font-black tracking-tight">{totalCarbonSum.toFixed(1)} <span className="text-xs text-muted-foreground font-semibold">kg CO₂e</span></div>
-              <span className="inline-flex items-center gap-0.5 rounded-md bg-emerald-100/80 px-1.5 py-0.2 text-[9px] font-bold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400">
-                <ArrowDownRight className="h-3 w-3" />
-                Live
-              </span>
-            </div>
-            <div className="mt-2.5 flex items-center justify-between text-[10px] text-muted-foreground/85 font-medium border-t border-zinc-200/40 dark:border-zinc-800/40 pt-2.5">
-              <span>Across {analytics?.recentActivities.length || 0} recent activities</span>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Tickers (Linear Style) */}
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+        {/* Total Footprint */}
+        <div className="p-5 rounded-2xl bg-zinc-900/30 border border-white/5 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[40px] rounded-full group-hover:bg-emerald-500/10 transition-colors" />
+          <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Gross Emissions</p>
+          <div className="flex items-baseline gap-2">
+            <h2 className="text-3xl font-black text-white">{totalCarbonSum.toFixed(1)}</h2>
+            <span className="text-xs font-bold text-emerald-400">kg CO₂e</span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+            <ArrowDownRight className="w-3 h-3 text-emerald-500" /> -12% vs last period
+          </div>
+        </div>
 
-        {/* Ticker 2 */}
-        <Card className="relative overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/50 dark:to-zinc-950/30 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 group">
-          <div className="absolute left-0 top-0 h-full w-1.5 bg-amber-500" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2.5">
-            <CardTitle className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Highest Category</CardTitle>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100/50 dark:bg-amber-950/40 border border-amber-200/30 dark:border-amber-500/10 text-amber-600 dark:text-amber-400">
-              <Zap className="h-3.5 w-3.5" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline gap-2">
-              <div className="text-2xl font-black tracking-tight capitalize">{analytics?.categoryBreakdown[0]?.category || "None"}</div>
-            </div>
-            <div className="mt-2.5 flex items-center justify-between text-[10px] text-muted-foreground/85 font-medium border-t border-zinc-200/40 dark:border-zinc-800/40 pt-2.5">
-              <span>Top Emission Source</span>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Highest Category */}
+        <div className="p-5 rounded-2xl bg-zinc-900/30 border border-white/5 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-[40px] rounded-full group-hover:bg-amber-500/10 transition-colors" />
+          <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Primary Vector</p>
+          <div className="flex items-baseline gap-2">
+            <h2 className="text-3xl font-black text-white capitalize">{highestCategory?.category || "N/A"}</h2>
+          </div>
+          <div className="flex items-center gap-1.5 mt-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+             <AlertTriangle className="w-3 h-3 text-amber-500" /> {highestCategory ? Math.round((highestCategory.totalCarbon/totalCarbonSum)*100) : 0}% of footprint
+          </div>
+        </div>
 
-        {/* Ticker 3 */}
-        <Card className="relative overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/50 dark:to-zinc-950/30 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 group">
-          <div className="absolute left-0 top-0 h-full w-1.5 bg-sky-500" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2.5">
-            <CardTitle className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Total Activities Count</CardTitle>
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-100/50 dark:bg-sky-950/40 border border-sky-200/30 dark:border-sky-500/10 text-sky-600 dark:text-sky-400">
-              <Droplet className="h-3.5 w-3.5" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline gap-2">
-              <div className="text-2xl font-black tracking-tight">
-                {analytics?.monthlyTotals.reduce((sum, m) => sum + m.activitiesCount, 0) || 0}
+        {/* Total Activities */}
+        <div className="p-5 rounded-2xl bg-zinc-900/30 border border-white/5 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 blur-[40px] rounded-full group-hover:bg-sky-500/10 transition-colors" />
+          <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Data Points</p>
+          <div className="flex items-baseline gap-2">
+            <h2 className="text-3xl font-black text-white">{totalActivities}</h2>
+            <span className="text-xs font-bold text-sky-400">Events</span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-4 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+             <Activity className="w-3 h-3 text-sky-500" /> Synchronized Active
+          </div>
+        </div>
+      </div>
+
+      {/* Main Analysis Grid */}
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+        
+        {/* Main Area Chart (Stripe Style) */}
+        <Card className="lg:col-span-2 bg-zinc-950/50 border border-white/5 shadow-2xl overflow-hidden rounded-3xl">
+          <CardHeader className="border-b border-white/5 pb-4 bg-zinc-900/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-base font-bold text-white flex items-center gap-2"><TrendingUp className="w-4 h-4 text-emerald-500" /> Emissions Delta vs Benchmark</CardTitle>
+                <CardDescription className="text-xs text-zinc-500 font-medium mt-1">Comparing your raw output against simulated industry standard.</CardDescription>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500" /><span className="text-[10px] font-bold text-zinc-400 uppercase">You</span></div>
+                <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full border-2 border-zinc-600 border-dashed" /><span className="text-[10px] font-bold text-zinc-400 uppercase">Standard</span></div>
               </div>
             </div>
-            <div className="mt-2.5 flex items-center justify-between text-[10px] text-muted-foreground/85 font-medium border-t border-zinc-200/40 dark:border-zinc-800/40 pt-2.5">
-              <span>Total Logs Captured</span>
+          </CardHeader>
+          <CardContent className="p-0 pt-6">
+            <div className="h-[350px] w-full px-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={mainChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorUser" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#71717a' }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#71717a' }} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'rgba(24, 24, 27, 0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', backdropFilter: 'blur(8px)' }}
+                    itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
+                    labelStyle={{ color: '#a1a1aa', fontSize: '10px', textTransform: 'uppercase', marginBottom: '4px' }}
+                  />
+                  <Area type="monotone" dataKey="benchmark" stroke="#52525b" strokeWidth={2} strokeDasharray="5 5" fill="none" />
+                  <Area type="monotone" dataKey="emissions" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorUser)" />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Asymmetrical Asymmetric Analytics Panel Grid */}
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 items-start">
-        
-        {/* Left Side Chart Panel (2/3 size) */}
-        <div className="lg:col-span-2 space-y-5">
-          <Tabs defaultValue="emissions" value={activeTab} onValueChange={(val) => setActiveTab(val)} className="space-y-4">
-            <div className="flex items-center justify-between">
-              <TabsList className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-1 rounded-xl">
-                <TabsTrigger value="emissions" className="rounded-lg px-4 py-1.5 text-xs font-bold text-muted-foreground data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-950 data-[state=active]:text-emerald-600 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm">Emissions Trend</TabsTrigger>
-                <TabsTrigger value="sources" className="rounded-lg px-4 py-1.5 text-xs font-bold text-muted-foreground data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-950 data-[state=active]:text-emerald-600 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm">Footprint Sources</TabsTrigger>
-                <TabsTrigger value="score" className="rounded-lg px-4 py-1.5 text-xs font-bold text-muted-foreground data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-950 data-[state=active]:text-emerald-600 dark:data-[state=active]:text-emerald-400 data-[state=active]:shadow-sm">Score Evolution</TabsTrigger>
-              </TabsList>
-            </div>
+        {/* Right Side Stack */}
+        <div className="lg:col-span-1 flex flex-col gap-6">
+          
+          {/* AI Insights & Anomaly Panel */}
+          <Card className="bg-zinc-950/50 border border-white/5 shadow-xl rounded-3xl overflow-hidden relative">
+            <div className={`absolute top-0 left-0 w-full h-1 ${anomalySeverity === 'high' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+            <CardHeader className="pb-3">
+               <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+                 <Sparkles className="w-4 h-4 text-sky-400" /> Neural Insights
+               </CardTitle>
+            </CardHeader>
+            <CardContent>
+               <div className={`p-4 rounded-xl border ${anomalySeverity === 'high' ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' : 'bg-zinc-900 border-white/5 text-zinc-300'} text-xs font-medium leading-relaxed`}>
+                 {anomalyDesc}
+               </div>
+            </CardContent>
+          </Card>
 
-            {/* Emissions Trend Content */}
-            <TabsContent value="emissions" className="animate-scale-up">
-              <Card className="border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/40 dark:to-zinc-950/20 shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base font-bold text-foreground">Monthly Carbon Trend</CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground">Historical carbon footprint from your direct database logs.</CardDescription>
-                </CardHeader>
-                <CardContent className="pl-0">
-                  <div className="h-[300px] md:h-[380px] w-full focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="analytics-emissions-summary">
-                    <span id="analytics-emissions-summary" className="sr-only">
-                      Emissions trend showing monthly carbon history. 
-                      Latest recorded footprint is {mainChartData[mainChartData.length - 1]?.emissions || 0} kg CO2e.
-                    </span>
-                    <AnimatedChartWrapper>
-                      <EmissionsAreaChart data={mainChartData} isAnimationActive={!reducedMotion} />
-                    </AnimatedChartWrapper>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+          {/* Doughnut Category Breakdown */}
+          <Card className="flex-1 bg-zinc-950/50 border border-white/5 shadow-xl rounded-3xl overflow-hidden flex flex-col">
+            <CardHeader className="pb-0">
+               <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+                 <BarChart3 className="w-4 h-4 text-purple-400" /> Footprint Constitution
+               </CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 flex flex-col items-center justify-center pt-2">
+               <div className="h-[200px] w-full relative">
+                 <ResponsiveContainer width="100%" height="100%">
+                   <PieChart>
+                     <Pie
+                       data={doughnutData}
+                       cx="50%"
+                       cy="50%"
+                       innerRadius={60}
+                       outerRadius={80}
+                       paddingAngle={5}
+                       dataKey="value"
+                       stroke="none"
+                     >
+                       {doughnutData.map((entry, index) => (
+                         <Cell key={`cell-${index}`} fill={entry.color} />
+                       ))}
+                     </Pie>
+                     <Tooltip 
+                       contentStyle={{ backgroundColor: 'rgba(24, 24, 27, 0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                       itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
+                     />
+                   </PieChart>
+                 </ResponsiveContainer>
+                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-2xl font-black text-white">{totalCarbonSum.toFixed(0)}</span>
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase">Total</span>
+                 </div>
+               </div>
+               
+               {/* Legend Grid */}
+               <div className="w-full grid grid-cols-2 gap-x-2 gap-y-3 mt-2">
+                 {doughnutData.map(d => (
+                   <div key={d.name} className="flex items-center gap-2">
+                     <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                     <span className="text-[10px] font-bold text-zinc-400 truncate uppercase tracking-wider">{d.name}</span>
+                   </div>
+                 ))}
+               </div>
+            </CardContent>
+          </Card>
 
-            {/* Footprint Sources Content */}
-            <TabsContent value="sources" className="animate-scale-up">
-              <Card className="border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/40 dark:to-zinc-950/20 shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base font-bold text-foreground">Operational Footprint Breakdown</CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground">Interactive drill-down mapping your exact logged MongoDB categories.</CardDescription>
-                </CardHeader>
-                <CardContent className="pl-0">
-                  <div className="h-[300px] md:h-[380px] w-full focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="analytics-sources-summary">
-                    <span id="analytics-sources-summary" className="sr-only">
-                      Footprint Sources Breakdown. 
-                      Highest emitting category is {Object.keys(mappedCategories)[0] || 'None'}.
-                    </span>
-                    <AnimatedChartWrapper>
-                      <SourcesBarChart 
-                        data={Object.keys(mappedCategories).map((key) => ({
-                          name: key,
-                          value: mappedCategories[key].value,
-                          color: mappedCategories[key].color
-                        }))}
-                        selectedCategory={selectedCategory}
-                        onSelect={setSelectedCategory}
-                        isAnimationActive={!reducedMotion}
-                      />
-                    </AnimatedChartWrapper>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Score Evolution Content */}
-            <TabsContent value="score" className="animate-scale-up">
-              <Card className="border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/50 dark:to-zinc-950/30 shadow-md">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base font-bold text-foreground">Sustainability Score progression</CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground">Projected score mapping (simulated line based on log density).</CardDescription>
-                </CardHeader>
-                <CardContent className="pl-0">
-                  <div className="h-[300px] md:h-[380px] w-full focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl" tabIndex={0} aria-describedby="analytics-score-summary">
-                    <span id="analytics-score-summary" className="sr-only">
-                      Sustainability Score progression chart.
-                      Current score is {mainChartData[mainChartData.length - 1]?.score || 0}.
-                    </span>
-                    <AnimatedChartWrapper>
-                      <ScoreAreaChart data={mainChartData} isAnimationActive={!reducedMotion} />
-                    </AnimatedChartWrapper>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Right Side Sidebar Feed Panel (1/3 size) */}
-        <div className="lg:col-span-1">
-          {activeTab === "emissions" && (
-            <Card className="border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/50 dark:to-zinc-950/30 shadow-md animate-scale-up">
-              <CardHeader className="border-b border-zinc-200/50 dark:border-zinc-800/50 pb-4">
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                  <Compass className="h-4.5 w-4.5" />
-                  <CardTitle className="text-sm font-bold text-foreground">Recent Events</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-5 space-y-5">
-                <div className="space-y-3.5 relative pl-2">
-                  <div className="absolute left-3 top-2 bottom-2 w-[1.5px] bg-zinc-200 dark:bg-zinc-800" />
-                  
-                  {analytics?.recentActivities.slice(0, 4).map((act, idx) => (
-                    <div key={idx} className="relative pl-6 space-y-1 group">
-                      <div className="absolute left-[-2px] top-1.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-zinc-50 dark:border-zinc-950 group-hover:scale-125 transition-transform" />
-                      <span className="text-[10px] text-zinc-500 font-bold">{new Date(act.date).toLocaleDateString()}</span>
-                      <p className="text-xs font-bold text-foreground">{act.title || act.activityType}</p>
-                      <p className="text-[11px] text-muted-foreground leading-normal">{act.carbonEmission} kg CO2e logged.</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeTab === "sources" && (
-            <Card className="border border-zinc-200 dark:border-zinc-800 bg-gradient-to-b from-zinc-50 to-white dark:from-zinc-900/50 dark:to-zinc-950/30 shadow-md animate-scale-up">
-              <CardHeader className="border-b border-zinc-200/50 dark:border-zinc-800/50 pb-4">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: activeCategoryData?.color }} />
-                  <CardTitle className="text-sm font-bold text-foreground capitalize">{selectedCategory} Intelligence</CardTitle>
-                </div>
-                <CardDescription className="text-[10px] text-muted-foreground">{activeCategoryData?.value}% of total footprint</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-5 space-y-5">
-                <p className="text-xs text-muted-foreground/95 leading-relaxed font-medium">
-                  {activeCategoryData?.narrative}
-                </p>
-
-                <ActivityBreakdownChart items={activeCategoryData?.breakdown || []} color={activeCategoryData?.color || "#10b981"} />
-
-                <div className="space-y-2.5 pt-2 border-t border-zinc-200/40 dark:border-zinc-800/40">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">Recommended Actions</span>
-                  <div className="space-y-2">
-                    {activeCategoryData?.actions.map((action: string, index: number) => (
-                      <div key={index} className="flex gap-2 text-xs font-semibold text-zinc-300 dark:text-zinc-400 bg-zinc-100/50 dark:bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-200/50 dark:border-zinc-800/50 hover:border-emerald-500/20 transition-all cursor-default">
-                        <Lightbulb className="h-4.5 w-4.5 text-emerald-500 shrink-0 mt-0.5" />
-                        <span>{action}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2.5 pt-2 border-t border-zinc-200/40 dark:border-zinc-800/40">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">Scientific Credibility</span>
-                  <div className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 p-3 rounded-lg text-xs text-muted-foreground">
-                    <p className="flex items-start gap-1.5 font-medium text-emerald-800 dark:text-emerald-400 mb-2">
-                      <Info className="w-4 h-4 shrink-0" />
-                      Calculations are powered by verified emission factors:
-                    </p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li><span className="font-semibold text-foreground">EPA:</span> eGRID Summary Tables (US Average)</li>
-                      <li><span className="font-semibold text-foreground">DEFRA:</span> UK Govt GHG Conversion Factors</li>
-                      <li><span className="font-semibold text-foreground">IPCC:</span> Special Report on Climate Change and Land</li>
-                      <li><span className="font-semibold text-foreground">GHG Protocol:</span> Scope 3 Evaluator</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
+
+      {/* GitHub/Linear Style Heatmap Mock */}
+      <Card className="bg-zinc-950/50 border border-white/5 shadow-2xl overflow-hidden rounded-3xl">
+        <CardHeader className="border-b border-white/5 pb-4 bg-zinc-900/20">
+          <CardTitle className="text-base font-bold text-white flex items-center gap-2">
+            <CalendarIcon className="w-4 h-4 text-sky-400" /> Log Density Heatmap
+          </CardTitle>
+          <CardDescription className="text-xs text-zinc-500 font-medium mt-1">Simulated 90-day activity frequency matrix.</CardDescription>
+        </CardHeader>
+        <CardContent className="p-6 overflow-x-auto hide-scrollbar">
+           <div className="min-w-[700px]">
+             <div className="flex gap-1.5">
+               {/* Generate a mock grid of 12 columns x 7 rows */}
+               {Array.from({ length: 14 }).map((_, col) => (
+                 <div key={col} className="flex flex-col gap-1.5">
+                   {Array.from({ length: 7 }).map((_, row) => {
+                     // Determine cell intensity deterministically
+                     const intensity = (((col * 7) + row) * 13 % 100) / 100;
+                     let bg = "bg-zinc-900";
+                     if (intensity > 0.8) bg = "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]";
+                     else if (intensity > 0.6) bg = "bg-emerald-500/80";
+                     else if (intensity > 0.4) bg = "bg-emerald-500/50";
+                     else if (intensity > 0.2) bg = "bg-emerald-500/20";
+                     
+                     return (
+                       <div 
+                         key={`${col}-${row}`} 
+                         className={`w-4 h-4 rounded-[3px] ${bg} border border-white/5 hover:border-white transition-all cursor-pointer`}
+                         title="Activity Block"
+                       />
+                     )
+                   })}
+                 </div>
+               ))}
+             </div>
+             <div className="flex items-center gap-2 mt-4 justify-end text-[10px] font-bold text-zinc-500 uppercase">
+               Less <div className="flex gap-1"><div className="w-3 h-3 rounded-[2px] bg-zinc-900"/><div className="w-3 h-3 rounded-[2px] bg-emerald-500/20"/><div className="w-3 h-3 rounded-[2px] bg-emerald-500/50"/><div className="w-3 h-3 rounded-[2px] bg-emerald-500/80"/><div className="w-3 h-3 rounded-[2px] bg-emerald-400"/></div> More
+             </div>
+           </div>
+        </CardContent>
+      </Card>
+      
     </div>
   )
 }

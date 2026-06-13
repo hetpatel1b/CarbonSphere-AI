@@ -1,44 +1,47 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Award, Leaf, Zap, Droplet, Wind, Trophy, CheckCircle2, Star, Hexagon, Crown, Sparkles, Target, Flame, Activity, Loader2 } from "lucide-react"
+import { Award, Leaf, Zap, Droplet, Wind, Trophy, Star, Hexagon, Crown, Sparkles, Target, Flame } from "lucide-react"
 import { achievementService, AchievementDocument, Rarity } from "@/services/achievementService"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
+import { motion } from "framer-motion"
 
 const RARITY_CONFIG = {
   Common: {
-    color: "text-slate-500",
-    bg: "bg-slate-100 dark:bg-slate-800/40",
-    border: "border-slate-200 dark:border-slate-800",
-    glow: "shadow-[0_0_15px_rgba(100,116,139,0.15)]",
+    color: "text-slate-400",
+    bg: "bg-slate-900",
+    border: "border-slate-800",
+    glow: "shadow-[0_0_15px_rgba(100,116,139,0.1)]",
+    gradient: "from-slate-800 to-slate-900",
     icon: Star
   },
   Rare: {
-    color: "text-sky-500",
-    bg: "bg-sky-100 dark:bg-sky-900/40",
-    border: "border-sky-200 dark:border-sky-800",
-    glow: "shadow-[0_0_15px_rgba(14,165,233,0.2)]",
+    color: "text-sky-400",
+    bg: "bg-sky-950/50",
+    border: "border-sky-500/30",
+    glow: "shadow-[0_0_20px_rgba(14,165,233,0.15)]",
+    gradient: "from-sky-900/60 to-sky-950/40",
     icon: Hexagon
   },
   Epic: {
-    color: "text-violet-500",
-    bg: "bg-violet-100 dark:bg-violet-900/40",
-    border: "border-violet-200 dark:border-violet-800",
-    glow: "shadow-[0_0_20px_rgba(139,92,246,0.25)]",
+    color: "text-violet-400",
+    bg: "bg-violet-950/50",
+    border: "border-violet-500/40",
+    glow: "shadow-[0_0_30px_rgba(139,92,246,0.25)]",
+    gradient: "from-violet-900/60 to-violet-950/40",
     icon: Flame
   },
   Legendary: {
-    color: "text-amber-500",
-    bg: "bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40",
-    border: "border-amber-300 dark:border-amber-700/50",
-    glow: "shadow-[0_0_25px_rgba(245,158,11,0.3)]",
+    color: "text-amber-400",
+    bg: "bg-amber-950/50",
+    border: "border-amber-500/50",
+    glow: "shadow-[0_0_40px_rgba(245,158,11,0.35)]",
+    gradient: "from-amber-600/30 via-orange-600/20 to-amber-950/40",
     icon: Crown
   }
 }
@@ -63,6 +66,62 @@ const determineRarity = (points: number): Rarity => {
   return "Legendary";
 }
 
+const calculateLevel = (totalXP: number) => {
+  const level = Math.floor(Math.sqrt(totalXP / 50)) + 1;
+  const currentLevelXP = (level - 1) * (level - 1) * 50;
+  const nextLevelXP = level * level * 50;
+  const xpIntoLevel = totalXP - currentLevelXP;
+  const xpNeededForLevel = nextLevelXP - currentLevelXP;
+  const progressPct = Math.min(100, Math.max(0, (xpIntoLevel / xpNeededForLevel) * 100));
+  
+  let rank = "Novice Ecologist";
+  if (level >= 5) rank = "Green Guardian";
+  if (level >= 10) rank = "Climate Champion";
+  if (level >= 15) rank = "Sustainability Master";
+  if (level >= 20) rank = "Carbon Vanguard";
+
+  return { level, rank, xpIntoLevel, xpNeededForLevel, progressPct, nextLevelXP };
+}
+
+// Circular Progress Component
+const CircularProgress = ({ progress, size = 64, strokeWidth = 6, children, className }: any) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (progress / 100) * circumference;
+
+  return (
+    <div className={`relative flex items-center justify-center ${className}`} style={{ width: size, height: size }}>
+      <svg className="absolute inset-0 transform -rotate-90" width={size} height={size}>
+        <circle
+          className="text-zinc-800 transition-all duration-300"
+          strokeWidth={strokeWidth}
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx={size / 2}
+          cy={size / 2}
+        />
+        <motion.circle
+          className="text-emerald-500"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference}
+          strokeLinecap="round"
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx={size / 2}
+          cy={size / 2}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+        />
+      </svg>
+      {children}
+    </div>
+  );
+};
+
 export default function AchievementsPage() {
   const [activeTab, setActiveTab] = useState("All")
   const [achievements, setAchievements] = useState<AchievementDocument[]>([])
@@ -75,7 +134,7 @@ export default function AchievementsPage() {
         const data = await achievementService.getAchievementStatus();
         setAchievements(data);
       } catch (err: unknown) {
-        setError((err instanceof Error ? (err instanceof Error ? (err as Error).message : String(err)) : String(err)) || "Failed to load achievements");
+        setError((err instanceof Error ? err.message : String(err)) || "Failed to load achievements");
       } finally {
         setIsLoading(false);
       }
@@ -85,30 +144,21 @@ export default function AchievementsPage() {
 
   const unlockedCount = achievements.filter(a => a.unlocked).length
   const totalCount = achievements.length
-  const completionPct = totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0
+  
+  const totalXP = achievements.filter(a => a.unlocked).reduce((sum, a) => sum + a.points, 0);
+  const { level, rank, progressPct, nextLevelXP } = calculateLevel(totalXP);
 
   const filteredAchievements = activeTab === "All" 
     ? achievements 
     : achievements.filter(a => a.category === activeTab)
 
-  const featured = achievements.find(a => determineRarity(a.points) === "Legendary") || achievements[0]
-
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-8 animate-in fade-in duration-500 pb-8 w-full">
-        <div className="flex flex-col gap-1.5">
-          <Skeleton className="h-6 w-48 rounded-full" />
-          <Skeleton className="h-8 w-64 rounded-md mt-1" />
-          <Skeleton className="h-4 w-96 rounded-md" />
+      <div className="flex flex-col gap-8 animate-in fade-in duration-500 pb-8 w-full max-w-6xl mx-auto">
+        <Skeleton className="h-[250px] w-full rounded-3xl bg-zinc-900 border border-zinc-800" />
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {[1,2,3,4,5,6].map(i => <Skeleton key={i} className="h-[180px] rounded-2xl bg-zinc-900 border border-zinc-800" />)}
         </div>
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-          <Skeleton className="h-24 rounded-2xl" />
-          <Skeleton className="h-24 rounded-2xl" />
-          <Skeleton className="h-24 rounded-2xl" />
-          <Skeleton className="h-24 rounded-2xl" />
-        </div>
-        <Skeleton className="h-48 rounded-2xl" />
-        <Skeleton className="h-48 rounded-2xl" />
       </div>
     )
   }
@@ -117,7 +167,7 @@ export default function AchievementsPage() {
     return (
       <div className="pt-10">
         <ErrorState 
-          title="Failed to load achievements"
+          title="Gamification Services Offline"
           message={error}
           onRetry={() => window.location.reload()}
         />
@@ -125,135 +175,89 @@ export default function AchievementsPage() {
     )
   }
 
-  const latestUnlocked = achievements.filter(a => a.unlocked).sort((a, b) => new Date(b.unlockedAt || 0).getTime() - new Date(a.unlockedAt || 0).getTime())[0]
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } }
+  }
 
   return (
-    <div className="flex flex-col gap-8 pb-8 animate-scale-up">
-      {/* Header */}
-      <div className="flex flex-col gap-1.5">
-        <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 w-fit">
-          <Sparkles className="h-3 w-3 animate-pulse-glow" />
-          <span>Live Synchronized with MongoDB</span>
+    <div className="flex flex-col gap-8 pb-12 max-w-6xl mx-auto">
+      
+      {/* Gamification Hero Profile */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 p-1"
+      >
+        <div className="absolute inset-0 z-0 opacity-40">
+           <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-500/20 blur-[100px] rounded-full mix-blend-screen" />
+           <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-teal-500/20 blur-[100px] rounded-full mix-blend-screen" />
         </div>
-        <h1 className="text-3xl font-black tracking-tight">Achievements</h1>
-        <p className="text-sm text-muted-foreground">
-          Unlock badges, earn XP, and track your sustainability journey dynamically.
-        </p>
-      </div>
-
-      {/* Top Statistics */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-        <Card className="bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm border-border/40">
-          <CardContent className="p-4 flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total</span>
-            <div className="flex items-center gap-2 mt-1">
-              <Trophy className="h-5 w-5 text-emerald-500" />
-              <span className="text-2xl font-bold">{totalCount}</span>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm border-border/40">
-          <CardContent className="p-4 flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Unlocked</span>
-            <div className="flex items-center gap-2 mt-1">
-              <CheckCircle2 className="h-5 w-5 text-sky-500" />
-              <span className="text-2xl font-bold">{unlockedCount}</span>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm border-border/40">
-          <CardContent className="p-4 flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">In Progress</span>
-            <div className="flex items-center gap-2 mt-1">
-              <Activity className="h-5 w-5 text-amber-500" />
-              <span className="text-2xl font-bold">{totalCount - unlockedCount}</span>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm border-border/40">
-          <CardContent className="p-4 flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Completion</span>
-            <div className="flex items-center gap-2 mt-1">
-              <Target className="h-5 w-5 text-violet-500" />
-              <span className="text-2xl font-bold">{completionPct}%</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Achievement Journey */}
-      {latestUnlocked && (
-        <Card className="border-emerald-500/20 bg-gradient-to-r from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20 shadow-sm">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20 shrink-0">
-                <Award className="h-8 w-8 text-white" />
+        
+        <div className="relative z-10 bg-zinc-900/60 backdrop-blur-2xl rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-10 border border-white/5">
+          
+          {/* Level Ring */}
+          <div className="flex-shrink-0 relative">
+            <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full" />
+            <CircularProgress progress={progressPct} size={160} strokeWidth={8} className="drop-shadow-2xl bg-zinc-950 rounded-full border-4 border-zinc-900">
+              <div className="flex flex-col items-center justify-center text-center">
+                <span className="text-xs font-bold uppercase tracking-widest text-zinc-500">Level</span>
+                <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-teal-200 drop-shadow-sm">{level}</span>
               </div>
-              <div className="flex-1 space-y-2 text-center md:text-left w-full">
-                <h3 className="text-lg font-bold text-foreground">Latest Unlock: {latestUnlocked.title}</h3>
-                <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                  <span>Earned +{latestUnlocked.points} XP</span>
-                  <span>Unlocked on {new Date(latestUnlocked.unlockedAt!).toLocaleDateString()}</span>
-                </div>
-                <Progress value={100} className="h-3 bg-emerald-100 dark:bg-emerald-950 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-teal-400" />
+            </CircularProgress>
+          </div>
+
+          {/* Profile Stats */}
+          <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
+                <Award className="w-3.5 h-3.5" /> {rank}
+              </div>
+              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">Eco Profile</h1>
+            </div>
+            
+            <div className="w-full max-w-md bg-zinc-950/50 border border-zinc-800/50 rounded-2xl p-4 flex items-center justify-between mt-2">
+              <div className="flex flex-col">
+                <span className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Total XP</span>
+                <span className="text-2xl font-bold text-white">{totalXP.toLocaleString()} <span className="text-sm text-zinc-600 font-normal">XP</span></span>
+              </div>
+              <div className="h-10 w-px bg-zinc-800" />
+              <div className="flex flex-col text-right">
+                <span className="text-xs text-zinc-500 font-semibold uppercase tracking-wider">Next Level</span>
+                <span className="text-2xl font-bold text-white">{nextLevelXP.toLocaleString()} <span className="text-sm text-zinc-600 font-normal">XP</span></span>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+          
+          {/* Trophy Count */}
+          <div className="hidden lg:flex flex-col items-center justify-center shrink-0 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 min-w-[160px]">
+            <Trophy className="w-10 h-10 text-amber-500 mb-3 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
+            <span className="text-3xl font-black text-white">{unlockedCount} <span className="text-xl text-zinc-600 font-medium">/ {totalCount}</span></span>
+            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mt-1">Unlocked</span>
+          </div>
 
-      {/* Featured Achievement */}
-      {featured && (
-        <div className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-amber-500" /> Featured Challenge
-          </h2>
-          <Card className={`relative overflow-hidden transition-all border-amber-300 dark:border-amber-700/50 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 shadow-[0_0_30px_rgba(245,158,11,0.15)] group hover:shadow-[0_0_40px_rgba(245,158,11,0.25)]`}>
-            <div className="absolute top-0 right-0 p-4">
-              <Badge className="bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/50 dark:text-amber-400 dark:border-amber-700 gap-1.5 px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur-md">
-                <Crown className="h-3.5 w-3.5" />
-                {determineRarity(featured.points)}
-              </Badge>
-            </div>
-            <CardContent className="p-6 md:p-8">
-              <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-xl shadow-amber-500/30 shrink-0 transform transition-transform group-hover:scale-105">
-                  {(() => {
-                    const FeaturedIcon = getIconComponent(featured.badgeIcon);
-                    return <FeaturedIcon className="h-12 w-12 text-white" />;
-                  })()}
-                </div>
-                <div className="flex-1 space-y-4 text-center md:text-left mt-2 md:mt-0 w-full">
-                  <div>
-                    <h3 className="text-2xl font-bold text-foreground">{featured.title}</h3>
-                    <p className="text-muted-foreground mt-1">{featured.description}</p>
-                  </div>
-                  <div className="space-y-2 max-w-md mx-auto md:mx-0">
-                    <div className="flex justify-between text-xs font-medium">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="text-amber-600 dark:text-amber-500">{featured.progress}%</span>
-                    </div>
-                    <Progress value={featured.progress} className="h-2 bg-amber-200/50 dark:bg-amber-900/50 [&>div]:bg-gradient-to-r [&>div]:from-amber-500 [&>div]:to-orange-400" />
-                  </div>
-                  <div className="flex items-center justify-center md:justify-start gap-3 pt-2">
-                    <Badge variant="outline" className="bg-white/50 dark:bg-black/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 gap-1.5 py-1">
-                      <Sparkles className="h-3.5 w-3.5" /> +{featured.points} XP
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
-      )}
+      </motion.div>
 
-      {/* Achievement Categories */}
-      <Tabs defaultValue="All" value={activeTab} onValueChange={setActiveTab} className="w-full mt-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-          <h2 className="text-lg font-semibold">Your Achievements</h2>
-          <TabsList className="bg-muted/50 border border-border/40 w-full sm:w-auto overflow-x-auto justify-start">
+      {/* Categories & Filter */}
+      <Tabs defaultValue="All" value={activeTab} onValueChange={setActiveTab} className="w-full mt-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h2 className="text-2xl font-bold text-white tracking-tight">Trophy Cabinet</h2>
+          <TabsList className="bg-zinc-900 border border-zinc-800 w-full sm:w-auto h-12 p-1">
             {["All", "Community", "Energy"].map((tab) => (
-              <TabsTrigger key={tab} value={tab} className="text-xs whitespace-nowrap">
+              <TabsTrigger 
+                key={tab} 
+                value={tab} 
+                className="text-sm font-medium px-6 h-full data-[state=active]:bg-zinc-800 data-[state=active]:text-white rounded-md transition-all"
+              >
                 {tab}
               </TabsTrigger>
             ))}
@@ -262,84 +266,96 @@ export default function AchievementsPage() {
 
         <TabsContent value={activeTab} className="mt-0 outline-none">
           {filteredAchievements.length === 0 ? (
-            <div className="flex items-center justify-center p-8">
+            <div className="flex items-center justify-center p-12 bg-zinc-900/30 border border-zinc-800/50 rounded-3xl">
               <EmptyState 
                 icon={Trophy}
-                title="No Achievements"
-                description="No achievements found in this category."
+                title="No Trophies"
+                description="Keep exploring to discover more challenges."
                 className="bg-transparent border-none"
               />
             </div>
           ) : (
-            <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {filteredAchievements.map((achievement, i) => {
+            <motion.div 
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            >
+              {filteredAchievements.map((achievement) => {
                 const rarityName = determineRarity(achievement.points)
                 const rarityStyle = RARITY_CONFIG[rarityName]
                 const RarityIcon = rarityStyle.icon
                 const AchIcon = getIconComponent(achievement.badgeIcon)
-
+                
                 return (
-                  <Card key={achievement._id} className={`flex flex-col relative overflow-hidden transition-all duration-300 ${
-                    achievement.unlocked 
-                      ? `border ${rarityStyle.border} ${rarityStyle.glow} bg-white dark:bg-zinc-950 group hover:-translate-y-1` 
-                      : 'border-border/40 bg-muted/10 opacity-75 hover:opacity-100 group'
-                  }`}>
-                    {achievement.unlocked && (
-                      <div className="absolute top-0 right-0 p-3">
-                        <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-500/20 gap-1">
-                          <CheckCircle2 className="h-3 w-3" />
-                          Unlocked
-                        </Badge>
-                      </div>
-                    )}
-                    <CardHeader className="pb-3 flex-1">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transform transition-transform group-hover:scale-110 ${
-                          achievement.unlocked ? rarityStyle.bg : 'bg-muted dark:bg-zinc-800'
-                        }`}>
-                          <AchIcon className={`w-6 h-6 ${achievement.unlocked ? rarityStyle.color : 'text-muted-foreground'}`} />
+                  <motion.div variants={itemVariants} key={achievement._id}>
+                    <Card className={`h-full flex flex-col relative overflow-hidden transition-all duration-500 ${
+                      achievement.unlocked 
+                        ? `border ${rarityStyle.border} ${rarityStyle.glow} bg-gradient-to-br ${rarityStyle.gradient} group hover:-translate-y-2 hover:shadow-2xl` 
+                        : 'border-zinc-800 bg-zinc-950/50 opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0'
+                    }`}>
+                      
+                      {achievement.unlocked && (
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+                      )}
+
+                      <CardHeader className="pb-4 relative z-10 flex-row gap-4 items-start space-y-0">
+                        <div className="relative shrink-0">
+                          {achievement.unlocked && (
+                            <div className={`absolute inset-0 rounded-2xl blur-md opacity-50 ${rarityStyle.bg}`} />
+                          )}
+                          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center relative z-10 border border-white/10 ${
+                            achievement.unlocked ? 'bg-zinc-950 shadow-inner' : 'bg-zinc-900'
+                          }`}>
+                            <AchIcon className={`w-8 h-8 ${achievement.unlocked ? rarityStyle.color : 'text-zinc-600'}`} />
+                          </div>
+                          
+                          {!achievement.unlocked && achievement.progress > 0 && (
+                            <div className="absolute -bottom-2 -right-2 bg-zinc-900 border border-zinc-700 rounded-full w-8 h-8 flex items-center justify-center text-[10px] font-bold text-emerald-400">
+                              {achievement.progress}%
+                            </div>
+                          )}
                         </div>
-                        {!achievement.unlocked && (
-                          <Badge variant="outline" className={`gap-1 px-2 py-0.5 text-[10px] ${rarityStyle.color} ${rarityStyle.border} bg-background/50 backdrop-blur-sm`}>
-                            <RarityIcon className="h-3 w-3" />
-                            {rarityName}
-                          </Badge>
-                        )}
-                        {achievement.unlocked && (
-                          <Badge variant="outline" className={`gap-1 px-2 py-0.5 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity absolute top-3 left-3 ${rarityStyle.color} ${rarityStyle.border} bg-background/90 backdrop-blur-sm`}>
-                            <RarityIcon className="h-3 w-3" />
-                            {rarityName}
-                          </Badge>
-                        )}
-                      </div>
-                      <CardTitle className="text-base font-bold">{achievement.title}</CardTitle>
-                      <CardDescription className="text-xs leading-relaxed mt-1 line-clamp-2">{achievement.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pb-3">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                          <span>Progress</span>
-                          <span className={achievement.unlocked ? rarityStyle.color : ""}>{achievement.progress}%</span>
+
+                        <div className="flex-1 min-w-0 pt-1">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <Badge variant="outline" className={`gap-1 px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider border-none bg-black/40 backdrop-blur-md ${rarityStyle.color}`}>
+                              <RarityIcon className="h-3 w-3" />
+                              {rarityName}
+                            </Badge>
+                            {achievement.unlocked && (
+                              <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0 text-[10px]">
+                                Unlocked
+                              </Badge>
+                            )}
+                          </div>
+                          <CardTitle className="text-lg font-bold text-white truncate">{achievement.title}</CardTitle>
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 mt-1.5">
+                            <Sparkles className="h-3.5 w-3.5" /> +{achievement.points} XP
+                          </div>
                         </div>
-                        <Progress 
-                          value={achievement.progress} 
-                          className={`h-1.5 bg-muted/50 ${
-                            achievement.unlocked 
-                              ? `[&>div]:bg-current ${rarityStyle.color}`
-                              : '[&>div]:bg-muted-foreground/30'
-                          }`} 
-                        />
-                      </div>
-                    </CardContent>
-                    <CardFooter className="pt-3 pb-4 border-t border-border/40 bg-muted/5 flex items-center gap-2">
-                      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                        <Sparkles className="h-3.5 w-3.5" /> +{achievement.points} XP
-                      </div>
-                    </CardFooter>
-                  </Card>
+                      </CardHeader>
+                      
+                      <CardContent className="pb-5 pt-0 flex-1 relative z-10">
+                        <p className="text-sm text-zinc-400 leading-relaxed">
+                          {achievement.description}
+                        </p>
+                      </CardContent>
+
+                      {!achievement.unlocked && (
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-900">
+                           <div 
+                             className="h-full bg-emerald-500/50" 
+                             style={{ width: `${achievement.progress}%` }} 
+                           />
+                        </div>
+                      )}
+                      
+                    </Card>
+                  </motion.div>
                 )
               })}
-            </div>
+            </motion.div>
           )}
         </TabsContent>
       </Tabs>
