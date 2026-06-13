@@ -20,7 +20,6 @@ jobs:
       MONGODB_URI: "mongodb://localhost:27017/carbonsphere-test"
       JWT_SECRET: "test-secret-key"
       FRONTEND_URL: "http://localhost:3000"
-      PORT: "5000"
     steps:
     - uses: actions/checkout@v4
     
