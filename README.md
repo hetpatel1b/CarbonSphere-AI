@@ -276,7 +276,6 @@ pnpm dev
 
 ---
 
-## 📄 License & Contributors
+## 📄Contributors
 
-*   **License:** Distributed under the MIT License. See [LICENSE](file:///d:/Het/CarbonSphere-AI/LICENSE) for more information.
 *   **Contributors:** Developed by [Het Patel](https://github.com/hetpatel1b) and open-source contributors.
