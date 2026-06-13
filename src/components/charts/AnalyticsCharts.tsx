@@ -48,22 +48,31 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 
 export function EmissionsAreaChart({ data, isAnimationActive }: { data: ChartDataItem[], isAnimationActive: boolean }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <AreaChart role="img" aria-label="Emissions History Chart" data={data} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-        <defs>
-          <linearGradient id="emissionsGlowGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
-            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
-        <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-        <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}kg`} />
-        <Tooltip content={<CustomTooltip />} />
-        <Area type="monotone" name="emissions" dataKey="emissions" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#emissionsGlowGrad)" activeDot={{ r: 6 }} isAnimationActive={isAnimationActive} />
-        <Line type="monotone" name="target" dataKey="target" stroke="#ef4444" strokeWidth={1.5} strokeDasharray="4 4" dot={false} isAnimationActive={isAnimationActive} />
-      </AreaChart>
-    </ResponsiveContainer>
+    <>
+      <span id="analytics-emissions-desc" className="sr-only">
+        Emissions History Chart showing chronological tracking of actual emissions against target emissions.
+      </span>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart 
+          tabIndex={0}
+          className="focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl"
+          aria-describedby="analytics-emissions-desc"
+          role="img" aria-label="Emissions History Chart" data={data} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+          <defs>
+            <linearGradient id="emissionsGlowGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
+              <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
+          <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
+          <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}kg`} />
+          <Tooltip content={<CustomTooltip />} />
+          <Area type="monotone" name="emissions" dataKey="emissions" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#emissionsGlowGrad)" activeDot={{ r: 6 }} isAnimationActive={isAnimationActive} />
+          <Line type="monotone" name="target" dataKey="target" stroke="#ef4444" strokeWidth={1.5} strokeDasharray="4 4" dot={false} isAnimationActive={isAnimationActive} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </>
   )
 }
 
@@ -74,52 +83,77 @@ export function SourcesBarChart({ data, selectedCategory, onSelect, isAnimationA
   isAnimationActive: boolean
 }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart 
-        role="img" aria-label="Emissions Category Chart" data={data}
-        margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
-        onClick={(state) => {
-          if (state && state.activeLabel) {
-            onSelect(state.activeLabel as string)
-          }
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
-        <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-        <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
-        <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
-        <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={50} isAnimationActive={isAnimationActive}>
-          {data.map((entry, index) => (
-            <Cell 
-              key={`cell-${index}`} 
-              fill={entry.color} 
-              className="cursor-pointer transition-opacity duration-300 hover:opacity-80"
-              stroke={selectedCategory === entry.name ? "#ffffff" : "none"}
-              strokeWidth={selectedCategory === entry.name ? 2 : 0}
-            />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <>
+      <span id="analytics-sources-desc" className="sr-only">
+        Emissions Category Chart showing percentage distribution of emissions by source. Press Enter or Space to cycle through categories.
+      </span>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart 
+          tabIndex={0}
+          className="focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl"
+          aria-describedby="analytics-sources-desc"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              const currentIndex = data.findIndex(d => d.name === selectedCategory)
+              const nextIndex = (currentIndex + 1) % data.length
+              onSelect(data[nextIndex].name)
+            }
+          }}
+          role="img" aria-label="Emissions Category Chart" data={data}
+          margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
+          onClick={(state) => {
+            if (state && state.activeLabel) {
+              onSelect(state.activeLabel as string)
+            }
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
+          <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
+          <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
+          <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+          <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={50} isAnimationActive={isAnimationActive}>
+            {data.map((entry, index) => (
+              <Cell 
+                key={`cell-${index}`} 
+                fill={entry.color} 
+                className="cursor-pointer transition-opacity duration-300 hover:opacity-80"
+                stroke={selectedCategory === entry.name ? "#ffffff" : "none"}
+                strokeWidth={selectedCategory === entry.name ? 2 : 0}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </>
   )
 }
 
 export function ScoreAreaChart({ data, isAnimationActive }: { data: ChartDataItem[], isAnimationActive: boolean }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <AreaChart role="img" aria-label="Score History Chart" data={data} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-        <defs>
-          <linearGradient id="scoreGlowGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25}/>
-            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
-        <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-        <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} domain={[550, 900]} />
-        <Tooltip content={<CustomTooltip />} />
-        <Area type="monotone" name="score" dataKey="score" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#scoreGlowGrad)" activeDot={{ r: 6 }} isAnimationActive={isAnimationActive} />
-      </AreaChart>
-    </ResponsiveContainer>
+    <>
+      <span id="analytics-score-desc" className="sr-only">
+        Score History Chart illustrating progression of sustainability scores over time.
+      </span>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart 
+          tabIndex={0}
+          className="focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl"
+          aria-describedby="analytics-score-desc"
+          role="img" aria-label="Score History Chart" data={data} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
+          <defs>
+            <linearGradient id="scoreGlowGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25}/>
+              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1f1f23" />
+          <XAxis dataKey="name" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
+          <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} domain={[550, 900]} />
+          <Tooltip content={<CustomTooltip />} />
+          <Area type="monotone" name="score" dataKey="score" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#scoreGlowGrad)" activeDot={{ r: 6 }} isAnimationActive={isAnimationActive} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </>
   )
 }

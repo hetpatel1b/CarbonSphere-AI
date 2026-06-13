@@ -32,9 +32,13 @@ export default function MarketplaceCard({
       {isRecommended && (
         <Badge className="absolute -top-3 -right-2 z-10 shadow-sm bg-emerald-500 text-white">Recommended</Badge>
       )}
-      <div className="flex items-center justify-center h-40 bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 rounded-t-md relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="z-10">{getCategoryIcon(project.category)}</div>
+      <div 
+        className="flex items-center justify-center h-40 bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 rounded-t-md relative overflow-hidden"
+        role="img"
+        aria-label={`Visualization of ${project.category} category`}
+      >
+        <div className="absolute inset-0 bg-black/10" aria-hidden="true" />
+        <div className="z-10" aria-hidden="true">{getCategoryIcon(project.category)}</div>
       </div>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-semibold">{project.title}</CardTitle>
