@@ -17,7 +17,7 @@ jobs:
     env:
       GROQ_API_KEY: "gsk_dummy_groq_key_for_ci_purposes_only"
       NEXT_PUBLIC_API_URL: "http://localhost:5000/api"
-      MONGODB_URI: "mongodb://localhost:27017/carbonsphere-test"
+      MONGODB_URI: "mongodb://127.0.0.1:27017/carbonsphere-test"
       JWT_SECRET: "test-secret-key"
       FRONTEND_URL: "http://localhost:3000"
     steps:

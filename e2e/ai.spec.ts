@@ -55,9 +55,9 @@ test.describe('AI Capabilities', () => {
       await route.fulfill({ headers: corsHeaders, json: { csrfToken: 'mock-csrf-token', success: true } });
     });
     
-    await page.route('**/api/auth/me', async route => {
+    await page.route('**/api/settings/profile', async route => {
       if (route.request().method() === 'OPTIONS') return route.fallback();
-      await route.fulfill({ headers: corsHeaders, json: { user: { _id: 'test', name: 'Test User' }, success: true } });
+      await route.fulfill({ headers: corsHeaders, json: { data: { _id: 'test', name: 'Test User', email: 'test@test.com' }, success: true } });
     });
 
     // Navigate to /login first so we are on the correct origin to set cookies/storage without triggering AuthGuard redirects
