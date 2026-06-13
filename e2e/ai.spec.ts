@@ -28,14 +28,6 @@ const mockInsight = {
 
 test.describe('AI Capabilities', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to /login first so we are on the correct origin to set cookies/storage without triggering AuthGuard redirects
-    await page.goto('/login');
-    
-    await page.evaluate(() => {
-      document.cookie = "token=test-token; path=/;";
-      window.localStorage.setItem('user', JSON.stringify({ _id: 'test', name: 'Test User', email: 'test@test.com' }));
-    });
-
     // Catch-all to prevent real backend 401s from crashing the test via apiClient redirects
     await page.route('**/api/**', async route => {
       await route.fulfill({ json: { success: true, data: [] } });
@@ -48,6 +40,14 @@ test.describe('AI Capabilities', () => {
     
     await page.route('**/api/auth/me', async route => {
       await route.fulfill({ json: { user: { _id: 'test', name: 'Test User' }, success: true } });
+    });
+
+    // Navigate to /login first so we are on the correct origin to set cookies/storage without triggering AuthGuard redirects
+    await page.goto('/login');
+    
+    await page.evaluate(() => {
+      document.cookie = "token=test-token; path=/;";
+      window.localStorage.setItem('user', JSON.stringify({ _id: 'test', name: 'Test User', email: 'test@test.com' }));
     });
   });
 
