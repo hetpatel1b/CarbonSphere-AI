@@ -108,9 +108,9 @@ export default function ChallengesPage() {
   const { active, completed, upcoming, available, stats } = data;
 
   const statsCards = [
-    { label: "Challenges Joined", value: stats.challengesJoined.toString(), icon: Target },
-    { label: "Challenges Completed", value: stats.challengesCompleted.toString(), icon: CheckCircle2 },
-    { label: "Points Earned", value: stats.pointsEarned.toLocaleString(), icon: Trophy },
+    { label: "Challenges Joined", value: stats?.challengesJoined?.toString() || "0", icon: Target },
+    { label: "Challenges Completed", value: stats?.challengesCompleted?.toString() || "0", icon: CheckCircle2 },
+    { label: "Points Earned", value: stats?.pointsEarned?.toLocaleString() || "0", icon: Trophy },
   ]
 
   const calculateDaysRemaining = (endDate: string) => {

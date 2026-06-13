@@ -169,7 +169,7 @@ export default function DashboardPage() {
         <div className="animate-scale-up animation-delay-225">
           <MetricCard 
             title="Total Activities" 
-            value={summary?.totalActivities.toString() || "0"} 
+            value={summary?.totalActivities?.toString() || "0"} 
             icon={Calendar}
             description="Keep logging!" 
           />
