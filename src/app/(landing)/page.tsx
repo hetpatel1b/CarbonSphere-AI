@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, Leaf, Sparkles, LineChart, Target, Users, ShieldCheck, Zap, Globe, Github } from "lucide-react";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 const fadeIn: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -21,6 +21,12 @@ export default function LandingPage() {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
+
+  // Wake up Railway backend silently
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    fetch(`${apiUrl}/health`).catch(() => {});
+  }, []);
 
   return (
     <div className="overflow-hidden">

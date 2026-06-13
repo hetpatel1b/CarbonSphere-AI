@@ -1,5 +1,8 @@
 # 🌌 CarbonSphere AI
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://carbon-sphere-ai.vercel.app/)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/hetpatel1b/CarbonSphere-AI)
+
 ### Empowering individuals and organizations with AI-driven, actionable sustainability intelligence.
 
 ---

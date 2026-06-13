@@ -12,8 +12,21 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const geist = Inter({ subsets: ["latin"], variable: "--font-geist" }); // Fallback to inter
 
 export const metadata: Metadata = {
-  title: "CarbonSphere AI",
-  description: "AI-powered carbon footprint awareness platform",
+  title: "CarbonSphere AI | Intelligent Sustainability",
+  description: "Track, simulate, and forecast your environmental impact with enterprise-grade precision and Groq-powered AI coaching.",
+  keywords: ["Sustainability", "Carbon Footprint", "AI Coach", "Net Zero", "Climate Tech", "Forecasting"],
+  openGraph: {
+    title: "CarbonSphere AI | Intelligent Sustainability",
+    description: "Track, simulate, and forecast your environmental impact with enterprise-grade precision and Groq-powered AI coaching.",
+    type: "website",
+    url: "https://carbon-sphere-ai.vercel.app/",
+    siteName: "CarbonSphere AI",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CarbonSphere AI | Intelligent Sustainability",
+    description: "Track, simulate, and forecast your environmental impact with enterprise-grade precision and Groq-powered AI coaching.",
+  }
 };
 
 export default function RootLayout({
