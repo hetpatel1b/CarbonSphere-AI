@@ -184,6 +184,7 @@ const getHealthInfo = (req, res) => {
     status,
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+    memoryUsage: process.memoryUsage(),
     components: {
       database: {
         status: isDbConnected ? 'connected' : 'disconnected',

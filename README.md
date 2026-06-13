@@ -155,7 +155,43 @@ graph TD
     Services <-->|Groq SDK| Groq
 ```
 
-### 3. Request Flow
+### 3. Database Schema (Entity-Relationship)
+The following ER diagram illustrates the core MongoDB collections and their logical relationships:
+
+```mermaid
+erDiagram
+    USER ||--o{ ACTIVITY : logs
+    USER ||--o{ OFFSET_PURCHASE : makes
+    USER ||--o{ USER_CHALLENGE : joins
+    USER ||--o{ FORECAST : generates
+    
+    ACTIVITY {
+        ObjectId _id
+        String userId
+        String category
+        String activityType
+        Number carbonEmission
+        Date date
+    }
+    
+    OFFSET_PURCHASE {
+        ObjectId _id
+        String userId
+        String projectId
+        Number creditsBought
+        Date purchaseDate
+    }
+    
+    USER_CHALLENGE {
+        ObjectId _id
+        String userId
+        String challengeId
+        String status
+        Number progress
+    }
+```
+
+### 4. Request Flow
 1. **Client Interaction:** The user interacts with the Next.js frontend (e.g., logging an activity or requesting AI insights).
 2. **API Request Initiation:** The frontend `apiClient` securely attaches the JWT and dynamically fetched Cross-Origin CSRF token to the request headers.
 3. **Backend Middleware Processing:** The Express.js backend intercepts the request, validates the CORS origin, verifies rate limits via `express-rate-limit`, decodes the JWT, and validates the CSRF token.

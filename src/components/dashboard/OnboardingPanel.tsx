@@ -24,6 +24,13 @@ export function OnboardingPanel() {
         <p className="text-muted-foreground text-sm md:text-base max-w-lg mx-auto font-medium relative z-10">
           Your journey to a sustainable future begins here. We need some data to build your footprint analysis. Choose a starting point below.
         </p>
+        
+        <div className="mt-6 relative z-10">
+          <Link href="/log" className="inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 h-11 px-8 py-2 hover:scale-105 active:scale-95">
+            <Activity className="mr-2 h-5 w-5" />
+            Log Your First Activity
+          </Link>
+        </div>
       </div>
 
       {/* CTA Grid */}

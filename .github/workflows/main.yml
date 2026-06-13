@@ -9,10 +9,18 @@ on:
 jobs:
   quality-gates:
     runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
     env:
       GROQ_API_KEY: "gsk_dummy_groq_key_for_ci_purposes_only"
-      NEXT_PUBLIC_API_URL: "http://localhost:3000/api"
-      NEXT_PUBLIC_DEMO_MODE: "true"
+      NEXT_PUBLIC_API_URL: "http://localhost:5000/api"
+      MONGODB_URI: "mongodb://localhost:27017/carbonsphere-test"
+      JWT_SECRET: "test-secret-key"
+      FRONTEND_URL: "http://localhost:3000"
+      PORT: "5000"
     steps:
     - uses: actions/checkout@v4
     
@@ -29,6 +37,12 @@ jobs:
         
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
+      
+    - name: Start backend server
+      run: |
+        cd backend
+        npm run start &
+        sleep 5
       
     - name: Typecheck
       run: pnpm run typecheck
