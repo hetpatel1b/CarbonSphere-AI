@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GROQ_API_KEY: "gsk_dummy_groq_key_for_ci_purposes_only"
-      NEXT_PUBLIC_API_URL: "http://localhost:5000/api"
+      NEXT_PUBLIC_API_URL: "http://localhost:3000/api"
       NEXT_PUBLIC_DEMO_MODE: "true"
     steps:
     - uses: actions/checkout@v4
