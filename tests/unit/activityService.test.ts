@@ -39,4 +39,23 @@ describe('activityService', () => {
       newlyCompletedChallenges: []
     });
   });
+
+
+  it('should throw error on missing required fields', async () => {
+    const invalidActivity = { title: '' } as any; // Missing type, emission, date, etc.
+    vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Missing required fields'));
+    await expect(activityService.createActivity(invalidActivity)).rejects.toThrow('Missing required fields');
+  });
+
+  it('should throw error on invalid emission values', async () => {
+    const invalidActivity = { title: 'Test', activityType: 'Transport', carbonEmission: -50, category: 'Transport', date: '2026-01-01', details: {} };
+    vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Invalid emission value'));
+    await expect(activityService.createActivity(invalidActivity)).rejects.toThrow('Invalid emission value');
+  });
+
+  it('should throw error on database failure', async () => {
+    const newActivity = { title: 'Test', activityType: 'Transport', carbonEmission: 10, category: 'Transport', date: '2026-01-01', details: {} };
+    vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Database error'));
+    await expect(activityService.createActivity(newActivity)).rejects.toThrow('Database error');
+  });
 });

@@ -33,4 +33,18 @@ describe('authService', () => {
     expect(apiClient.post).toHaveBeenCalledWith('/auth/register', { name: 'Test', email: 'test@test.com', password: 'password123' });
     expect(result).toEqual(mockResponse);
   });
+
+
+  it('should throw error on invalid login', async () => {
+    vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Invalid credentials'));
+
+    await expect(authService.login('test@test.com', 'wrongpassword')).rejects.toThrow('Invalid credentials');
+    expect(apiClient.post).toHaveBeenCalledWith('/auth/login', { email: 'test@test.com', password: 'wrongpassword' });
+  });
+
+  it('should throw error on invalid signup', async () => {
+    vi.mocked(apiClient.post).mockRejectedValueOnce(new Error('Email already exists'));
+
+    await expect(authService.register('Test', 'test@test.com', 'password123')).rejects.toThrow('Email already exists');
+  });
 });

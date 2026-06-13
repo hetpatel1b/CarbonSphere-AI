@@ -83,24 +83,28 @@ export function SourcesBarChart({ data, selectedCategory, onSelect, isAnimationA
   isAnimationActive: boolean
 }) {
   return (
-    <>
+    <div 
+      style={{ width: '100%', height: '100%' }}
+      className="focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl"
+      role="figure"
+      aria-label="Emissions Category Chart"
+      aria-describedby="analytics-sources-desc"
+      tabIndex={0}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          const currentIndex = data.findIndex(d => d.name === selectedCategory)
+          const nextIndex = (currentIndex + 1) % data.length
+          onSelect(data[nextIndex].name)
+        }
+      }}
+    >
       <span id="analytics-sources-desc" className="sr-only">
         Emissions Category Chart showing percentage distribution of emissions by source. Press Enter or Space to cycle through categories.
       </span>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart 
-          tabIndex={0}
-          className="focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none rounded-xl"
-          aria-describedby="analytics-sources-desc"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault()
-              const currentIndex = data.findIndex(d => d.name === selectedCategory)
-              const nextIndex = (currentIndex + 1) % data.length
-              onSelect(data[nextIndex].name)
-            }
-          }}
-          role="img" aria-label="Emissions Category Chart" data={data}
+          data={data}
           margin={{ top: 20, right: 30, left: 10, bottom: 5 }}
           onClick={(state) => {
             if (state && state.activeLabel) {
@@ -125,8 +129,8 @@ export function SourcesBarChart({ data, selectedCategory, onSelect, isAnimationA
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </>
-  )
+    </div>
+  );
 }
 
 export function ScoreAreaChart({ data, isAnimationActive }: { data: ChartDataItem[], isAnimationActive: boolean }) {
