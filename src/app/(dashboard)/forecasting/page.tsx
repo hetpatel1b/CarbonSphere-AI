@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import dynamic from "next/dynamic"
-import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2, Info } from "lucide-react"
+import { TrendingDown, TrendingUp, Sparkles, AlertTriangle, Lightbulb, Leaf, ArrowRight, Activity as ActivityIcon, CheckCircle2, Info, HelpCircle, Database, LineChart, Target, ShieldAlert, Calculator, BrainCircuit } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { fetchForecastData, applyAction, generateForecast } from "@/services/forecastService"
 import { ForecastData, ForecastAction } from "@/types"
@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 const ForecastChart = dynamic(() => import('@/components/charts/ForecastChart'), { ssr: false, loading: () => <Skeleton className="w-full h-full rounded-xl" /> })
 
@@ -222,7 +223,8 @@ export default function ForecastingPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 pb-8">
+    <TooltipProvider delayDuration={300}>
+      <div className="flex flex-col gap-8 pb-8">
       {/* Header */}
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight">Carbon Forecasting</h1>
@@ -263,7 +265,17 @@ export default function ForecastingPage() {
         
         <Card>
           <CardContent className="p-5 flex flex-col gap-1">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Forecasted (Next Month)</p>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Forecasted (Next Month)</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 hover:text-foreground transition-colors cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="text-xs font-medium">Projected based on a weighted 30-day moving average and upcoming planned reductions.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             {hasSufficientData ? (
                <h4 className="text-2xl font-bold mt-1 text-emerald-600 dark:text-emerald-400">{forecast?.forecastNextMonth?.toFixed(2)} <span className="text-sm font-normal opacity-70">tCO₂e</span></h4>
             ) : (
@@ -274,7 +286,17 @@ export default function ForecastingPage() {
 
         <Card>
           <CardContent className="p-5 flex flex-col gap-1">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Risk Level</p>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Risk Level</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 hover:text-foreground transition-colors cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="text-xs font-medium">Evaluates current trajectory against recommended sustainability targets and recent volatility.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             {hasSufficientData ? (
               <div className="flex items-center mt-1 gap-2">
                 <RiskIcon className={cn("h-5 w-5", riskColor)} />
@@ -288,7 +310,17 @@ export default function ForecastingPage() {
 
         <Card>
           <CardContent className="p-5 flex flex-col gap-1">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Trend Direction</p>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Trend Direction</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground/70 hover:text-foreground transition-colors cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="text-xs font-medium">Mathematical derivation of emission changes over the last 3 logging periods.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
             {hasSufficientData ? (
                <h4 className={`text-xl font-bold mt-2 leading-tight ${forecast?.trendDirection === 'Decreasing' ? 'text-emerald-500' : (forecast?.trendDirection === 'Stable' ? 'text-amber-500' : 'text-rose-500')}`}>{forecast?.trendDirection}</h4>
             ) : (
@@ -476,24 +508,99 @@ export default function ForecastingPage() {
         </DialogContent>
       </Dialog>
         
-      {/* Scientific Credibility Block */}
-      <div className="mt-4 pt-6 border-t border-border/40">
-        <span className="text-xs font-bold uppercase text-muted-foreground tracking-wider block mb-3">Scientific Credibility</span>
-        <div className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/10 p-4 rounded-xl text-sm text-muted-foreground">
-          <p className="flex items-start gap-2 font-medium text-emerald-800 dark:text-emerald-400 mb-3">
-            <Info className="w-5 h-5 shrink-0" />
-            Forecasts and recommendations are modeled using verified emission factors:
-          </p>
-          <ul className="list-disc pl-6 space-y-1.5">
-            <li><span className="font-semibold text-foreground">EPA:</span> eGRID Summary Tables (US Average)</li>
-            <li><span className="font-semibold text-foreground">DEFRA:</span> UK Govt GHG Conversion Factors</li>
-            <li><span className="font-semibold text-foreground">IPCC:</span> Special Report on Climate Change and Land</li>
-            <li><span className="font-semibold text-foreground">GHG Protocol:</span> Scope 3 Evaluator</li>
-          </ul>
+      {/* How Predictions Are Generated */}
+      <div className="mt-6 pt-8 border-t border-border/40">
+        <div className="flex items-center gap-2 mb-6">
+          <BrainCircuit className="h-6 w-6 text-emerald-500" />
+          <h2 className="text-xl font-bold tracking-tight">How Predictions Are Generated</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Forecast Methodology Card */}
+          <Card className="border-border/50 shadow-sm bg-gradient-to-b from-card to-muted/20">
+            <CardHeader className="pb-4 border-b border-border/40">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Calculator className="h-4 w-4 text-muted-foreground" />
+                Forecast Methodology
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-6">
+              <div className="flex items-start gap-3">
+                <Database className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold">Historical Emissions Base</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">Predictions rely on a robust base of your past 30-90 days of logged activities, heavily weighting recurring emissions (e.g., daily commutes) over one-off anomalies.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <LineChart className="h-5 w-5 shrink-0 text-sky-600 dark:text-sky-400 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold">Trend Analysis & Category Weighting</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">A rolling statistical average isolates trends within specific categories (Transport, Energy). High-emission categories naturally influence the trajectory more heavily.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="h-5 w-5 shrink-0 text-rose-500 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold">Risk Scoring</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">Risk levels (Low, Medium, High, Critical) are computed dynamically by comparing your forecasted trendline against standardized sustainable thresholds and goals.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Target className="h-5 w-5 shrink-0 text-amber-500 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold">Improvement Projections</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">When you &quot;Apply Action,&quot; the system deducts the estimated CO₂ reduction directly from your future forecasted model, offering an instant visualization of the impact.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Scientific Credibility Card */}
+          <Card className="border-emerald-200/50 dark:border-emerald-900/30 shadow-sm bg-emerald-50/30 dark:bg-emerald-500/5 flex flex-col">
+            <CardHeader className="pb-4 border-b border-emerald-100 dark:border-emerald-900/30">
+              <CardTitle className="text-base font-semibold flex items-center gap-2 text-emerald-800 dark:text-emerald-400">
+                <Info className="h-4 w-4" />
+                Scientific Credibility
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5 flex-1 flex flex-col">
+              <p className="text-sm font-medium text-emerald-800/80 dark:text-emerald-400/80 mb-5">
+                Forecasts and recommendations are strictly modeled using globally verified emission factors and climate databases:
+              </p>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-200/50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">US</div>
+                  <p className="text-sm text-foreground mt-0.5"><span className="font-semibold">EPA:</span> eGRID Summary Tables (US Average)</p>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-200/50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">UK</div>
+                  <p className="text-sm text-foreground mt-0.5"><span className="font-semibold">DEFRA:</span> UK Govt GHG Conversion Factors</p>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-200/50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">UN</div>
+                  <p className="text-sm text-foreground mt-0.5"><span className="font-semibold">IPCC:</span> Special Report on Climate Change and Land</p>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-200/50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">GL</div>
+                  <p className="text-sm text-foreground mt-0.5"><span className="font-semibold">GHG Protocol:</span> Scope 3 Evaluator</p>
+                </li>
+              </ul>
+              
+              <div className="mt-auto pt-6">
+                <div className="p-3.5 rounded-lg bg-emerald-100/50 dark:bg-emerald-900/20 border border-emerald-200/50 dark:border-emerald-800/30">
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium leading-relaxed">
+                    Note: While highly accurate based on input data, predictions should be used as a guiding metric rather than an absolute scientific measurement.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
         </>
       )}
-    </div>
+      </div>
+    </TooltipProvider>
   )
 }
