@@ -26,20 +26,38 @@ const mockInsight = {
   generatedAt: new Date().toISOString()
 };
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': 'http://localhost:3000',
+  'Access-Control-Allow-Credentials': 'true',
+};
+
 test.describe('AI Capabilities', () => {
   test.beforeEach(async ({ page }) => {
     // Catch-all to prevent real backend 401s from crashing the test via apiClient redirects
     await page.route('**/api/**', async route => {
-      await route.fulfill({ json: { success: true, data: [] } });
+      if (route.request().method() === 'OPTIONS') {
+        await route.fulfill({
+          status: 204,
+          headers: {
+            ...corsHeaders,
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-CSRF-Token',
+          }
+        });
+        return;
+      }
+      await route.fulfill({ headers: corsHeaders, json: { success: true, data: [] } });
     });
 
     // Specific mocks take precedence because they are registered later
     await page.route('**/api/csrf-token', async route => {
-      await route.fulfill({ json: { csrfToken: 'mock-csrf-token', success: true } });
+      if (route.request().method() === 'OPTIONS') return route.fallback();
+      await route.fulfill({ headers: corsHeaders, json: { csrfToken: 'mock-csrf-token', success: true } });
     });
     
     await page.route('**/api/auth/me', async route => {
-      await route.fulfill({ json: { user: { _id: 'test', name: 'Test User' }, success: true } });
+      if (route.request().method() === 'OPTIONS') return route.fallback();
+      await route.fulfill({ headers: corsHeaders, json: { user: { _id: 'test', name: 'Test User' }, success: true } });
     });
 
     // Navigate to /login first so we are on the correct origin to set cookies/storage without triggering AuthGuard redirects
@@ -54,7 +72,8 @@ test.describe('AI Capabilities', () => {
   test.describe('AI Coach Flows', () => {
     test('AI Coach Success Flow - Loads initial data', async ({ page }) => {
       await page.route('**/api/ai-coach/latest', async route => {
-        await route.fulfill({ json: { success: true, data: mockInsight } });
+        if (route.request().method() === 'OPTIONS') return route.fallback();
+        await route.fulfill({ headers: corsHeaders, json: { success: true, data: mockInsight } });
       });
 
       await page.goto('/ai-coach');
@@ -69,7 +88,8 @@ test.describe('AI Capabilities', () => {
     test('AI Coach Loading & Generation Flow', async ({ page }) => {
       // Return empty initially
       await page.route('**/api/ai-coach/latest', async route => {
-        await route.fulfill({ json: { success: true, data: { insight: null, recommendations: [] } } });
+        if (route.request().method() === 'OPTIONS') return route.fallback();
+        await route.fulfill({ headers: corsHeaders, json: { success: true, data: { insight: null, recommendations: [] } } });
       });
       
       await page.goto('/ai-coach');
@@ -77,8 +97,9 @@ test.describe('AI Capabilities', () => {
 
       // Intercept generate endpoint with delay
       await page.route('**/api/ai-coach/analyze', async route => {
+        if (route.request().method() === 'OPTIONS') return route.fallback();
         await new Promise(resolve => setTimeout(resolve, 1000));
-        await route.fulfill({ json: { success: true, data: mockInsight } });
+        await route.fulfill({ headers: corsHeaders, json: { success: true, data: mockInsight } });
       });
 
       // Click Generate
@@ -95,11 +116,12 @@ test.describe('AI Capabilities', () => {
     test('AI Coach Error & Retry Flow', async ({ page }) => {
       let requestCount = 0;
       await page.route('**/api/ai-coach/latest', async route => {
+        if (route.request().method() === 'OPTIONS') return route.fallback();
         requestCount++;
         if (requestCount === 1) {
-          await route.fulfill({ status: 500, json: { message: 'Groq Rate Limit Exceeded' } });
+          await route.fulfill({ status: 500, headers: corsHeaders, json: { message: 'Groq Rate Limit Exceeded' } });
         } else {
-          await route.fulfill({ json: { success: true, data: mockInsight } });
+          await route.fulfill({ headers: corsHeaders, json: { success: true, data: mockInsight } });
         }
       });
 
@@ -148,8 +170,9 @@ test.describe('AI Capabilities', () => {
       const submitBtn = page.locator('form button[type="submit"]');
 
       await page.route('**/api/assistant/chat', async route => {
+        if (route.request().method() === 'OPTIONS') return route.fallback();
         await new Promise(resolve => setTimeout(resolve, 1000));
-        await route.fulfill({ json: { 
+        await route.fulfill({ headers: corsHeaders, json: { 
           data: {
             content: 'I can help you reduce your carbon footprint.',
             impact: 'High',
@@ -183,7 +206,8 @@ test.describe('AI Capabilities', () => {
       const submitBtn = page.locator('form button[type="submit"]');
 
       await page.route('**/api/assistant/chat', async route => {
-        await route.fulfill({ status: 500, json: { message: 'Groq AI Service Unavailable' } });
+        if (route.request().method() === 'OPTIONS') return route.fallback();
+        await route.fulfill({ status: 500, headers: corsHeaders, json: { message: 'Groq AI Service Unavailable' } });
       });
 
       await input.fill('Will this fail?');
