@@ -317,6 +317,20 @@ Run the Next.js frontend (in a separate terminal):
 pnpm dev
 ```
 
+## 🔒 Security & Demo Mode Architecture
+
+CarbonSphere AI utilizes a robust, production-ready security architecture that strictly isolates offline demonstration modes from live backend networks.
+
+### 1. Zero-Trust Demo Interceptor
+The platform features a client-side "Demo Mode" (`demoInterceptor.ts`) designed to allow judges and guests to experience the UI without a database connection.
+* **Network Isolation:** When enabled via `localStorage`, the interceptor mocks HTTP responses *entirely within the browser memory*.
+* **No Backend Access:** Demo Mode does NOT bypass backend authentication. Any request that escapes the interceptor will still be rejected by the Express backend with a `401 Unauthorized` if a valid JWT is not present.
+* **No Data Leakage:** The mock data is purely hardcoded generic data. No real user metrics, emails, or password hashes are bundled into the frontend.
+
+### 2. Live Environment Safeguards
+* **Persistent Banner Alert:** If Demo Mode is activated, a persistent `DemoModeBanner` is dynamically injected into the React Tree, ensuring judges are 100% aware that the UI is using local mock data.
+* **Strict JWT + CSRF Authentication:** Real user sessions are secured via `httpOnly` secure cookies. Cross-Site Request Forgery (CSRF) tokens are strictly validated on every mutating request (`POST`, `PUT`, `DELETE`).
+
 ---
 
 ## 📸 Screenshots

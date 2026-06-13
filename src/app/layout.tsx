@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "sonner";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { DemoModeBanner } from "@/components/DemoModeBanner";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -39,11 +40,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${geist.variable} font-sans antialiased`}
       >
-        {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
-          <div className="bg-emerald-500 text-white text-center text-xs py-1 font-medium shadow-sm z-50 relative print:hidden">
-            Demo Mode Enabled
-          </div>
-        )}
+        <DemoModeBanner />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
