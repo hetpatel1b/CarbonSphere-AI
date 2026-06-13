@@ -13,6 +13,7 @@ import { dashboardService, DashboardSummary, DashboardAnalytics } from "@/servic
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
+import { OnboardingPanel } from "@/components/dashboard/OnboardingPanel"
 import { toast } from "sonner"
 
 // Helper to format relative time
@@ -132,14 +133,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col gap-8 animate-scale-up">
         <AIHeroSection />
-        <EmptyState
-          icon={Activity}
-          title="No Activities Logged Yet"
-          description="Start tracking your sustainability journey by logging your first activity."
-          actionLabel="Log Activity"
-          actionHref="/log"
-          className="my-8"
-        />
+        <OnboardingPanel />
       </div>
     )
   }

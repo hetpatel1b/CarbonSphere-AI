@@ -14,6 +14,7 @@ import { dashboardService, DashboardAnalytics } from "@/services/dashboardServic
 import { Skeleton } from "@/components/ui/skeleton"
 import { ErrorState } from "@/components/ui/error-state"
 import { EmptyState } from "@/components/ui/empty-state"
+import { OnboardingPanel } from "@/components/dashboard/OnboardingPanel"
 import { toast } from "sonner"
 import { useReducedMotion } from "@/hooks/useReducedMotion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -198,14 +199,7 @@ export default function AnalyticsPage() {
           <h1 className="text-3xl font-black tracking-tight">Analytics & Intelligence</h1>
           <p className="text-sm text-muted-foreground">Detailed breakdown of your carbon footprint generated from real activity logs.</p>
         </div>
-        <EmptyState
-          icon={Activity}
-          title="No Data to Analyze"
-          description="Log your sustainability activities to see detailed analytics."
-          actionLabel="Log Activity"
-          actionHref="/log"
-          className="my-8"
-        />
+        <OnboardingPanel />
       </div>
     )
   }
