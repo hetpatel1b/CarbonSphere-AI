@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeToggle } from "./ThemeToggle";
+
 import { MobileNav } from "./MobileNav";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
@@ -15,7 +15,6 @@ export function TopHeader() {
       </div>
       <div className="flex items-center gap-1.5">
         <NotificationDropdown />
-        <ThemeToggle />
         <UserAccountMenu />
       </div>
     </header>
