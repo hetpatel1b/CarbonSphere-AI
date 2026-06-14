@@ -14,7 +14,7 @@ test.describe('Challenges Flow', () => {
       }));
     }, testId);
     await page.goto('/challenges');
-    await expect(page.locator('h1:has-text("Sustainability Challenges")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h2:has-text("Active Quests")')).toBeVisible({ timeout: 10000 });
   });
 
   test('should load challenges and allow joining', async ({ page }) => {
@@ -28,6 +28,6 @@ test.describe('Challenges Flow', () => {
     }
     
     // Ensure active challenges section exists
-    await expect(page.locator('text=Active Joined Challenges')).toBeVisible();
+    await expect(page.locator('text=Active Quests')).toBeVisible();
   });
 });

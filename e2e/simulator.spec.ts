@@ -14,7 +14,7 @@ test.describe('Simulator Flow', () => {
       }));
     }, testId);
     await page.goto('/simulator');
-    await expect(page.locator('h1:has-text("Sustainability Simulator")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h1:has-text("Telemetry Simulator")')).toBeVisible({ timeout: 10000 });
   });
 
   test('should run a simulation successfully', async ({ page }) => {
@@ -22,13 +22,13 @@ test.describe('Simulator Flow', () => {
     await page.locator('text=Public Transit').click();
 
     // Click Run Simulation
-    await page.getByRole('button', { name: /Run Simulation/i }).click();
+    await page.getByRole('button', { name: /Execute Projection/i }).click();
 
     // Wait for results
-    await expect(page.locator('text=Simulation Results').first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Trajectory Graph').first()).toBeVisible({ timeout: 15000 });
     
     // Verify AI insights loaded
-    await expect(page.locator('text=Groq AI Coach Assessment').first()).toBeVisible();
+    await expect(page.locator('text=Intelligence Analysis').first()).toBeVisible();
     
     // Verify chart is visible
     await expect(page.getByRole('img', { name: 'Simulation Comparison Chart' })).toBeVisible();

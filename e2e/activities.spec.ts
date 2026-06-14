@@ -17,10 +17,10 @@ test.describe('Activities Flow', () => {
     await expect(page).toHaveURL(/\/log/);
     
     // Wait for page to load
-    await expect(page.locator('text=Activity Log').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Ledger').first()).toBeVisible({ timeout: 10000 });
     
-    // Click 'Log Activity' to open the modal
-    await page.getByRole('button', { name: 'Log Activity' }).first().click();
+    // Click 'Log Event' to open the modal
+    await page.getByRole('button', { name: 'Log Event' }).first().click();
     await expect(page.locator('text=Log New Activity').first()).toBeVisible({ timeout: 5000 });
 
     // Fill out the form

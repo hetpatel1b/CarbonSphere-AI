@@ -18,7 +18,7 @@ test.describe('Dashboard Flow', () => {
     await expect(page.getByTestId('sidebar-nav-analytics')).toBeVisible();
     
     // Check if hero section is visible
-    await expect(page.locator('text=Your sustainability performance is')).toBeVisible();
+    await expect(page.locator('text=You are tracking')).toBeVisible();
   });
 
   test('should navigate to Analytics from sidebar', async ({ page }) => {
@@ -27,7 +27,7 @@ test.describe('Dashboard Flow', () => {
     await expect(page).toHaveURL(/\/analytics/);
     
     // Analytics page should load
-    await expect(page.locator('text=Analytics & Intelligence')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Intelligence').first()).toBeVisible({ timeout: 10000 });
   });
   
   test('should navigate to Forecasting from sidebar', async ({ page }) => {
@@ -59,7 +59,7 @@ test.describe('Dashboard Flow', () => {
     
     await page.goto('/dashboard');
     // We can't always catch the loading spinner perfectly in E2E, but we verify it doesn't crash during delay
-    await expect(page.locator('text=Your sustainability performance is')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=You are tracking')).toBeVisible({ timeout: 15000 });
   });
 
   test('should handle dashboard API error state safely', async ({ page }) => {

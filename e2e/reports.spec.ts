@@ -14,25 +14,25 @@ test.describe('Reports Flow', () => {
       }));
     }, testId);
     await page.goto('/reports');
-    await expect(page.locator('h1:has-text("Impact Reporting")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h1:has-text("Impact Reports")')).toBeVisible({ timeout: 10000 });
   });
 
   test('should generate a new monthly report', async ({ page }) => {
     // Click Generate Monthly
-    await page.getByRole('button', { name: /Generate Monthly/i }).click();
+    await page.getByRole('button', { name: /Standard Report/i }).click();
 
     // The active report view should appear
     await expect(page.locator('h1:has-text("Sustainability Impact Report")')).toBeVisible({ timeout: 15000 });
     
     // Verify AI sections are loaded
-    await expect(page.locator('text=Executive Summary')).toBeVisible();
-    await expect(page.locator('text=Emissions Analysis')).toBeVisible();
+    await expect(page.locator('text=AI Executive Summary')).toBeVisible();
+    await expect(page.locator('text=Emissions Ledger')).toBeVisible();
 
     // Close the viewer
     await page.getByRole('button', { name: 'Close Viewer' }).click();
 
     // The new report should now be in the history vault
-    await expect(page.locator('h2:has-text("Report History Vault")')).toBeVisible();
-    await expect(page.locator('text=Sustainability Report').first()).toBeVisible();
+    await expect(page.locator('h2:has-text("Intelligence Vault")')).toBeVisible();
+    await expect(page.locator('text=Sustainability Brief').first()).toBeVisible();
   });
 });

@@ -14,22 +14,22 @@ test.describe('Marketplace Flow', () => {
       }));
     }, testId);
     await page.goto('/offset-marketplace');
-    await expect(page.locator('h1:has-text("Carbon Offset Marketplace")')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('h1:has-text("Impact Investments")')).toBeVisible({ timeout: 10000 });
   });
 
   test('should load marketplace and purchase an offset', async ({ page }) => {
-    // Wait for projects to load and click the first "Select Project" button
-    const selectProjectButton = page.getByRole('button', { name: 'Select Project' }).first();
+    // Wait for projects to load and click the first card
+    const selectProjectButton = page.locator('div.group.cursor-pointer').first();
     await expect(selectProjectButton).toBeVisible({ timeout: 10000 });
     await selectProjectButton.click();
 
     // The modal should open
-    await expect(page.locator('text=Fund Project')).toBeVisible();
+    await expect(page.locator('text=Investment Thesis')).toBeVisible();
 
     // Click confirm purchase
-    await page.getByRole('button', { name: 'Confirm Purchase' }).click();
+    await page.getByRole('button', { name: 'Execute Trade' }).click();
 
     // Verify success
-    await expect(page.locator('text=Purchase Successful!')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Investment Confirmed')).toBeVisible({ timeout: 10000 });
   });
 });

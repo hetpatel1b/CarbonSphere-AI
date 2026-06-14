@@ -155,7 +155,7 @@ export default function DashboardPage() {
   const levelTitle = titles[Math.min(level - 1, titles.length - 1)];
 
   return (
-    <div className="flex flex-col gap-6 md:gap-8 pb-12 overflow-hidden max-w-full">
+    <div data-testid="dashboard-loaded" className="flex flex-col gap-6 md:gap-8 pb-12 overflow-hidden max-w-full">
       
       {/* 1. Dynamic Tesla-Style Hero */}
       <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-white/10 shadow-2xl p-8 md:p-12 min-h-[300px] flex flex-col md:flex-row items-center gap-10 md:gap-16 group">
@@ -224,7 +224,7 @@ export default function DashboardPage() {
                <Sparkles className="w-5 h-5 text-purple-400" />
              </div>
              <div>
-               <h4 className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-0.5">AI Copilot Insight</h4>
+               <h2 className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-0.5">AI Copilot Insight</h2>
                <p className="text-sm font-semibold text-zinc-200 line-clamp-1">{summary.aiInsight.executiveSummary || summary.aiInsight.challengeSuggestion || "Analyze your footprint to find savings."}</p>
              </div>
           </div>

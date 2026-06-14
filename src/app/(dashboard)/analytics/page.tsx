@@ -230,7 +230,7 @@ export default function AnalyticsPage() {
             </div>
           </CardHeader>
           <CardContent className="p-0 pt-6">
-            <div className="h-[350px] w-full px-2">
+            <div className="h-[350px] w-full px-2" aria-label="Emissions Trend Chart" role="figure">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={mainChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
@@ -281,7 +281,7 @@ export default function AnalyticsPage() {
                </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col items-center justify-center pt-2">
-               <div className="h-[200px] w-full relative">
+               <div className="h-[200px] w-full relative" aria-label="Emissions Category Chart" role="figure">
                  <ResponsiveContainer width="100%" height="100%">
                    <PieChart>
                      <Pie

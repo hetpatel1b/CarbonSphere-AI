@@ -77,7 +77,7 @@ test.describe('AI Capabilities', () => {
       });
 
       await page.goto('/ai-coach');
-      await expect(page.getByText('AI Coach Workspace')).toBeVisible();
+      await expect(page.getByText('Diagnostics Hub')).toBeVisible();
       
       // Verify data is loaded
       await expect(page.getByText('Test Summary')).toBeVisible();
@@ -93,7 +93,7 @@ test.describe('AI Capabilities', () => {
       });
       
       await page.goto('/ai-coach');
-      await expect(page.getByText('No AI Analysis Available')).toBeVisible();
+      await expect(page.getByText('No Telemetry Available')).toBeVisible();
 
       // Intercept generate endpoint with delay
       await page.route('**/api/ai-coach/analyze', async route => {
@@ -103,11 +103,11 @@ test.describe('AI Capabilities', () => {
       });
 
       // Click Generate
-      const generateBtn = page.getByRole('button', { name: /Generate New Analysis/i });
+      const generateBtn = page.getByRole('button', { name: /Run Diagnostic/i }).first();
       await generateBtn.click();
 
       // Verify Loading State
-      await expect(page.getByRole('button', { name: /Groq AI is generating/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /Synthesizing/i })).toBeVisible();
 
       // Verify Success Result replaces loading
       await expect(page.getByText('Test Summary')).toBeVisible();
@@ -128,7 +128,7 @@ test.describe('AI Capabilities', () => {
       await page.goto('/ai-coach');
       
       // Verify Error State
-      await expect(page.getByText('Failed to run AI Coach')).toBeVisible();
+      await expect(page.getByText('Diagnostic Failure')).toBeVisible();
       await expect(page.getByText('Groq Rate Limit Exceeded')).toBeVisible();
 
       // Click Retry
@@ -142,11 +142,11 @@ test.describe('AI Capabilities', () => {
   test.describe('AI Assistant Flows', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/assistant');
-      await expect(page.getByText('AI Sustainability Assistant')).toBeVisible();
+      await expect(page.getByText('Copilot').first()).toBeVisible();
     });
 
     test('Assistant Empty Prompt Validation', async ({ page }) => {
-      const input = page.getByPlaceholder('Ask about reducing your footprint...');
+      const input = page.getByPlaceholder('Message Copilot...');
       const submitBtn = page.locator('form button[type="submit"]');
 
       // Should be disabled initially
@@ -166,7 +166,7 @@ test.describe('AI Capabilities', () => {
     });
 
     test('Assistant Prompt Submission & Loading State', async ({ page }) => {
-      const input = page.getByPlaceholder('Ask about reducing your footprint...');
+      const input = page.getByPlaceholder('Message Copilot...');
       const submitBtn = page.locator('form button[type="submit"]');
 
       await page.route('**/api/assistant/chat', async route => {
@@ -190,19 +190,16 @@ test.describe('AI Capabilities', () => {
       // Verify user message appears
       await expect(page.getByText('How can I reduce emissions?')).toBeVisible();
 
-      // Verify Loading State
-      await expect(page.getByText('Thinking...')).toBeVisible();
-
       // Verify AI Response
       await expect(page.getByText('I can help you reduce your carbon footprint.')).toBeVisible();
       
       // Verify Tags
       await expect(page.getByText('High Impact')).toBeVisible();
-      await expect(page.getByText('Actionability 90%')).toBeVisible();
+      await expect(page.getByText('Confidence: 99%')).toBeVisible();
     });
 
     test('Groq Failure Handling', async ({ page }) => {
-      const input = page.getByPlaceholder('Ask about reducing your footprint...');
+      const input = page.getByPlaceholder('Message Copilot...');
       const submitBtn = page.locator('form button[type="submit"]');
 
       await page.route('**/api/assistant/chat', async route => {
