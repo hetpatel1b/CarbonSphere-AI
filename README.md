@@ -379,4 +379,4 @@ The platform features a client-side "Demo Mode" (`demoInterceptor.ts`) designed 
 
 ## 📄Contributors
 
-*   **Contributors:** Developed by [Het Patel](https://github.com/hetpatel1b) and open-source contributors.
+*   **Contributors:** Developed by [Het Patel](https://github.com/hetpatel1b).
