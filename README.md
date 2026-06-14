@@ -369,18 +369,6 @@ The platform features a client-side "Demo Mode" (`demoInterceptor.ts`) designed 
 
 ---
 
-## 📸 Screenshots
-
-*Below are placeholder paths representing UI features:*
-
-*   **Dashboard Overview:** `/assets/screenshots/dashboard_mock.png`
-*   **Emissions Forecasting:** `/assets/screenshots/forecasting_mock.png`
-*   **AI Coach Insights:** `/assets/screenshots/ai_coach_mock.png`
-*   **Offset Registry:** `/assets/screenshots/marketplace_mock.png`
-*   **Impact Report Generator:** `/assets/screenshots/reports_mock.png`
-
----
-
 ## 🔮 Future Roadmap
 
 1.  **Distributed Caching:** Add Redis to synchronize API rate limiting variables and cache database counts globally.
